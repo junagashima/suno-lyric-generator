@@ -28,25 +28,36 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `あなたは音楽分析の専門家です。指定された楽曲を分析し、必ず以下のJSON形式で回答してください：
+          content: `あなたは音楽分析の専門家です。指定された楽曲を詳細に分析し、必ず以下のJSON形式で回答してください：
 
 {
-  "mood": "簡潔な感情表現（最大50文字）",
-  "style": "ジャンル1, テンポ, 楽器編成"
+  "mood": "感情・雰囲気の詳細表現（最大80文字）",
+  "style": "詳細な音楽スタイル分析（最大200文字）"
 }
 
-重要な制約：
-1. "mood"は必ず50文字以内の日本語表現にする（簡潔かつ具体的に）
-   良い例：切なくも温かい雰囲気で、希望と郷愁が入り混じった感情
-   悪い例：この楽曲は切なさと温かさが同居しており、聴く人の心に深く響く複雑な感情表現を持っている
-2. "style"は必ず音楽的な単語をカンマ区切りで3-5個程度
-   良い例：J-POP, ミディアムテンポ, アコースティック
-   悪い例：J-POPのバラード調でアコースティックギターを中心とした編成
-3. 長文での説明は絶対に避ける
-4. 必ずJSON形式で返答する
+重要な分析要件：
+1. **mood（雰囲気・感情）**: 80文字以内で具体的かつ詳細に
+   - 感情の層や変化を表現
+   - リスナーに与える印象
+   - 楽曲全体の情緒的な特徴
+   
+2. **style（音楽スタイル）**: 200文字以内で詳細に分析
+   - メインジャンル・サブジャンル
+   - BPM・テンポ感
+   - 主要楽器・編成
+   - 音響的特徴・プロダクション
+   - 楽曲構成・アレンジの特徴
+   - ボーカルスタイル・歌唱の特徴
 
-実際の出力例：
-{"mood": "切なく美しい雰囲気で、過去への郷愁と未来への希望が交錯する", "style": "バラード, スローテンポ, ピアノ, ストリングス"}`
+分析精度要件：
+- 楽曲の核となるジャンル分類を明確にする
+- 具体的な楽器名・音色を含める
+- テンポやリズムパターンを詳述
+- 現代的なプロダクション要素も考慮
+- 該当楽曲特有の音楽的特徴を抽出
+
+出力例：
+{"mood": "切なさと温かさが共存し、青春の終わりと新たな始まりへの複雑な感情を描いた、ノスタルジックで希望に満ちた雰囲気", "style": "アコースティック・J-POPバラード, 85-90BPM, フィンガーピッキングギター主体, ピアノ・ストリングス・軽いパーカッション, オーガニックで自然なプロダクション, サビでの壮大な展開, 透明感のある女性ボーカル"}`
         },
         {
           role: "user",
@@ -64,34 +75,37 @@ export async function POST(request: NextRequest) {
       // JSON形式のレスポンスをパース
       const parsedResponse = JSON.parse(response)
       
-      // 雰囲気・感情を50文字以内に制限（強制的に短くする）
+      // 雰囲気・感情を80文字以内に制限（適度に詳細を保持）
       let mood = parsedResponse.mood || '穏やかで優しい雰囲気'
       
-      // 長すぎる場合は最初の50文字に切り詰める
-      if (mood.length > 50) {
+      // 長すぎる場合は最初の80文字に切り詰める
+      if (mood.length > 80) {
         // 句読点があれば、そこで切る
         const punctIndex = mood.search(/[、。]/);
-        if (punctIndex > 0 && punctIndex <= 50) {
+        if (punctIndex > 0 && punctIndex <= 80) {
           mood = mood.substring(0, punctIndex);
         } else {
-          mood = mood.substring(0, 50);
+          mood = mood.substring(0, 80);
         }
       }
       
-      // 音楽スタイルを確実に単語リスト形式に
-      let style = parsedResponse.style || 'J-POP, ミディアムテンポ'
+      // 音楽スタイルを200文字以内に制限（詳細分析を保持）
+      let style = parsedResponse.style || 'J-POP, ミディアムテンポ, アコースティック'
       
       // スタイルが長文になっている場合の処理
-      if (style.length > 50) {
-        // 最初の50文字で切って、最後のカンマまでにする
-        style = style.substring(0, 50);
-        const lastComma = style.lastIndexOf(',');
-        if (lastComma > 0) {
-          style = style.substring(0, lastComma);
+      if (style.length > 200) {
+        // 最初の200文字で切って、最後のカンマまたは句点まで適切に処理
+        style = style.substring(0, 200);
+        const lastPunct = Math.max(style.lastIndexOf(','), style.lastIndexOf('、'), style.lastIndexOf('。'));
+        if (lastPunct > 100) { // ある程度の長さを確保
+          style = style.substring(0, lastPunct);
         }
       }
       
-      console.log('分析結果:', { mood, style });  // デバッグ用ログ
+      console.log('詳細分析結果:', { 
+        mood: `${mood} (${mood.length}文字)`, 
+        style: `${style} (${style.length}文字)` 
+      });  // デバッグ用ログ
 
       return NextResponse.json({
         mood,
@@ -99,6 +113,8 @@ export async function POST(request: NextRequest) {
         debug: {
           originalMood: parsedResponse.mood,
           originalStyle: parsedResponse.style,
+          moodLength: mood.length,
+          styleLength: style.length,
           processed: true
         }
       })
@@ -107,7 +123,7 @@ export async function POST(request: NextRequest) {
       // JSONパースに失敗した場合のフォールバック
       return NextResponse.json({
         mood: '穏やかで優しい雰囲気',
-        style: 'J-POP, ミディアムテンポ',
+        style: 'J-POP, ミディアムテンポ, アコースティック, ピアノ, 自然なプロダクション',
         debug: {
           error: 'JSON parse failed',
           rawResponse: response

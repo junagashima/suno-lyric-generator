@@ -225,13 +225,18 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
         <textarea
           value={musicStyle}
           onChange={(e) => setMusicStyle(e.target.value)}
-          rows={3}
+          rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="例: アコースティックポップ、フォークロック、J-POPバラード"
+          placeholder="例: J-POPバラード, 85BPM, アコースティックギター, ピアノ, ストリングス, オーガニックなプロダクション"
         />
         {mode === 'simple' && (
           <p className="text-xs text-gray-500 mt-1">
-            ※ 簡単モードでは楽曲分析により自動入力されますが、追加・変更可能です
+            ※ 簡単モードでは楽曲分析により詳細に自動入力されますが、追加・変更可能です
+          </p>
+        )}
+        {mode === 'custom' && (
+          <p className="text-xs text-gray-500 mt-1">
+            ※ ジャンル、テンポ、楽器編成、プロダクション手法などを詳しく記述してください
           </p>
         )}
       </div>
