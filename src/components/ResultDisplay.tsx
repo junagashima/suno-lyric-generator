@@ -50,12 +50,12 @@ export function ResultDisplay({ data, isLoading }: Props) {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">🎤 生成結果</h2>
 
-      {/* デバッグ情報（開発時のみ） */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-gray-100 p-3 rounded text-xs text-gray-600">
-          <strong>Debug:</strong> titles = {JSON.stringify(data.titles)}, length = {data.titles?.length || 0}
-        </div>
-      )}
+      {/* デバッグ情報（常時表示 - テスト用） */}
+      <div className="bg-gray-100 p-3 rounded text-xs text-gray-600 mb-4">
+        <strong>Debug:</strong> titles = {JSON.stringify(data.titles)}, length = {data.titles?.length || 0}
+        <br />
+        <strong>Data keys:</strong> {Object.keys(data || {}).join(', ')}
+      </div>
 
       <div className="grid grid-cols-1 gap-6">
         {/* タイトル候補ウィンドウ */}

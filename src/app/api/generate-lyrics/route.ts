@@ -5,6 +5,38 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 })
 
+// テーマと雰囲気に基づいてフォールバックタイトルを生成
+function generateFallbackTitles(theme: string, mood: string, content: string): string[] {
+  const titles: string[] = []
+  
+  // テーマベースのタイトル
+  if (theme.includes('恋') || theme.includes('愛')) {
+    titles.push('君への想い', '恋の調べ', '心のメロディー')
+  } else if (theme.includes('卒業') || theme.includes('別れ')) {
+    titles.push('旅立ちの日に', '新しい扉', '思い出の彼方')
+  } else if (theme.includes('友情') || theme.includes('仲間')) {
+    titles.push('かけがえのない時間', '絆の歌', 'ともに歩もう')
+  } else if (theme.includes('家族')) {
+    titles.push('ありがとうの歌', '家族の絆', '温かい場所')
+  } else if (theme.includes('夢') || theme.includes('希望')) {
+    titles.push('明日への扉', '輝く未来', '夢の向こう側')
+  }
+  
+  // 雰囲気ベースのタイトル
+  if (mood.includes('切ない') || mood.includes('悲しい')) {
+    titles.push('心の雨', '涙の調べ', '静かな想い')
+  } else if (mood.includes('希望') || mood.includes('前向き')) {
+    titles.push('光の道', '新しい朝', '希望の歌')
+  } else if (mood.includes('温かい') || mood.includes('優しい')) {
+    titles.push('やさしい時間', '温もり', '心の安らぎ')
+  }
+  
+  // 一般的なフォールバック
+  titles.push('今日という日', '心の歌', '大切なもの', '新しい始まり', '永遠の瞬間')
+  
+  return titles
+}
+
 interface VocalSettings {
   gender: string
   age: string
@@ -191,52 +223,60 @@ Suno AIで使用する英語のスタイル指示文を作成してください�
     const lyricsResponse = lyricsCompletion.choices[0]?.message?.content || ''
     const styleResponse = styleCompletion.choices[0]?.message?.content || ''
 
-    // タイトル候補を抽出（複数のパターンに対応）
+    // タイトル候補を確実に生成するためのフォールバック処理
     let titles: string[] = []
     
-    // パターン1: **タイトル候補:** の後に番号付きリスト
-    let titlesMatch = lyricsResponse.match(/\*\*タイトル候補:\*\*\n((?:\d+\.\s*\[.+?\]\n?)+)/s)
-    if (titlesMatch) {
-      titles = titlesMatch[1]
-        .split('\n')
-        .filter(line => line.trim())
-        .map(line => line.replace(/^\d+\.\s*\[(.+?)\]/, '$1'))
-    }
+    // まず、AI応答からタイトルを抽出を試みる
+    const allLines = lyricsResponse.split('\n')
+    let inTitleSection = false
     
-    // パターン2: **タイトル候補** の後に番号付きリスト（コロンなし）
-    if (titles.length === 0) {
-      titlesMatch = lyricsResponse.match(/\*\*タイトル候補\*\*\n((?:\d+\.\s*.+\n?)+)/s)
-      if (titlesMatch) {
-        titles = titlesMatch[1]
-          .split('\n')
-          .filter(line => line.trim())
-          .map(line => line.replace(/^\d+\.\s*(.+)/, '$1').replace(/^\[(.+?)\]$/, '$1'))
+    for (const line of allLines) {
+      if (line.includes('タイトル')) {
+        inTitleSection = true
+        continue
       }
-    }
-    
-    // パターン3: 単純な番号付きリスト検索
-    if (titles.length === 0) {
-      const allLines = lyricsResponse.split('\n')
-      let inTitleSection = false
-      for (const line of allLines) {
-        if (line.includes('タイトル')) {
-          inTitleSection = true
-          continue
-        }
-        if (inTitleSection) {
-          if (line.match(/^\d+\./)) {
-            const titleMatch = line.match(/^\d+\.\s*(.+)/)
-            if (titleMatch) {
-              titles.push(titleMatch[1].replace(/^\[(.+?)\]$/, '$1'))
-            }
-          } else if (line.trim() === '' || line.includes('**')) {
-            break
+      if (inTitleSection) {
+        const titleMatch = line.match(/^\d+\.\s*(.+)/) || line.match(/^・\s*(.+)/) || line.match(/^-\s*(.+)/)
+        if (titleMatch) {
+          let title = titleMatch[1].trim()
+          title = title.replace(/^\[(.+?)\]$/, '$1') // [タイトル] → タイトル
+          title = title.replace(/^「(.+)」$/, '$1') // 「タイトル」 → タイトル
+          if (title && !title.includes('**') && !title.includes('歌詞')) {
+            titles.push(title)
           }
+        } else if (line.includes('**') || line.includes('歌詞')) {
+          break
         }
       }
     }
     
-    console.log('タイトル抽出結果:', { titles, rawResponse: lyricsResponse.substring(0, 500) })
+    // タイトルが3つ未満の場合、テーマに基づいて生成
+    if (titles.length < 3) {
+      const fallbackTitles = generateFallbackTitles(theme, mood, content)
+      while (titles.length < 3 && fallbackTitles.length > 0) {
+        const fallback = fallbackTitles.shift()
+        if (fallback && !titles.includes(fallback)) {
+          titles.push(fallback)
+        }
+      }
+    }
+    
+    // 確実に3つのタイトルを保証
+    if (titles.length === 0) {
+      titles = ['新しい歌', '心の調べ', '大切な想い']
+    } else if (titles.length === 1) {
+      titles.push('心の調べ', '大切な想い')
+    } else if (titles.length === 2) {
+      titles.push('大切な想い')
+    }
+    
+    // 最初の3つだけを使用
+    titles = titles.slice(0, 3)
+    
+    console.log('=== タイトル抽出デバッグ ===')
+    console.log('生のAI応答（最初の1000文字）:', lyricsResponse.substring(0, 1000))
+    console.log('最終タイトル:', titles)
+    console.log('タイトル数:', titles.length)
 
     // 歌詞部分を抽出（タイトル候補以降の部分）
     const lyricsMatch = lyricsResponse.match(/\*\*歌詞（Sunoタグ付き）:\*\*\n([\s\S]+)$/s)
