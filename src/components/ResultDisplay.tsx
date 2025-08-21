@@ -50,9 +50,16 @@ export function ResultDisplay({ data, isLoading }: Props) {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">🎤 生成結果</h2>
 
+      {/* デバッグ情報（開発時のみ） */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-100 p-3 rounded text-xs text-gray-600">
+          <strong>Debug:</strong> titles = {JSON.stringify(data.titles)}, length = {data.titles?.length || 0}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6">
         {/* タイトル候補ウィンドウ */}
-        {data.titles && data.titles.length > 0 && (
+        {data.titles && data.titles.length > 0 ? (
           <div className="bg-yellow-50 p-6 rounded-lg border-2 border-yellow-200 shadow-md">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-800 flex items-center">
@@ -110,6 +117,14 @@ export function ResultDisplay({ data, isLoading }: Props) {
                 <strong>📋 使用方法:</strong> このテキストをそのままSuno AIの「Lyrics」欄にコピー＆ペーストしてください
               </p>
             </div>
+          </div>
+        ) : (
+          /* タイトル候補が見つからない場合の表示 */
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ タイトル候補が生成されませんでした</h3>
+            <p className="text-sm text-red-700">
+              AI応答からタイトルを抽出できませんでした。手動でタイトルを設定してください。
+            </p>
           </div>
         )}
 
