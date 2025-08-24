@@ -5,6 +5,13 @@ export interface MusicData {
   genre: string
   era: string
   tempo: string
+  bpm?: number // BPM値
+  key?: string // 音域・キー
+  vocalRange?: string // ボーカル音域
+  musicalFeatures?: string[] // 楽曲の特色
+  commonIntervals?: string[] // 多用音程
+  chord?: string[] // 主要コード進行
+  structure?: string // 楽曲構成
   mood: string[]
   instruments: string[]
 }
@@ -17,6 +24,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'ニューミュージック・フォーク',
     era: '1980年代',
     tempo: 'スローバラード',
+    bpm: 65,
+    key: 'Fm（ヘ短調）',
+    vocalRange: '中音域中心（A3-F5）',
+    musicalFeatures: ['メランコリックなメロディー', '7thコードの多用', 'テンション豊富な和声'],
+    commonIntervals: ['短3度', '完全4度', '短7度'],
+    chord: ['Fm-B♭m-C7-Fm', 'A♭-E♭-Fm'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-アウトロ',
     mood: ['切ない', '大人っぽい', 'ノスタルジック'],
     instruments: ['アコースティックギター', 'ピアノ', 'ストリングス']
   },
@@ -28,6 +42,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'J-POPバラード',
     era: '2010年代',
     tempo: 'ミディアムバラード',
+    bpm: 85,
+    key: 'C（ハ長調）',
+    vocalRange: '中音域（G3-E5）',
+    musicalFeatures: ['親しみやすいメロディー', 'シンプルなコード進行', 'フォーク的な歌詞'],
+    commonIntervals: ['長3度', '完全5度', '長2度'],
+    chord: ['C-Am-F-G', 'Dm-G-C'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-Aメロ-Bメロ-サビ-Cメロ-サビ-アウトロ',
     mood: ['温かい', '恋愛', '希望的'],
     instruments: ['アコースティックギター', 'ピアノ', 'ドラム']
   },
@@ -49,6 +70,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'J-POPロック',
     era: '2010年代後半',
     tempo: 'ミディアムテンポ',
+    bpm: 92,
+    key: 'G（ト長調）',
+    vocalRange: '中高音域（A3-A5）',
+    musicalFeatures: ['ピアノ主導のアレンジ', '転調によるドラマ性', 'テンションコードの効果的使用'],
+    commonIntervals: ['長3度', '完全4度', '短7度'],
+    chord: ['G-Em-C-D', 'Am-D-G-C'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-Cメロ-転調サビ-アウトロ',
     mood: ['切ない', '恋愛', 'ドラマチック'],
     instruments: ['ピアノ', 'エレキギター', 'ドラム', 'ベース']
   },
@@ -70,6 +98,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'オルタナティブロック',
     era: '2010年代後半',
     tempo: 'ミディアムロック',
+    bpm: 136,
+    key: 'Em（ホ短調）',
+    vocalRange: '広音域（F#3-B5）',
+    musicalFeatures: ['複雑なリズムパターン', 'モーダルな和声', '高い技術力のアレンジ'],
+    commonIntervals: ['短3度', '完全5度', '短2度'],
+    chord: ['Em-Am-D-G', 'C-D-Em'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-ブリッジ-サビ×2-アウトロ',
     mood: ['力強い', 'ドラマチック', '感情的'],
     instruments: ['エレキギター', 'ドラム', 'ベース', 'シンセサイザー']
   },
@@ -81,6 +116,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'J-POPバラード',
     era: '2010年代後半',
     tempo: 'スローバラード',
+    bpm: 87,
+    key: 'A♭（変イ長調）',
+    vocalRange: '中高音域（E♭3-A♭5）',
+    musicalFeatures: ['印象的なピアノフレーズ', 'ストリングスアレンジ', '繊細な転調技法'],
+    commonIntervals: ['長3度', '完全5度', '長6度'],
+    chord: ['A♭-Fm-D♭-E♭', 'B♭m-E♭-A♭'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-Cメロ-転調サビ-アウトロ',
     mood: ['切ない', '喪失感', '美しい'],
     instruments: ['ピアノ', 'ストリングス', 'ドラム']
   },
@@ -102,6 +144,13 @@ export const musicDatabase: Record<string, MusicData> = {
     genre: 'J-POP・エレクトロニック',
     era: '2020年代',
     tempo: 'アップテンポ',
+    bpm: 130,
+    key: 'G#m（嬰ト短調）',
+    vocalRange: '中高音域（F#3-C#6）',
+    musicalFeatures: ['EDM要素', '細かいシンセアルペジオ', '現代的なプロダクション'],
+    commonIntervals: ['短3度', '完全4度', '長7度'],
+    chord: ['G#m-E-B-F#', 'C#m-F#-B'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-ブリッジ-ラストサビ-アウトロ',
     mood: ['疾走感', 'ドラマチック', '現代的'],
     instruments: ['シンセサイザー', 'エレクトロニック', 'ドラム']
   },

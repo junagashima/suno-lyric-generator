@@ -31,9 +31,42 @@ export async function POST(request: NextRequest) {
       console.log(`✅ 楽曲データベースからマッチ: ${song} - ${artist}`)
       console.log('データベース情報:', knownMusicData)
       
-      // データベース情報から正確な分析結果を生成
+      // データベース情報から詳細な分析結果を生成
       const mood = knownMusicData.mood.join('で') + 'な雰囲気'
-      const style = `${knownMusicData.genre}, ${knownMusicData.tempo}, ${knownMusicData.vocal}ボーカル, ${knownMusicData.instruments.join('・')}, ${knownMusicData.era}`
+      
+      let style = `${knownMusicData.genre}, ${knownMusicData.vocal}ボーカル`
+      
+      // BPMとテンポ情報
+      if (knownMusicData.bpm) {
+        style += `, ${knownMusicData.bpm}BPM`
+      }
+      style += `, ${knownMusicData.tempo}`
+      
+      // 音域・キー情報
+      if (knownMusicData.key) {
+        style += `, キー:${knownMusicData.key}`
+      }
+      if (knownMusicData.vocalRange) {
+        style += `, ${knownMusicData.vocalRange}`
+      }
+      
+      // 楽器編成
+      style += `, ${knownMusicData.instruments.join('・')}`
+      
+      // 楽曲の特色
+      if (knownMusicData.musicalFeatures) {
+        style += `, ${knownMusicData.musicalFeatures.join('、')}`
+      }
+      
+      // 多用音程
+      if (knownMusicData.commonIntervals) {
+        style += `, 多用音程:${knownMusicData.commonIntervals.join('・')}`
+      }
+      
+      // コード進行
+      if (knownMusicData.chord) {
+        style += `, 主要コード:${knownMusicData.chord.join('→')}`
+      }
       
       return NextResponse.json({
         mood,
@@ -73,13 +106,17 @@ export async function POST(request: NextRequest) {
 - リスナーに与える心理的印象
 - 歌詞やメロディーから感じられる情緒
 
-**style**: 音楽的特徴の詳細
+**style**: 音楽的特徴の詳細（音楽理論要素を重視）
 1. **ジャンル**: 正確なジャンル分類
-2. **テンポ/BPM**: 推定テンポ
-3. **楽器編成**: 主要楽器とアレンジ
-4. **ボーカル**: 性別・年代・歌唱スタイル（★重要★）
-5. **プロダクション**: 音響的特徴
-6. **時代背景**: リリース年代の音楽的特徴
+2. **テンポ/BPM**: 具体的なBPM値（推定）
+3. **音域・キー**: 楽曲のキー（例：Cメジャー、Am等）
+4. **ボーカル**: 性別・年代・音域・歌唱スタイル（★重要★）
+5. **楽器編成**: 主要楽器とアレンジの詳細
+6. **コード進行**: 主要なコード進行パターン
+7. **音程・音階**: 特徴的な音程や多用される音程
+8. **楽曲構成**: セクション構成（Aメロ-Bメロ-サビ等）
+9. **音楽的特色**: リズムパターン、和声の特徴、メロディー特性
+10. **プロダクション**: 音響的特徴・録音技法
 
 ## 精度要件
 - ボーカルの性別判定は最重要（男性/女性を明記）
@@ -98,7 +135,16 @@ export async function POST(request: NextRequest) {
 4. JSON形式で回答
 
 楽曲名: ${song}
-アーティスト: ${artist}`
+アーティスト: ${artist}
+
+## 特に重視する分析要素
+- **正確なBPM値**（推定値でも可）
+- **楽曲のキー**（長調/短調、転調の有無）
+- **ボーカル音域**（低音域/中音域/高音域）
+- **特徴的なコード進行**
+- **リズムパターンの特徴**
+- **多用される音程関係**（3度、5度、7度等）
+- **楽曲構成の詳細**`
         }
       ],
       temperature: 0.2,  // 精度重視で温度をさらに下げる
@@ -166,12 +212,16 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // 分析結果の品質チェック
+      // 分析結果の品質チェック（音楽理論要素を含む）
       const qualityCheck = {
         hasVocalInfo: style.includes('男性') || style.includes('女性') || style.includes('ボーカル'),
         hasGenre: style.match(/(J-POP|ロック|バラード|フォーク|R&B|ソウル|ポップス)/i),
         hasTempo: style.match(/(BPM|テンポ|スロー|ミディアム|アップ)/i),
-        hasInstruments: style.match(/(ギター|ピアノ|ドラム|ベース|ストリングス)/i)
+        hasInstruments: style.match(/(ギター|ピアノ|ドラム|ベース|ストリングス)/i),
+        hasBPM: style.match(/\d+\s*BPM/i),
+        hasKey: style.match(/(キー|[A-G][#♭]?|メジャー|マイナー|長調|短調)/i),
+        hasChords: style.match(/(コード|[A-G][#♭]?m?[0-9]?)/i),
+        hasMusicalFeatures: style.match(/(音程|音階|リズム|和声|メロディー)/i)
       }
       
       console.log('=== 楽曲分析結果 ===');
