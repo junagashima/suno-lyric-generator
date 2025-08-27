@@ -109,6 +109,23 @@ export const musicDatabase: Record<string, MusicData> = {
     instruments: ['エレキギター', 'ドラム', 'ベース', 'シンセサイザー']
   },
   
+  'SPECIALZ': {
+    artist: 'King Gnu',
+    vocal: '男性',
+    genre: 'ダーク・オルタナティブロック',
+    era: '2020年代',
+    tempo: 'アップテンポ・疾走感',
+    bpm: 128,
+    key: 'Em（ホ短調）',
+    vocalRange: '広音域・表現力重視（E3-B5）',
+    musicalFeatures: ['ヘビーで歪んだギターリフ', '突き刺すようなドラム', '不穏なシンセアクセント', '静と動の極端な対比'],
+    commonIntervals: ['短3度', '減5度（トライトーン）', '短7度'],
+    chord: ['Em-Am-B7', 'C-D-Em', 'F#dim'],
+    structure: 'ダークイントロ-抑制Aメロ-跳ねるBメロ-爆発サビ-不安定ブリッジ-厚みラストサビ',
+    mood: ['ダーク', '緊張感', 'カオス的', '呪術的'],
+    instruments: ['ヘビーエレキギター', 'シャープドラム', 'うねるベース', '不穏シンセ']
+  },
+  
   // 米津玄師
   'Lemon': {
     artist: '米津玄師',

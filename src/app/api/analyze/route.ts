@@ -31,41 +31,39 @@ export async function POST(request: NextRequest) {
       console.log(`✅ 楽曲データベースからマッチ: ${song} - ${artist}`)
       console.log('データベース情報:', knownMusicData)
       
-      // データベース情報から詳細な分析結果を生成
-      const mood = knownMusicData.mood.join('で') + 'な雰囲気'
+      // データベース情報から表現豊かな分析結果を生成
+      const mood = `${knownMusicData.mood.join('で')}な雰囲気。${knownMusicData.structure ? 'セクション間の感情変化により' + knownMusicData.mood[0] + 'から解放への流れを表現' : ''}`
       
-      let style = `${knownMusicData.genre}, ${knownMusicData.vocal}ボーカル`
+      let style = `${knownMusicData.genre}, ${knownMusicData.vocal}ボーカル（${knownMusicData.vocalRange || '力強い歌唱'}）`
       
-      // BPMとテンポ情報
+      // テンポと疾走感の表現
       if (knownMusicData.bpm) {
-        style += `, ${knownMusicData.bpm}BPM`
+        const tempoDescription = knownMusicData.bpm >= 130 ? '疾走感のある' : 
+                                knownMusicData.bpm >= 100 ? '躍動感のある' : '重厚で落ち着いた'
+        style += `, ${tempoDescription}${knownMusicData.bpm}BPM, ${knownMusicData.tempo}`
+      } else {
+        style += `, ${knownMusicData.tempo}`
       }
-      style += `, ${knownMusicData.tempo}`
       
-      // 音域・キー情報
+      // 音域・キー情報（感覚的表現）
       if (knownMusicData.key) {
-        style += `, キー:${knownMusicData.key}`
-      }
-      if (knownMusicData.vocalRange) {
-        style += `, ${knownMusicData.vocalRange}`
+        const keyDescription = knownMusicData.key.includes('短調') ? 'ダークで内省的な' : '明るく開放的な'
+        style += `, ${keyDescription}${knownMusicData.key}`
       }
       
-      // 楽器編成
-      style += `, ${knownMusicData.instruments.join('・')}`
+      // 楽器編成と役割
+      if (knownMusicData.instruments.length > 0) {
+        style += `, 楽器編成:${knownMusicData.instruments.join('・')}`
+      }
       
-      // 楽曲の特色
+      // 楽曲の特色（感覚的表現重視）
       if (knownMusicData.musicalFeatures) {
-        style += `, ${knownMusicData.musicalFeatures.join('、')}`
+        style += `. 音楽的特色:${knownMusicData.musicalFeatures.join('、')}`
       }
       
-      // 多用音程
-      if (knownMusicData.commonIntervals) {
-        style += `, 多用音程:${knownMusicData.commonIntervals.join('・')}`
-      }
-      
-      // コード進行
-      if (knownMusicData.chord) {
-        style += `, 主要コード:${knownMusicData.chord.join('→')}`
+      // 楽曲構成による表現
+      if (knownMusicData.structure) {
+        style += `. 構成:${knownMusicData.structure}`
       }
       
       return NextResponse.json({
@@ -86,65 +84,76 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `あなたは日本の音楽業界に精通した専門の楽曲分析家です。実在する楽曲について正確で詳細な分析を行います。
+          content: `あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
-## 分析方針
-- 楽曲の事実に基づいた正確な情報を提供
-- アーティスト・楽曲名から正確な情報を推論
-- 憶測ではなく、音楽的特徴の客観的分析を重視
-- 特にボーカルの性別・年代は正確に判定
+## 分析の目的
+- **Suno AIでの楽曲再現**のためのスタイル指示作成
+- 技術データより「音の質感・雰囲気・感情の動き」を優先
+- 聴き手の感覚に訴える表現を用いた分析
+- 楽曲の「魂」や「エネルギー」を言語化
 
 ## JSON出力形式（必須）
 {
-  "mood": "感情・雰囲気（最大80文字）",
-  "style": "音楽スタイル詳細（最大200文字）"
+  "mood": "感情・雰囲気の詳細表現（最大100文字）",
+  "style": "Suno AI向け音楽的特徴（最大250文字）"
 }
 
-## 分析要素（必須含有）
-**mood**: 楽曲の感情的特徴
-- 主要な感情表現（切ない/希望的/ノスタルジック等）
-- リスナーに与える心理的印象
-- 歌詞やメロディーから感じられる情緒
+## 分析アプローチ（Suno AI最適化）
 
-**style**: 音楽的特徴の詳細（音楽理論要素を重視）
-1. **ジャンル**: 正確なジャンル分類
-2. **テンポ/BPM**: 具体的なBPM値（推定）
-3. **音域・キー**: 楽曲のキー（例：Cメジャー、Am等）
-4. **ボーカル**: 性別・年代・音域・歌唱スタイル（★重要★）
-5. **楽器編成**: 主要楽器とアレンジの詳細
-6. **コード進行**: 主要なコード進行パターン
-7. **音程・音階**: 特徴的な音程や多用される音程
-8. **楽曲構成**: セクション構成（Aメロ-Bメロ-サビ等）
-9. **音楽的特色**: リズムパターン、和声の特徴、メロディー特性
-10. **プロダクション**: 音響的特徴・録音技法
+**mood**: 楽曲の感情的エッセンス
+- 聴き手の心に与える**直接的な感情体験**
+- 楽曲の**エネルギーの流れ**（静→動、緊張→解放等）
+- **比喩的表現**を用いた雰囲気の描写
+- 楽曲が描く**情景・シーン**の表現
 
-## 精度要件
-- ボーカルの性別判定は最重要（男性/女性を明記）
-- アーティスト名から正確なボーカル情報を推論
-- 楽曲の実際の特徴に基づく分析
-- 推測部分は「推定」と明記`
+**style**: Suno AIが理解する音楽的特徴
+1. **サウンドの質感**: 音の重厚さ、軽やかさ、ダークさ、明るさ
+2. **楽器の役割と効果**: 各楽器が楽曲に与える印象・役割
+3. **ボーカルの表現力**: 歌唱の感情的特徴、技法の効果
+4. **リズムの特性**: グルーブ感、疾走感、重厚感等
+5. **音響的印象**: 空間の広がり、密度、音圧の特徴
+6. **楽曲の展開**: セクション間の感情の変化、構成の効果
+7. **プロダクションの特色**: 音作りの方向性、現代性
+
+## 重要な表現方針
+- **感覚的表現を重視**: 「120BPM」→「疾走感のある中高速テンポ」
+- **比喩・イメージを活用**: 「真夜中のビル街で踊るような」
+- **動的な表現**: 「静から動へ」「緊張から解放へ」
+- **質感の描写**: 「ヘビーで歪んだ」「クリアで透明感のある」
+- **Suno AIが理解する英語表現につながる分析**`
         },
         {
           role: "user",
-          content: `楽曲「${song}」by ${artist} を正確に分析してください。
+          content: `楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
-## 分析指示
-1. この楽曲の正確な情報を基に分析
-2. 特にボーカルの性別は正確に判定
-3. 音楽的特徴を具体的に記述
-4. JSON形式で回答
+## 分析の目的
+この楽曲をSuno AIで再現・参考にするためのスタイル指示を作成したい
 
-楽曲名: ${song}
-アーティスト: ${artist}
+## 分析指示（感覚・表現重視）
+1. **音の質感・雰囲気を言語化**
+   - 「この楽曲を聴いた時の感覚」を具体的に表現
+   - 比喩やイメージを使った印象的な描写
 
-## 特に重視する分析要素
-- **正確なBPM値**（推定値でも可）
-- **楽曲のキー**（長調/短調、転調の有無）
-- **ボーカル音域**（低音域/中音域/高音域）
-- **特徴的なコード進行**
-- **リズムパターンの特徴**
-- **多用される音程関係**（3度、5度、7度等）
-- **楽曲構成の詳細**`
+2. **楽曲の感情的な流れ**
+   - イントロからアウトロまでの「感情の動き」
+   - 静と動、緊張と解放の変化
+
+3. **サウンドの特徴を感覚で表現**
+   - 「ヘビーで歪んだ」「クリアで透明感のある」等
+   - 楽器の「役割と印象」（数値より感覚）
+
+4. **ボーカルの表現力・感情**
+   - 歌唱の「感情的特徴」と「表現技法の効果」
+   - 性別・年代は正確に
+
+## 分析対象楽曲
+- 楽曲: ${song}
+- アーティスト: ${artist}
+
+## 出力要件
+- Suno AIが理解できる「英語表現」につながる日本語分析
+- 技術データより「聴覚的印象・感情体験」を重視
+- 楽曲の「魂・エッセンス」を捉えた表現`
         }
       ],
       temperature: 0.2,  // 精度重視で温度をさらに下げる

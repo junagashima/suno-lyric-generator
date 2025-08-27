@@ -157,11 +157,11 @@ ${content}
 ※ リスナーが口ずさみたくなるようなキャッチーなフレーズを含めてください
 `
 
-    // 英語スタイル指示生成プロンプト
+    // 英語スタイル指示生成プロンプト（表現力強化）
     const stylePrompt = `
-Suno AIで使用する英語のスタイル指示文を作成してください。以下の日本語設定を、Suno AIが最も効果的に理解できる英語表現に変換してください。
+Suno AIで楽曲を生成するための高品質英語スタイル指示を作成してください。ChatGPTレベルの表現力で、Suno AIが音楽の「魂」を理解できる指示文を生成します。
 
-## 日本語設定
+## 日本語分析結果（全要素統合）
 - 雰囲気・感情: ${mood}
 - 音楽スタイル: ${musicStyle}
 - テーマ: ${theme}
@@ -171,19 +171,38 @@ Suno AIで使用する英語のスタイル指示文を作成してください�
 - 歌唱技法: ${vocal.techniques.join(', ')}
 - 楽曲の長さ: ${songLength}
 
-## Suno AI英語スタイル指示作成要件
+## Suno AI最適化指示作成方針
 
-1. **音楽ジャンル**：明確で具体的なジャンル指定
-2. **テンポ・ムード**：楽曲の雰囲気を的確に表現
-3. **ボーカル特性**：性別、年齢、歌唱スタイルの指定
-4. **楽器編成**：主要楽器と音色の指定
-5. **プロダクション**：音響効果や録音スタイル
+### 1. 感覚的表現の活用
+- 「120BPM」→「fast-paced and intense」
+- 「切ない」→「melancholic yet evocative」
+- 「ヘビー」→「heavy and distorted」
 
-英語のスタイル指示文のみを出力してください（説明文は不要）。
-簡潔で効果的な英語表現で、100語以内でまとめてください。
+### 2. 音の質感・雰囲気の英語表現
+- **ダーク**: dark, ominous, haunting, brooding
+- **エネルギッシュ**: energetic, explosive, dynamic, driving
+- **切ない**: melancholic, wistful, bittersweet, poignant
+- **透明感**: clear, crisp, ethereal, pristine
 
-例：
-"Emotional J-pop ballad, acoustic guitar and piano-driven, female vocals in 20s with smooth delivery and subtle vibrato, melancholic yet hopeful atmosphere, modern production with string arrangements, medium tempo"
+### 3. 楽器・音響の表現技法
+- **ギター**: distorted, fingerpicked, heavy riffs, sharp cutting
+- **ドラム**: punchy, driving, sharp snares, powerful kicks
+- **ボーカル**: soaring, passionate, restrained-to-explosive, layered harmonies
+
+### 4. 楽曲展開の動的表現
+- 「静から動へ」→「building from calm to explosive」
+- 「緊張と解放」→「tension and release dynamics」
+- 「疾走感」→「driving momentum with urgent energy」
+
+## 出力要件
+- **150語以内**で表現力豊かに
+- **感覚的・比喩的表現**を積極活用
+- 楽曲の「エネルギー・感情の流れ」を表現
+- Suno AIが「音楽体験」を再現できる指示
+- 英語指示文のみ出力
+
+## 目標品質例（ChatGPTレベル）：
+"Dark and experimental J-rock with heavy distorted guitars, driving bass, sharp drums, and ominous synth accents. Dynamic male vocals shifting between calm restraint and explosive shouts, layered with falsetto harmonies. Fast and intense tempo with sudden energy shifts. Tense, chaotic, yet exhilarating atmosphere like dancing on the edge of collapse in a neon-lit city at midnight."
 `
 
     // 歌詞生成
@@ -209,7 +228,7 @@ Suno AIで使用する英語のスタイル指示文を作成してください�
       messages: [
         {
           role: "system",
-          content: "You are an expert in music production and Suno AI optimization. You can translate Japanese musical concepts into effective English style instructions that Suno AI can understand and execute accurately."
+          content: "You are a master music producer and Suno AI specialist who creates exceptionally expressive and evocative style instructions. You translate musical concepts into vivid, sensory-rich English descriptions that capture the soul and energy of music, going beyond technical specifications to convey the emotional experience and artistic essence that Suno AI needs to recreate authentic musical expressions."
         },
         {
           role: "user",
