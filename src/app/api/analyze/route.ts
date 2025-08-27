@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         forbiddenElements = "comedic tones, light instrumentation, swing rhythm"
       }
       
-      style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
+      let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
       
       return NextResponse.json({
         mood,

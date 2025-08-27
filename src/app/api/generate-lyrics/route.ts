@@ -298,7 +298,7 @@ Forbidden: [禁止要素], [禁止要素], [禁止要素]."
       messages: [
         {
           role: "system",
-          content: "You are a Suno AI optimization specialist who creates precise, structured style instructions following proven ChatGPT best practices. You MUST use the exact "Core 10 Items" format with concrete specifications, avoiding all poetic language. Your instructions are technical blueprints, not artistic descriptions. Focus on what Suno AI needs to know: Purpose, Length, Language, specific instrument names, structure, and forbidden elements."
+          content: "You are a Suno AI optimization specialist who creates precise, structured style instructions following proven ChatGPT best practices. You MUST use the exact 'Core 10 Items' format with concrete specifications, avoiding all poetic language. Your instructions are technical blueprints, not artistic descriptions. Focus on what Suno AI needs to know: Purpose, Length, Language, specific instrument names, structure, and forbidden elements."
         },
         {
           role: "user",
