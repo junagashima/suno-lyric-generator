@@ -164,25 +164,33 @@ ${content}
 
     // 英語スタイル指示生成プロンプト（表現力強化）
     const stylePrompt = `
-Suno AIで楽曲を生成するための高品質英語スタイル指示を作成してください。ChatGPTレベルの表現力で、Suno AIが音楽の「魂」を理解できる指示文を生成します。
+Suno AIで楽曲を生成するための最適化された英語スタイル指示を作成してください。ChatGPT実証済みの「核10項目」ベストプラクティスに基づいて、一筆書き設計図スタイルで簡潔に指示します。
 
-## 日本語分析結果（全要素統合）
-- 雰囲気・感情: ${mood}
-- 音楽スタイル: ${musicStyle}
-- テーマ: ${theme}
-- ボーカル構成: ${vocal.gender}
-- ボーカル年齢: ${vocal.age}
-- ボーカル国籍: ${vocal.nationality}
+## 核10項目マッピング（一筆書き設計図用）
+1. **Purpose（用途）**: ${theme}をテーマとした楽曲
+2. **Length（長さ）**: ${songLength}
+3. **Language（言語）**: 日本語歌詞
+4. **Vocals（ボーカル）**: ${vocal.gender}、${vocal.age}、${vocal.nationality}
+5. **Tempo（テンポ帯）**: ${musicStyle}から抽出
+6. **Rhythm（リズム質感）**: 楽曲スタイルに応じて設定
+7. **Instruments（楽器）**: ${musicStyle}から主要楽器を抽出
+8. **Structure（構成）**: ${songLength}に応じた構成
+9. **Mood（感情3語）**: ${mood}から3つまでに絞る
+10. **Forbidden（禁止要素）**: ジャンルに応じて設定
+
+## 追加情報
 - 歌唱技法: ${vocal.techniques.join(', ')}
-- 楽曲の長さ: ${songLength}
+- 詳細スタイル: ${musicStyle}
 
 ## Suno AI最適化指示作成方針
 
-### 1. Suno AI効果的表現テクニック
-- **具体的楽器名**: "banjo textures", "3-piece band", "gentle strings"
-- **直接的感情表現**: "bittersweet intimacy", "half-sad whisper"
-- **シンプルな情景**: "alone at dusk", "memories swirling"
-- **BPM省略**: 「65BPM」→「slow tempo」「relaxed pace」
+### 1. 核10項目による一筆書き設計図作成
+- **Purpose指定**: "BGM for meeting", "MV style track", "Opening theme"
+- **Length明記**: "about 75 seconds", "30-35 seconds"  
+- **Language明記**: "Japanese lyrics", "instrumental only"
+- **禁止要素必須**: "No rap", "No EDM drops", "No comedic tones"
+- **楽器は3-4個**: "guitar + bass + drums + synth pad"
+- **テンポ帯表現**: "medium-fast", "relaxed", "driving beat"
 
 ### 2. 音の質感・雰囲気の英語表現
 - **ダーク**: dark, ominous, haunting, brooding
@@ -211,21 +219,41 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 - 「緊張と解放」→「tension and release dynamics」
 - 「疾走感」→「driving momentum with urgent energy」
 
-## 出力要件（Suno AI最適化）
-- **80-120語**で簡潔に表現（長すぎるとSunoが混乱）
-- **具体的な楽器・編成**を明記
-- **シンプルで直接的な感覚表現**
-- **技術的詳細は最小限**（BPM、キーは省略可）
-- **1-2個の効果的な比喩**のみ使用
+## Suno AI最適化要件（ChatGPT実証済みベストプラクティス）
+
+### 必須「核10項目」チェックリスト:
+1. **Purpose（用途）**: BGM/CM/OP/MVなど明記
+2. **Length（長さ）**: 30秒/60秒/2分など具体的に
+3. **Language（言語）**: 日本語/英語/インスト
+4. **Vocals（ボーカル）**: 有無・性別・表情（落ち着き→爆発等）
+5. **Tempo（テンポ帯）**: ゆったり/中速/速い（数値避ける）
+6. **Rhythm（リズム質感）**: 跳ねる/直進/シャッフル
+7. **Instruments（楽器パレット）**: 必須楽器を3-4個明記
+8. **Structure（構成）**: A→B→サビ/サビ先行等
+9. **Mood（感情3語まで）**: 緊張感・昂揚・ほろ苦さ等
+10. **Forbidden（禁止要素）**: ラップ禁止/EDMドロップ禁止等
+
+### 出力ルール:
+- **60-90語**の一筆書き設計図
+- **比喩は1個まで**（音像が浮かぶもの）
+- **禁止要素を必ず明記**（Sunoの勝手な追加を防ぐ）
 - 英語指示文のみ出力
 
-## 成功例（ChatGPTスタイル）：
-"Delicate banjo textures blended with nostalgic enka-style melodies and gentle 3-piece band instrumentation. Vocals should convey a soft, bittersweet intimacy—like a half-sad, half-smiling whisper. Tempo relaxed, mood reflective, with a hint of quirky melancholy. Imagine sipping red wine alone at dusk, memories swirling in the glass."
+## ChatGPT実証済み成功テンプレート：
 
-## 避けるべき表現：
-- 過度に詩的な表現（"sepia tones", "musical tapestry"）
-- 技術的詳細の羅列（音域、詳細コード進行）
-- 長い抽象的描写
+**赤いワイン系（Red Wine Style）:**
+"Purpose: MV style track, about 75 seconds, Japanese lyrics. Mood: bittersweet warmth, quiet build, nocturnal reflection. Tempo: medium, gentle 8-beat. Instruments: delicate banjo phrases + nostalgic enka-style melody + guitar/bass/drums. Structure: intro → verse → pre-chorus → chorus → closing. Vocals: soft male voice, half-sad whisper. Forbidden: comedic tones, heavy EDM, fast bluegrass banjo."
+
+**ダークJ-Rock系（SPECIALZ Style）:**
+"Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
+
+## 一筆書き設計図フォーマット（必須）：
+"Purpose: [用途], about [時間], [言語]. Mood: [感情3語まで]. Tempo: [テンポ帯], [リズム質感]. Instruments: [楽器3-4個] + [役割]. Structure: [簡潔な構成]. Vocals: [性別], [表情・技法]. Forbidden: [禁止要素3つまで]."
+
+## 絶対避ける表現：
+- 詩的比喩の過多（1個まで）
+- 技術数値（BPM、キー名は避ける）
+- 長い形容詞の連続
 `
 
     // 歌詞生成
