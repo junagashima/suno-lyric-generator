@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       const mood = `${knownMusicData.mood.join('で')}な雰囲気。${knownMusicData.structure ? 'セクション間の感情変化により' + knownMusicData.mood[0] + 'から解放への流れを表現' : ''}`
       
       // グループボーカル設定の詳細な表現
-      let vocalDescription = knownMusicData.vocal
+      let vocalDescription: string = knownMusicData.vocal
       if (knownMusicData.vocalDetails) {
         vocalDescription = `${knownMusicData.vocal}（${knownMusicData.vocalDetails}）`
       } else {
