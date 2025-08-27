@@ -65,37 +65,34 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      let style = `${knownMusicData.genre}, ${vocalDescription}（${knownMusicData.vocalRange || '表現力豊かな歌唱'}）`
+      // ChatGPT形式の構造化指示を生成
+      const purpose = "MV style track"
+      const length = "about 75 seconds"
+      const language = "Japanese lyrics"
       
-      // テンポと疾走感の表現
+      // テンポ表現（BPM数値は避ける）
+      let tempoDesc = "medium"
       if (knownMusicData.bpm) {
-        const tempoDescription = knownMusicData.bpm >= 130 ? '疾走感のある' : 
-                                knownMusicData.bpm >= 100 ? '躍動感のある' : '重厚で落ち着いた'
-        style += `, ${tempoDescription}${knownMusicData.bpm}BPM, ${knownMusicData.tempo}`
-      } else {
-        style += `, ${knownMusicData.tempo}`
+        tempoDesc = knownMusicData.bpm >= 130 ? "fast" : 
+                   knownMusicData.bpm >= 100 ? "medium-fast" : "slow"
       }
       
-      // 音域・キー情報（感覚的表現）
-      if (knownMusicData.key) {
-        const keyDescription = knownMusicData.key.includes('短調') ? 'ダークで内省的な' : '明るく開放的な'
-        style += `, ${keyDescription}${knownMusicData.key}`
+      // 感情語（3つまで）
+      const moodWords = knownMusicData.mood.slice(0, 3).join(', ')
+      
+      // 楽器（具体的に）
+      const instruments = knownMusicData.instruments.length > 0 ? 
+        knownMusicData.instruments.join(' + ') : "guitar + bass + drums"
+      
+      // 禁止要素（ジャンルに応じて）
+      let forbiddenElements = "comedic tones, heavy EDM, fast tempo changes"
+      if (knownMusicData.genre.includes('バラード')) {
+        forbiddenElements = "heavy distortion, fast tempo, aggressive drums"
+      } else if (knownMusicData.genre.includes('ロック')) {
+        forbiddenElements = "comedic tones, light instrumentation, swing rhythm"
       }
       
-      // 楽器編成と役割
-      if (knownMusicData.instruments.length > 0) {
-        style += `, 楽器編成:${knownMusicData.instruments.join('・')}`
-      }
-      
-      // 楽曲の特色（感覚的表現重視）
-      if (knownMusicData.musicalFeatures) {
-        style += `. 音楽的特色:${knownMusicData.musicalFeatures.join('、')}`
-      }
-      
-      // 楽曲構成による表現
-      if (knownMusicData.structure) {
-        style += `. 構成:${knownMusicData.structure}`
-      }
+      style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
       
       return NextResponse.json({
         mood,

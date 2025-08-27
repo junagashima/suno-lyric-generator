@@ -247,13 +247,32 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 **ダークJ-Rock系（SPECIALZ Style）:**
 "Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
 
-## 一筆書き設計図フォーマット（必須）：
-"Purpose: [用途], about [時間], [言語]. Mood: [感情3語まで]. Tempo: [テンポ帯], [リズム質感]. Instruments: [楽器3-4個] + [役割]. Structure: [簡潔な構成]. Vocals: [性別], [表情・技法]. Forbidden: [禁止要素3つまで]."
+## 厳守必須フォーマット（ChatGPT実証済み）：
 
-## 絶対避ける表現：
-- 詩的比喩の過多（1個まで）
-- 技術数値（BPM、キー名は避ける）
-- 長い形容詞の連続
+**必ず以下の構造で出力:**
+"Purpose: [MV style track/BGM/Opening theme], about [X seconds], [Japanese lyrics/instrumental]. 
+Mood: [感情語3つまで]. 
+Tempo: [medium/slow/fast], [具体的リズム記述]. 
+Instruments: [楽器名] + [楽器名] + [楽器名]. [追加楽器指定]. 
+Structure: [intro] → [verse] → [chorus] → [closing]. 
+Vocals: [性別] voice, [表情], [技法]. 
+Forbidden: [禁止要素], [禁止要素], [禁止要素]."
+
+**絶対に使用禁止の表現:**
+- "musical journey", "soundscape", "emotional depth"
+- "evoke", "infuse", "embrace", "heighten" 
+- 長い形容詞句や詩的描写
+
+## 🚫 絶対禁止表現リスト：
+- "musical journey", "soundscape", "evoke", "infuse", "embrace"
+- "emotional depth", "introspective", "poignant essence"  
+- "solitary evening walk", "echoes with memories"
+- キー名（F minor等）、BPM数値、音域指定
+
+## ⚡ 出力命令（必須遵守）：
+必ず「Purpose: 」で始まり、「Forbidden: 」で終わる構造化された指示のみ出力せよ。
+詩的表現・比喩・長い修飾句は一切使用するな。
+楽器名と禁止要素を具体的に明記せよ。
 `
 
     // 歌詞生成
@@ -279,7 +298,7 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
       messages: [
         {
           role: "system",
-          content: "You are a master music producer and Suno AI specialist who creates exceptionally expressive and evocative style instructions. You translate musical concepts into vivid, sensory-rich English descriptions that capture the soul and energy of music, going beyond technical specifications to convey the emotional experience and artistic essence that Suno AI needs to recreate authentic musical expressions."
+          content: "You are a Suno AI optimization specialist who creates precise, structured style instructions following proven ChatGPT best practices. You MUST use the exact "Core 10 Items" format with concrete specifications, avoiding all poetic language. Your instructions are technical blueprints, not artistic descriptions. Focus on what Suno AI needs to know: Purpose, Length, Language, specific instrument names, structure, and forbidden elements."
         },
         {
           role: "user",
