@@ -178,10 +178,11 @@ Suno AIで楽曲を生成するための高品質英語スタイル指示を作�
 
 ## Suno AI最適化指示作成方針
 
-### 1. 感覚的表現の活用
-- 「120BPM」→「fast-paced and intense」
-- 「切ない」→「melancholic yet evocative」
-- 「ヘビー」→「heavy and distorted」
+### 1. Suno AI効果的表現テクニック
+- **具体的楽器名**: "banjo textures", "3-piece band", "gentle strings"
+- **直接的感情表現**: "bittersweet intimacy", "half-sad whisper"
+- **シンプルな情景**: "alone at dusk", "memories swirling"
+- **BPM省略**: 「65BPM」→「slow tempo」「relaxed pace」
 
 ### 2. 音の質感・雰囲気の英語表現
 - **ダーク**: dark, ominous, haunting, brooding
@@ -210,15 +211,21 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 - 「緊張と解放」→「tension and release dynamics」
 - 「疾走感」→「driving momentum with urgent energy」
 
-## 出力要件
-- **150語以内**で表現力豊かに
-- **感覚的・比喩的表現**を積極活用
-- 楽曲の「エネルギー・感情の流れ」を表現
-- Suno AIが「音楽体験」を再現できる指示
+## 出力要件（Suno AI最適化）
+- **80-120語**で簡潔に表現（長すぎるとSunoが混乱）
+- **具体的な楽器・編成**を明記
+- **シンプルで直接的な感覚表現**
+- **技術的詳細は最小限**（BPM、キーは省略可）
+- **1-2個の効果的な比喩**のみ使用
 - 英語指示文のみ出力
 
-## 目標品質例（ChatGPTレベル）：
-"Dark and experimental J-rock with heavy distorted guitars, driving bass, sharp drums, and ominous synth accents. Dynamic male vocals shifting between calm restraint and explosive shouts, layered with falsetto harmonies. Fast and intense tempo with sudden energy shifts. Tense, chaotic, yet exhilarating atmosphere like dancing on the edge of collapse in a neon-lit city at midnight."
+## 成功例（ChatGPTスタイル）：
+"Delicate banjo textures blended with nostalgic enka-style melodies and gentle 3-piece band instrumentation. Vocals should convey a soft, bittersweet intimacy—like a half-sad, half-smiling whisper. Tempo relaxed, mood reflective, with a hint of quirky melancholy. Imagine sipping red wine alone at dusk, memories swirling in the glass."
+
+## 避けるべき表現：
+- 過度に詩的な表現（"sepia tones", "musical tapestry"）
+- 技術的詳細の羅列（音域、詳細コード進行）
+- 長い抽象的描写
 `
 
     // 歌詞生成
