@@ -34,7 +34,38 @@ export async function POST(request: NextRequest) {
       // データベース情報から表現豊かな分析結果を生成
       const mood = `${knownMusicData.mood.join('で')}な雰囲気。${knownMusicData.structure ? 'セクション間の感情変化により' + knownMusicData.mood[0] + 'から解放への流れを表現' : ''}`
       
-      let style = `${knownMusicData.genre}, ${knownMusicData.vocal}ボーカル（${knownMusicData.vocalRange || '力強い歌唱'}）`
+      // グループボーカル設定の詳細な表現
+      let vocalDescription = knownMusicData.vocal
+      if (knownMusicData.vocalDetails) {
+        vocalDescription = `${knownMusicData.vocal}（${knownMusicData.vocalDetails}）`
+      } else {
+        // グループボーカルの場合、詳細説明を追加
+        switch (knownMusicData.vocal) {
+          case '男女混合グループ':
+            vocalDescription = '男女混合グループ（メイン・ハーモニー・コーラスワークの多層構成）'
+            break
+          case '女性グループ':
+            vocalDescription = '女性グループ（複数ボーカルによる美しいハーモニー）'
+            break
+          case '男性グループ':
+            vocalDescription = '男性グループ（重厚なグループコーラスと力強い歌唱）'
+            break
+          case '男女デュエット':
+            vocalDescription = '男女デュエット（対話的な歌唱とハーモニー）'
+            break
+          case '女性デュエット':
+            vocalDescription = '女性デュエット（美しい二重唱とコーラスワーク）'
+            break
+          case '男性デュエット':
+            vocalDescription = '男性デュエット（重厚なハーモニーと対話的表現）'
+            break
+          case 'コーラス重視':
+            vocalDescription = 'コーラス重視（重層的な多声部構成）'
+            break
+        }
+      }
+      
+      let style = `${knownMusicData.genre}, ${vocalDescription}（${knownMusicData.vocalRange || '表現力豊かな歌唱'}）`
       
       // テンポと疾走感の表現
       if (knownMusicData.bpm) {

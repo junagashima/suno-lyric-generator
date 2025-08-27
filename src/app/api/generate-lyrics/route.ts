@@ -92,10 +92,15 @@ export async function POST(request: NextRequest) {
 - 楽曲の長さ: ${songLength}
 
 ## ボーカル設定
-- 性別: ${vocal.gender}
+- 構成: ${vocal.gender}
 - 年齢: ${vocal.age}
 - 国籍: ${vocal.nationality}
 - 歌唱技法: ${vocal.techniques.join(', ')}
+
+## ボーカル構成の特徴
+${vocal.gender.includes('グループ') || vocal.gender.includes('デュエット') || vocal.gender.includes('コーラス') ? 
+  '※ このボーカル構成では、ハーモニー・コーラスワーク・対話的歌唱を効果的に活用した歌詞構成を心がけてください' : 
+  '※ ソロボーカルの表現力を活かした歌詞構成を心がけてください'}
 
 ## 歌詞に盛り込みたい内容
 ${content}
@@ -165,7 +170,7 @@ Suno AIで楽曲を生成するための高品質英語スタイル指示を作�
 - 雰囲気・感情: ${mood}
 - 音楽スタイル: ${musicStyle}
 - テーマ: ${theme}
-- ボーカル性別: ${vocal.gender}
+- ボーカル構成: ${vocal.gender}
 - ボーカル年齢: ${vocal.age}
 - ボーカル国籍: ${vocal.nationality}
 - 歌唱技法: ${vocal.techniques.join(', ')}
@@ -188,6 +193,17 @@ Suno AIで楽曲を生成するための高品質英語スタイル指示を作�
 - **ギター**: distorted, fingerpicked, heavy riffs, sharp cutting
 - **ドラム**: punchy, driving, sharp snares, powerful kicks
 - **ボーカル**: soaring, passionate, restrained-to-explosive, layered harmonies
+
+### 3.1. グループボーカル表現技法（${vocal.gender}の場合）
+${vocal.gender.includes('グループ') || vocal.gender.includes('デュエット') || vocal.gender.includes('コーラス') ? `
+- **ハーモニー**: rich harmonies, layered vocals, call-and-response, vocal interplay
+- **コーラスワーク**: backing vocals, group chorus, multi-part harmony
+- **対話**: conversational vocals, duet exchanges, interwoven melodies
+- **音響効果**: vocal layering, harmonic richness, ensemble depth
+` : `
+- **ソロ表現**: expressive lead vocals, emotional delivery, vocal focus
+- **表現力**: dynamic range, vocal technique mastery, emotional connection
+`}
 
 ### 4. 楽曲展開の動的表現
 - 「静から動へ」→「building from calm to explosive」

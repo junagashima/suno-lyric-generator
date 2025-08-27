@@ -1,7 +1,8 @@
 // 楽曲分析の精度向上のための参照データベース
 export interface MusicData {
   artist: string
-  vocal: '男性' | '女性' | 'デュエット' | 'グループ'
+  vocal: '男性' | '女性' | '中性的' | '男女デュエット' | '女性デュエット' | '男性デュエット' | '女性グループ' | '男性グループ' | '男女混合グループ' | 'コーラス重視'
+  vocalDetails?: string // ボーカル構成の詳細
   genre: string
   era: string
   tempo: string
@@ -158,6 +159,7 @@ export const musicDatabase: Record<string, MusicData> = {
   '夜に駆ける': {
     artist: 'YOASOBI',
     vocal: '女性',
+    vocalDetails: 'メインボーカル女性、バックコーラス重視',
     genre: 'J-POP・エレクトロニック',
     era: '2020年代',
     tempo: 'アップテンポ',
@@ -170,6 +172,45 @@ export const musicDatabase: Record<string, MusicData> = {
     structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-ブリッジ-ラストサビ-アウトロ',
     mood: ['疾走感', 'ドラマチック', '現代的'],
     instruments: ['シンセサイザー', 'エレクトロニック', 'ドラム']
+  },
+  
+  // グループボーカルの例を追加
+  // いきものがかり（男女混合グループ）
+  'YELL': {
+    artist: 'いきものがかり',
+    vocal: '男女混合グループ',
+    vocalDetails: 'メイン女性ボーカル、男性ハーモニー・バックコーラス',
+    genre: 'J-POPバラード',
+    era: '2000年代後半',
+    tempo: 'ミディアムバラード',
+    bpm: 76,
+    key: 'F（ヘ長調）',
+    vocalRange: '中音域、グループハーモニー',
+    musicalFeatures: ['感動的なハーモニー', 'アコースティック主体', '卒業・応援ソング'],
+    commonIntervals: ['長3度', '完全5度', '長6度'],
+    chord: ['F-Dm-B♭-C', 'Am-Dm-Gm-C'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-Aメロ-Bメロ-サビ-Cメロ-転調サビ×2-アウトロ',
+    mood: ['希望的', '感動的', '励まし'],
+    instruments: ['アコースティックギター', 'ピアノ', 'ストリングス', 'ドラム']
+  },
+  
+  // BUMP OF CHICKEN（男性グループ）
+  'チャンプ': {
+    artist: 'BUMP OF CHICKEN',
+    vocal: '男性グループ',
+    vocalDetails: 'メインボーカル男性、グループコーラス',
+    genre: 'オルタナティブロック',
+    era: '2010年代',
+    tempo: 'ミディアムロック',
+    bpm: 140,
+    key: 'D（ニ長調）',
+    vocalRange: '中音域、力強い歌唱',
+    musicalFeatures: ['バンドサウンド', 'メロディアス', 'エネルギッシュ'],
+    commonIntervals: ['完全5度', '長3度', '完全4度'],
+    chord: ['D-A-Bm-G', 'Em-A-D'],
+    structure: 'イントロ-Aメロ-Bメロ-サビ-間奏-Aメロ-Bメロ-サビ-ブリッジ-サビ×2-アウトロ',
+    mood: ['前向き', 'エネルギッシュ', 'バンドサウンド'],
+    instruments: ['エレキギター', 'ベース', 'ドラム', 'キーボード']
   },
   
   // 宇多田ヒカル
