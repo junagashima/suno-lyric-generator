@@ -246,15 +246,22 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
         <h3 className="text-lg font-semibold text-gray-800 mb-3">🎤 ボーカル設定</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">性別</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ボーカル構成</label>
             <select
               value={vocalGender}
               onChange={(e) => setVocalGender(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option value="女性">女性</option>
-              <option value="男性">男性</option>
-              <option value="中性的">中性的</option>
+              <option value="女性">女性（ソロ）</option>
+              <option value="男性">男性（ソロ）</option>
+              <option value="中性的">中性的（ソロ）</option>
+              <option value="男女デュエット">男女デュエット</option>
+              <option value="女性デュエット">女性デュエット</option>
+              <option value="男性デュエット">男性デュエット</option>
+              <option value="女性グループ">女性グループ（3人以上）</option>
+              <option value="男性グループ">男性グループ（3人以上）</option>
+              <option value="男女混合グループ">男女混合グループ</option>
+              <option value="コーラス重視">コーラス重視（複数ボーカル）</option>
             </select>
           </div>
           <div>
