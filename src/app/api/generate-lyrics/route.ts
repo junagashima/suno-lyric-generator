@@ -126,6 +126,25 @@ contentReflection === 'metaphorical' ?
   '- **重要なキーワードは忠実に保持**、説明部分は詩的に表現\n- **専門用語の一部は残し**、周辺内容は美化して表現\n- **技術性と詩的表現のバランス**を取る'
 }
 
+## ラップセクション対応
+${includeRap || analyzedStructure?.hasRap ? `
+   **🔥 この楽曲にはRAP要素を含める指定です 🔥**
+   ${includeRap ? '- **ユーザー明示的選択**: ラップセクション必須' : ''}
+   ${analyzedStructure?.hasRap ? `- **楽曲分析検出**: ${analyzedStructure.genre} / ${analyzedStructure.vocalStyle}` : ''}
+   **MANDATORY: [Rap Verse]タグを必ず歌詞に含めてください**
+   - **[Rap Verse]セクションをメロディーセクションとは別に作成**
+   - **推奨構成**: Intro → Verse → Pre-Chorus → Chorus → **[Rap Verse]** → Chorus → Outro
+   **🎵 日本語ラップ基本技法:**
+   - **母音合わせ**: 行末の母音を統一（例：「未来/誓い/走りたい」でa-i音）
+   - **脚韻**: 行の終わりの音を揃える（最も効果的）
+   - **パンチライン**: キャッチーな決め台詞を1-2箇所に配置
+   - **リズム調整**: ビートに合わせた語感重視の歌詞構成
+   **📝 [Rap Verse]作成要件（4-8行）:**
+   - 内容テーマに沿った自己表現・主張を含める
+   - 韻踏みパターンを必ず使用
+   - パワフルで印象的な語彙選択
+` : ''}
+
 ## 作詞要件
 以下の要素を考慮してJ-POPヒット曲として成功する歌詞を作成してください：
 
@@ -137,7 +156,7 @@ contentReflection === 'metaphorical' ?
    - 現代のJ-POPトレンドを反映した語彙選択
 
 2. **Suno AIタグの効果的活用**
-   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]${analyzedStructure?.hasRap ? ', [Rap Verse]' : ''}
+   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]${includeRap || analyzedStructure?.hasRap ? ', [Rap Verse]' : ''}
    - 演出タグ: [Fade in], [Fade out], [Instrumental Break]
    - ボーカル指示タグ: [Vocal harmony], [Ad libs], [Whispered], [Belted]
    - 楽器指示タグ: [Piano solo], [Guitar riff], [String section]
@@ -147,20 +166,6 @@ contentReflection === 'metaphorical' ?
      songLength === '3-4分' ? '標準的な楽曲構成（Intro-Verse-Pre-Chorus-Chorus-Verse-Pre-Chorus-Chorus-Bridge-Chorus-Outro）' :
      songLength === '4-5分' ? '充実した楽曲構成（複数のセクション、Cメロ、間奏を含む）' :
      '長い楽曲構成（複数の展開、インストゥルメンタル部分を含む）'}
-
-## Step I: ラップセクション対応
-${analyzedStructure?.hasRap ? `
-   **🔥 この楽曲にはRAP要素が検出されました 🔥**
-   - ジャンル: ${analyzedStructure.genre}
-   - ボーカルスタイル: ${analyzedStructure.vocalStyle}
-   - **[Rap Verse]タグを使用してラップセクションを明確に配置**
-   - **ラップ部分は韻を踏んだリズミカルな歌詞構成を使用**
-   - **歌い部分（メロディー）とラップ部分を明確に区別**
-   - **楽曲構成例**: Intro → Verse(歌) → Pre-Chorus → Chorus → Rap Verse → Chorus → Bridge → Chorus → Outro
-` : `
-   - この楽曲は通常の歌唱スタイルで構成します
-   - メロディー重視の楽曲構成を使用
-`}
 
 ## 出力形式
 必ず以下の形式で回答してください（タイトル候補は必須）：
