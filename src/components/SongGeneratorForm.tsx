@@ -24,6 +24,9 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   // Step H: 楽曲分析結果の構造情報
   const [analyzedStructure, setAnalyzedStructure] = useState<any>(null)
   
+  // ラップ調選択の状態管理（安全追加）
+  const [includeRap, setIncludeRap] = useState(false)
+  
   // ボーカル設定
   const [vocalGender, setVocalGender] = useState('女性')
   const [vocalAge, setVocalAge] = useState('20代')
@@ -113,6 +116,8 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
             nationality: vocalNationality,
             techniques: vocalTechniques
           },
+          // ユーザー明示的ラップ選択（安全追加）
+          includeRap,
           // Step H: 楽曲構造情報を歌詞生成に渡す
           analyzedStructure
         }),
@@ -336,6 +341,37 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               </label>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ラップ調選択（安全追加） */}
+      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">🎤 ラップ調オプション</h3>
+        <div className="space-y-3">
+          <label className="flex items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={includeRap}
+              onChange={(e) => setIncludeRap(e.target.checked)}
+              className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              <strong>ラップセクション([Rap Verse])を含める</strong>
+            </span>
+          </label>
+          <p className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+            💡 <strong>推奨：</strong>Dragon Ash、RIP SLYME等のヒップホップ系楽曲や、ラップ要素を含むJ-POPの場合にチェック
+          </p>
+          {includeRap && (
+            <div className="bg-purple-100 p-3 rounded border-l-4 border-purple-400">
+              <p className="text-sm text-purple-800">
+                ✅ <strong>ラップ機能有効</strong><br/>
+                • 日本語ラップ技法（母音韻、脚韻、パンチライン）を使用<br/>
+                • [Rap Verse]タグで明確にセクション分け<br/>
+                • 楽曲のテーマに沿った韻踏み歌詞を生成
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

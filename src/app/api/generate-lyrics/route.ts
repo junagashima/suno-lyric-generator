@@ -53,11 +53,14 @@ interface GenerateRequest {
   contentReflection?: 'literal' | 'metaphorical' | 'balanced' // Step D: 安全に追加（オプショナル）
   songLength: string
   vocal: VocalSettings
+  // ユーザー明示的ラップ選択（安全追加）
+  includeRap?: boolean
   // Step I: 楽曲構造情報を受け取る
   analyzedStructure?: {
     hasRap: boolean
     vocalStyle: string
     genre: string
+    isDragonAshStyle?: boolean
   }
 }
 
@@ -72,6 +75,7 @@ export async function POST(request: NextRequest) {
       contentReflection = 'literal', // Step D: 安全なデフォルト値
       songLength,
       vocal,
+      includeRap = false, // 安全なデフォルト値
       analyzedStructure // Step I: 楽曲構造情報
     }: GenerateRequest = await request.json()
 
