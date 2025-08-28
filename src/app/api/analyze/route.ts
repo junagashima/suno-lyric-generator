@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { findMusicData } from './musicDatabase'
+import { findMusicData, MusicData } from './musicDatabase'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -24,221 +24,173 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // まず楽曲データベースから正確な情報を検索
-    const knownMusicData = findMusicData(song, artist)
-    
-    if (knownMusicData) {
-      console.log(`✅ 楽曲データベースからマッチ: ${song} - ${artist}`)
-      console.log('データベース情報:', knownMusicData)
-      
-      // データベース情報から表現豊かな分析結果を生成
-      const mood = `${knownMusicData.mood.join('で')}な雰囲気。${knownMusicData.structure ? 'セクション間の感情変化により' + knownMusicData.mood[0] + 'から解放への流れを表現' : ''}`
-      
-      // グループボーカル設定の詳細な表現
-      let vocalDescription: string = knownMusicData.vocal
-      if (knownMusicData.vocalDetails) {
-        vocalDescription = `${knownMusicData.vocal}（${knownMusicData.vocalDetails}）`
-      } else {
-        // グループボーカルの場合、詳細説明を追加
-        switch (knownMusicData.vocal) {
-          case '男女混合グループ':
-            vocalDescription = '男女混合グループ（メイン・ハーモニー・コーラスワークの多層構成）'
-            break
-          case '女性グループ':
-            vocalDescription = '女性グループ（複数ボーカルによる美しいハーモニー）'
-            break
-          case '男性グループ':
-            vocalDescription = '男性グループ（重厚なグループコーラスと力強い歌唱）'
-            break
-          case '男女デュエット':
-            vocalDescription = '男女デュエット（対話的な歌唱とハーモニー）'
-            break
-          case '女性デュエット':
-            vocalDescription = '女性デュエット（美しい二重唱とコーラスワーク）'
-            break
-          case '男性デュエット':
-            vocalDescription = '男性デュエット（重厚なハーモニーと対話的表現）'
-            break
-          case 'コーラス重視':
-            vocalDescription = 'コーラス重視（重層的な多声部構成）'
-            break
-        }
-      }
-      
-      // ChatGPT形式の構造化指示を生成
-      const purpose = "MV style track"
-      const length = "about 75 seconds"
-      const language = "Japanese lyrics"
-      
-      // テンポ表現（BPM数値は避ける）
-      let tempoDesc = "medium"
-      if (knownMusicData.bpm) {
-        tempoDesc = knownMusicData.bpm >= 130 ? "fast" : 
-                   knownMusicData.bpm >= 100 ? "medium-fast" : "slow"
-      }
-      
-      // 感情語（3つまで）
-      const moodWords = knownMusicData.mood.slice(0, 3).join(', ')
-      
-      // 楽器（具体的に）
-      const instruments = knownMusicData.instruments.length > 0 ? 
-        knownMusicData.instruments.join(' + ') : "guitar + bass + drums"
-      
-      // 禁止要素（ジャンルに応じて）
-      let forbiddenElements = "comedic tones, heavy EDM, fast tempo changes"
-      if (knownMusicData.genre.includes('バラード')) {
-        forbiddenElements = "heavy distortion, fast tempo, aggressive drums"
-      } else if (knownMusicData.genre.includes('ロック')) {
-        forbiddenElements = "comedic tones, light instrumentation, swing rhythm"
-      }
-      
-      let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
-      
-      // Step G: 歌詞構成用の構造情報を追加
-      const hasRapElements = knownMusicData.genre.includes('ヒップホップ') || 
-                           knownMusicData.artist.includes('Dragon Ash') ||
-                           knownMusicData.artist.includes('RIP SLYME')
-      
-      return NextResponse.json({
-        mood,
-        style,
-        // Step G: 安全に構造情報を追加
-        structure: {
-          hasRap: hasRapElements,
-          vocalStyle: knownMusicData.vocal,
-          genre: knownMusicData.genre
-        },
-        debug: {
-          source: 'database',
-          originalData: knownMusicData,
-          confidence: 'high'
-        }
-      })
-    }
-    
-    console.log(`🔍 AIによる分析を実行: ${song} - ${artist}`)
+    console.log(`🤖 AI主導による楽曲分析を開始: ${song} - ${artist}`)
+
+    // 🎯 AI-FIRST APPROACH: AIによる包括的楽曲分析を最優先で実行
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",  // 精度向上のためgpt-4oに変更
+      model: "gpt-4o",  // 最高精度の分析のためgpt-4o使用
       messages: [
         {
           role: "system",
-          content: `あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
+          content: `あなたは世界最高レベルの音楽プロデューサー・楽曲アナリストとして、**Suno AI用の楽曲再現分析**に特化した専門家です。あらゆる楽曲を分析し、Suno AIで高精度に再現可能な指示を作成することが使命です。
 
-## 分析の目的
-- **Suno AIでの楽曲再現**のためのスタイル指示作成
-- 技術データより「音の質感・雰囲気・感情の動き」を優先
-- 聴き手の感覚に訴える表現を用いた分析
-- 楽曲の「魂」や「エネルギー」を言語化
+## 🎯 分析の最終目的
+**Suno AIでの楽曲再現精度を最大化**するための包括的音楽分析
+- 楽曲の「DNA」を完全に解析・言語化
+- Suno AIが理解する最適な表現形式で出力
+- 技術データと感覚的表現の完璧なバランス
+- ジャンル・年代・文化的背景を考慮した分析
 
-## JSON出力形式（必須）
+## 📋 JSON出力形式（厳密遵守）
 {
-  "mood": "感情・雰囲気の詳細表現（最大100文字）",
-  "style": "Suno AI向け音楽的特徴（最大250文字）"
+  "mood": "楽曲の感情的エッセンス（80文字以内）",
+  "style": "Suno AI最適化スタイル指示（200文字以内）",
+  "vocal_analysis": "ボーカル特性の詳細分析",
+  "musical_elements": "音楽理論要素（BPM、キー、コード等）",
+  "production_style": "プロダクション特徴",
+  "genre_classification": "正確なジャンル分類",
+  "cultural_context": "文化的・時代的背景",
+  "suno_reproduction_notes": "Suno再現時の重要ポイント"
 }
 
-## 分析アプローチ（Suno AI最適化）
+## 🔍 包括的分析フレームワーク
 
-**mood**: 楽曲の感情的エッセンス
-- 聴き手の心に与える**直接的な感情体験**
-- 楽曲の**エネルギーの流れ**（静→動、緊張→解放等）
-- **比喩的表現**を用いた雰囲気の描写
-- 楽曲が描く**情景・シーン**の表現
+### 1. ボーカル分析（最重要）
+- **性別・年代・声質**: 正確な特定（男性/女性/年代層）
+- **歌唱技法**: ビブラート、ファルセット、グロウル等
+- **感情表現**: 声の感情的特徴と表現力
+- **グループ構成**: ソロ/デュエット/グループ/コーラス
+- **言語的特徴**: アクセント、発音特徴、言語
 
-**style**: Suno AIが理解する音楽的特徴
-1. **サウンドの質感**: 音の重厚さ、軽やかさ、ダークさ、明るさ
-2. **楽器の役割と効果**: 各楽器が楽曲に与える印象・役割
-3. **ボーカルの表現力**: 歌唱の感情的特徴、技法の効果
-4. **リズムの特性**: グルーブ感、疾走感、重厚感等
-5. **音響的印象**: 空間の広がり、密度、音圧の特徴
-6. **楽曲の展開**: セクション間の感情の変化、構成の効果
-7. **プロダクションの特色**: 音作りの方向性、現代性
+### 2. 音楽理論要素分析
+- **BPM推定**: 正確なテンポ感（数値＋感覚表現）
+- **キー・調性**: メジャー/マイナー、移調
+- **コード進行**: 主要進行パターン
+- **リズムパターン**: ビート、グルーブ特性
+- **音程・音階**: 特徴的な音程関係
 
-## 重要な表現方針
-- **感覚的表現を重視**: 「120BPM」→「疾走感のある中高速テンポ」
-- **比喩・イメージを活用**: 「真夜中のビル街で踊るような」
-- **動的な表現**: 「静から動へ」「緊張から解放へ」
-- **質感の描写**: 「ヘビーで歪んだ」「クリアで透明感のある」
-- **Suno AIが理解する英語表現につながる分析**`
+### 3. サウンド・プロダクション分析
+- **楽器構成**: 各楽器の役割と音色特徴
+- **音響処理**: リバーブ、ディストーション、エフェクト
+- **ミックスバランス**: 各要素の音量・定位
+- **音圧・ダイナミクス**: 音の迫力と動的変化
+- **空間性**: 音の広がり、奥行き感
+
+### 4. 楽曲構造・展開分析
+- **セクション構成**: イントロ、Aメロ、Bメロ、サビ等
+- **感情の流れ**: 楽曲全体の感情変化
+- **クライマックス**: 盛り上がりポイント
+- **転調・転拍**: 構造的変化要素
+
+### 5. ジャンル・文化的分析
+- **正確なジャンル特定**: サブジャンルまで詳細に
+- **時代的特徴**: 制作年代の音楽的傾向
+- **文化的背景**: 地域性、社会的コンテクスト
+- **影響源・系譜**: 音楽史的位置づけ
+
+## 🎵 Suno AI最適化指針
+
+### Style指示の構成要素
+1. **Purpose**: MV style track, about 75 seconds, Japanese lyrics
+2. **Mood**: 感情キーワード（3-5語、英語推奨）
+3. **Tempo**: 感覚表現 + BPM目安
+4. **Instruments**: 具体的楽器構成
+5. **Vocals**: 詳細なボーカル特徴
+6. **Production**: 音作りの方向性
+7. **Forbidden**: 避けるべき要素
+
+### 表現の最適化
+- **英語表現優先**: Suno AIの理解度向上
+- **感覚的修飾語**: "heavy", "bright", "warm", "driving"
+- **具体的楽器名**: "distorted electric guitar", "warm bass"
+- **ムード語彙**: "nostalgic", "energetic", "melancholic"
+- **技術的制約**: 長すぎる説明は避ける
+
+## ⚡ 重要な分析原則
+1. **精度最優先**: 推測より確実な分析
+2. **Suno互換性**: Suno AIが理解する表現形式
+3. **バランス**: 技術と感覚の調和
+4. **文化的配慮**: 楽曲の背景を尊重
+5. **再現可能性**: 実際にSunoで再現可能な指示`
         },
         {
           role: "user",
-          content: `楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
+          content: `楽曲「${song}」by ${artist} の**完全音楽分析**を実行してください。
 
-## 分析の目的
-この楽曲をSuno AIで再現・参考にするためのスタイル指示を作成したい
+## 🎯 分析ミッション
+この楽曲をSuno AIで**高精度再現**するための包括的分析
+- あらゆる音楽的要素を詳細分析
+- Suno AI最適化されたスタイル指示を生成
+- 楽曲の「DNA」を完全に解析・言語化
 
-## 分析指示（感覚・表現重視）
-1. **音の質感・雰囲気を言語化**
-   - 「この楽曲を聴いた時の感覚」を具体的に表現
-   - 比喩やイメージを使った印象的な描写
+## 📊 分析対象楽曲
+**楽曲名**: ${song}
+**アーティスト**: ${artist}
 
-2. **楽曲の感情的な流れ**
-   - イントロからアウトロまでの「感情の動き」
-   - 静と動、緊張と解放の変化
+## 🔍 実行する分析項目
 
-3. **サウンドの特徴を感覚で表現**
-   - 「ヘビーで歪んだ」「クリアで透明感のある」等
-   - 楽器の「役割と印象」（数値より感覚）
+### 1. ボーカル完全分析
+- 性別・年代・声質の正確な特定
+- 歌唱技法・感情表現の詳細分析
+- グループ構成（ソロ/デュエット/コーラス等）
+- 言語的特徴・アクセント
 
-4. **ボーカルの表現力・感情**
-   - 歌唱の「感情的特徴」と「表現技法の効果」
-   - 性別・年代は正確に
+### 2. 音楽理論要素分析
+- BPM推定（感覚表現込み）
+- キー・調性・コード進行
+- リズムパターン・グルーブ特性
+- 特徴的音程・音階要素
 
-## 分析対象楽曲
-- 楽曲: ${song}
-- アーティスト: ${artist}
+### 3. サウンド・プロダクション分析
+- 楽器構成と各楽器の役割
+- 音響処理・エフェクト使用
+- ミックスバランス・音圧特性
+- 空間性・音の広がり
 
-## 出力要件
-- Suno AIが理解できる「英語表現」につながる日本語分析
-- 技術データより「聴覚的印象・感情体験」を重視
-- 楽曲の「魂・エッセンス」を捉えた表現`
+### 4. 楽曲構造・感情分析
+- セクション構成と展開
+- 感情の流れ・クライマックス
+- 文化的背景・時代性
+
+### 5. Suno AI再現分析
+- 最適なSunoスタイル指示
+- 再現時の重要ポイント
+- 避けるべき要素の特定
+
+## 📋 出力要件
+- **完全JSON形式**で全分析結果を出力
+- **Suno AI互換性**を最重視した表現
+- **高精度再現**を可能にする詳細レベル
+- 楽曲の**本質的特徴**を捉えた分析
+
+この楽曲をSuno AIで再現するために必要な、あらゆる音楽的情報を抽出してください。`
         }
       ],
-      temperature: 0.2,  // 精度重視で温度をさらに下げる
-      max_tokens: 600,   // 詳細分析の途中切断防止のため大幅増加
+      temperature: 0.1,  // 最高精度のため温度を最低レベルに
+      max_tokens: 1500,   // 包括的分析のため大幅に拡張
       response_format: { type: "json_object" }
     })
 
     const response = completion.choices[0]?.message?.content || '{}'
     
     try {
-      // JSON形式のレスポンスをパース
-      const parsedResponse = JSON.parse(response)
+      // 🤖 AI分析結果をパース
+      const aiAnalysis = JSON.parse(response)
       
-      // 既知楽曲の検証（テスト用）
-      const knownSongs = {
-        '赤いワインに涙が': { artist: 'ブランデー戦記', vocal: '女性' },
-        'マリーゴールド': { artist: 'あいみょん', vocal: '女性' },
-        'Pretender': { artist: 'Official髭男dism', vocal: '男性' },
-        '白日': { artist: 'King Gnu', vocal: '男性' }
-      }
+      console.log(`✅ AI分析完了: ${song} - ${artist}`)
+      console.log('AI分析詳細:', {
+        vocal: aiAnalysis.vocal_analysis,
+        genre: aiAnalysis.genre_classification,
+        elements: aiAnalysis.musical_elements
+      })
       
-      const knownSong = Object.entries(knownSongs).find(([songName, info]) => 
-        song.includes(songName) && artist.includes(info.artist)
-      )
+      // 🎵 Suno AI用に最適化された指示を構築
+      let mood = aiAnalysis.mood || '穏やかで心温まる雰囲気'
+      let style = aiAnalysis.style || 'J-POP, medium tempo, acoustic instruments, warm vocals'
       
-      if (knownSong) {
-        const [, songInfo] = knownSong
-        console.log(`既知楽曲検出: ${song} - 正解ボーカル: ${songInfo.vocal}`)
-        
-        // ボーカル性別の検証
-        const detectedVocal = parsedResponse.style.includes('女性') ? '女性' : 
-                              parsedResponse.style.includes('男性') ? '男性' : '不明'
-        
-        console.log(`検出されたボーカル: ${detectedVocal}, 正解: ${songInfo.vocal}`)
-        
-        if (detectedVocal !== songInfo.vocal) {
-          console.warn('⚠️ ボーカル性別の分析結果が不正確です！')
-        }
-      }
-      
-      // 雰囲気・感情を80文字以内に制限（適度に詳細を保持）
-      let mood = parsedResponse.mood || '穏やかで優しい雰囲気'
-      
-      // 長すぎる場合は最初の80文字に切り詰める
+      // 📏 文字数制限の適用（既存UIとの互換性）
       if (mood.length > 80) {
-        // 句読点があれば、そこで切る
         const punctIndex = mood.search(/[、。]/);
         if (punctIndex > 0 && punctIndex <= 80) {
           mood = mood.substring(0, punctIndex);
@@ -247,67 +199,147 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // 音楽スタイルを200文字以内に制限（詳細分析を保持）
-      let style = parsedResponse.style || 'J-POP, ミディアムテンポ, アコースティック'
-      
-      // スタイルが長文になっている場合の処理
       if (style.length > 200) {
-        // 最初の200文字で切って、最後のカンマまたは句点まで適切に処理
         style = style.substring(0, 200);
-        const lastPunct = Math.max(style.lastIndexOf(','), style.lastIndexOf('、'), style.lastIndexOf('。'));
-        if (lastPunct > 100) { // ある程度の長さを確保
+        const lastPunct = Math.max(
+          style.lastIndexOf(','), 
+          style.lastIndexOf('、'), 
+          style.lastIndexOf('。')
+        );
+        if (lastPunct > 100) {
           style = style.substring(0, lastPunct);
         }
       }
       
-      // 分析結果の品質チェック（音楽理論要素を含む）
-      const qualityCheck = {
-        hasVocalInfo: style.includes('男性') || style.includes('女性') || style.includes('ボーカル'),
-        hasGenre: style.match(/(J-POP|ロック|バラード|フォーク|R&B|ソウル|ポップス)/i),
-        hasTempo: style.match(/(BPM|テンポ|スロー|ミディアム|アップ)/i),
-        hasInstruments: style.match(/(ギター|ピアノ|ドラム|ベース|ストリングス)/i),
-        hasBPM: style.match(/\d+\s*BPM/i),
-        hasKey: style.match(/(キー|[A-G][#♭]?|メジャー|マイナー|長調|短調)/i),
-        hasChords: style.match(/(コード|[A-G][#♭]?m?[0-9]?)/i),
-        hasMusicalFeatures: style.match(/(音程|音階|リズム|和声|メロディー)/i)
+      // 🔍 楽曲構造分析（歌詞生成用）
+      const hasRapElements = 
+        (aiAnalysis.genre_classification && 
+         aiAnalysis.genre_classification.toLowerCase().includes('hip')) ||
+        (aiAnalysis.genre_classification && 
+         aiAnalysis.genre_classification.includes('ヒップホップ')) ||
+        (aiAnalysis.vocal_analysis && 
+         aiAnalysis.vocal_analysis.includes('ラップ')) ||
+        artist.toLowerCase().includes('dragon ash') ||
+        artist.toLowerCase().includes('rip slyme')
+      
+      // 🎤 ボーカルスタイル分析
+      let vocalStyle = '男性'
+      if (aiAnalysis.vocal_analysis) {
+        if (aiAnalysis.vocal_analysis.includes('女性')) {
+          vocalStyle = '女性'
+        } else if (aiAnalysis.vocal_analysis.includes('デュエット')) {
+          vocalStyle = '男女デュエット'
+        } else if (aiAnalysis.vocal_analysis.includes('グループ')) {
+          vocalStyle = '男女混合グループ'
+        }
       }
       
-      console.log('=== 楽曲分析結果 ===');
-      console.log(`楽曲: ${song} - ${artist}`);
-      console.log('分析結果:', { 
-        mood: `${mood} (${mood.length}文字)`, 
-        style: `${style} (${style.length}文字)` 
-      });
-      console.log('品質チェック:', qualityCheck);
+      // 🔍 AI分析品質の評価
+      const analysisQuality = {
+        hasVocalAnalysis: Boolean(aiAnalysis.vocal_analysis),
+        hasMusicalElements: Boolean(aiAnalysis.musical_elements),
+        hasProductionStyle: Boolean(aiAnalysis.production_style),
+        hasGenreClassification: Boolean(aiAnalysis.genre_classification),
+        hasCulturalContext: Boolean(aiAnalysis.cultural_context),
+        hasReproductionNotes: Boolean(aiAnalysis.suno_reproduction_notes)
+      }
+      
+      console.log('=== 🤖 AI楽曲分析完了 ===');
+      console.log(`🎵 楽曲: ${song} - ${artist}`);
+      console.log(`🎭 感情: ${mood} (${mood.length}文字)`);
+      console.log(`🎼 スタイル: ${style} (${style.length}文字)`);
+      console.log(`🎤 ボーカル: ${vocalStyle}`);
+      console.log(`🎸 ジャンル: ${aiAnalysis.genre_classification || '不明'}`);
+      console.log(`🔍 分析品質:`, analysisQuality);
+      console.log(`🎯 ラップ要素: ${hasRapElements ? 'あり' : 'なし'}`);
 
+      // 🎯 既存UIとの互換性を保った結果を返す
       return NextResponse.json({
         mood,
         style,
+        // 🎵 歌詞生成用の構造情報
+        structure: {
+          hasRap: hasRapElements,
+          vocalStyle: vocalStyle,
+          genre: aiAnalysis.genre_classification || 'J-POP'
+        },
+        // 🔬 デバッグ・詳細情報
         debug: {
-          originalMood: parsedResponse.mood,
-          originalStyle: parsedResponse.style,
-          moodLength: mood.length,
-          styleLength: style.length,
-          processed: true
+          source: 'ai_analysis',
+          confidence: 'high',
+          aiAnalysis: {
+            vocal_analysis: aiAnalysis.vocal_analysis,
+            musical_elements: aiAnalysis.musical_elements,
+            production_style: aiAnalysis.production_style,
+            genre_classification: aiAnalysis.genre_classification,
+            cultural_context: aiAnalysis.cultural_context,
+            suno_reproduction_notes: aiAnalysis.suno_reproduction_notes
+          },
+          analysisQuality,
+          processedAt: new Date().toISOString()
         }
       })
     } catch (parseError) {
-      console.error('JSONパースエラー:', parseError);
-      // JSONパースに失敗した場合のフォールバック
+      console.error('❌ AI分析JSONパースエラー:', parseError);
+      console.log('📄 生レスポンス:', response);
+      
+      // 🔄 フォールバック: データベース検索を試行（変数は上位スコープから取得）
+      const fallbackData = findMusicData(song, artist);
+      
+      if (fallbackData) {
+        console.log('🔄 データベースフォールバックを使用');
+        return NextResponse.json({
+          mood: fallbackData.mood.join('で') + 'な雰囲気',
+          style: `Purpose: MV style track, about 75 seconds, Japanese lyrics. Mood: ${fallbackData.mood.slice(0, 3).join(', ')}. Instruments: ${fallbackData.instruments.join(' + ')}. Vocals: ${fallbackData.vocal}.`,
+          structure: {
+            hasRap: fallbackData.genre.includes('ヒップホップ'),
+            vocalStyle: fallbackData.vocal,
+            genre: fallbackData.genre
+          },
+          debug: {
+            source: 'database_fallback',
+            confidence: 'medium',
+            error: 'AI analysis parse failed, used database fallback'
+          }
+        });
+      }
+      
+      // 🆘 最終フォールバック
       return NextResponse.json({
-        mood: '穏やかで優しい雰囲気',
-        style: 'J-POP, ミディアムテンポ, アコースティック, ピアノ, 自然なプロダクション',
+        mood: '穏やかで心地よい雰囲気',
+        style: 'J-POP, medium tempo, acoustic guitar + piano + drums, warm male vocals, natural production',
+        structure: {
+          hasRap: false,
+          vocalStyle: '男性',
+          genre: 'J-POP'
+        },
         debug: {
-          error: 'JSON parse failed',
-          rawResponse: response
+          source: 'emergency_fallback',
+          confidence: 'low',
+          error: 'Both AI analysis and database lookup failed',
+          rawResponse: response.substring(0, 500)
         }
       })
     }
 
   } catch (error) {
-    console.error('楽曲分析エラー:', error)
+    console.error('❌ AI楽曲分析システムエラー:', error)
+    
     return NextResponse.json(
-      { error: '楽曲分析中にエラーが発生しました' },
+      { 
+        error: 'AI楽曲分析システムでエラーが発生しました。しばらく後に再試行してください。',
+        mood: '穏やかな雰囲気',
+        style: 'J-POP, medium tempo, acoustic instruments, expressive vocals',
+        structure: {
+          hasRap: false,
+          vocalStyle: '男性',
+          genre: 'J-POP'
+        },
+        debug: {
+          source: 'error_fallback',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      },
       { status: 500 }
     )
   }

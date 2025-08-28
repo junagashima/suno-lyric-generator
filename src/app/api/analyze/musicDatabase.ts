@@ -74,3 +74,34 @@ export const musicDatabase: Record<string, MusicData> = {
     instruments: ['heavy guitar', 'driving bass', 'powerful drums', 'dark synth']
   }
 }
+
+// 🔍 楽曲データ検索関数
+export function findMusicData(song: string, artist: string): MusicData | null {
+  // 楽曲名での直接マッチを試行
+  const directMatch = musicDatabase[song];
+  if (directMatch && directMatch.artist.toLowerCase().includes(artist.toLowerCase())) {
+    return directMatch;
+  }
+  
+  // 部分マッチ検索
+  for (const [songName, data] of Object.entries(musicDatabase)) {
+    const songMatch = song.toLowerCase().includes(songName.toLowerCase()) ||
+                     songName.toLowerCase().includes(song.toLowerCase());
+    const artistMatch = artist.toLowerCase().includes(data.artist.toLowerCase()) ||
+                       data.artist.toLowerCase().includes(artist.toLowerCase());
+    
+    if (songMatch && artistMatch) {
+      return data;
+    }
+  }
+  
+  // アーティスト名のみでマッチ（複数楽曲がある場合の対応）
+  for (const [songName, data] of Object.entries(musicDatabase)) {
+    if (data.artist.toLowerCase().includes(artist.toLowerCase()) ||
+        artist.toLowerCase().includes(data.artist.toLowerCase())) {
+      return data;
+    }
+  }
+  
+  return null;
+}
