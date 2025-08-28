@@ -24,8 +24,8 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   // Step H: 楽曲分析結果の構造情報
   const [analyzedStructure, setAnalyzedStructure] = useState<any>(null)
   
-  // ラップ調選択の状態管理（安全追加）
-  const [includeRap, setIncludeRap] = useState(false)
+  // ラップモード選択の状態管理（拡張版）
+  const [rapMode, setRapMode] = useState<'none' | 'partial' | 'full'>('none')
   
   // ボーカル設定
   const [vocalGender, setVocalGender] = useState('女性')
@@ -116,8 +116,8 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
             nationality: vocalNationality,
             techniques: vocalTechniques
           },
-          // ユーザー明示的ラップ選択（安全追加）
-          includeRap,
+          // ラップモード選択（拡張版）
+          rapMode,
           // Step H: 楽曲構造情報を歌詞生成に渡す
           analyzedStructure
         }),
@@ -347,28 +347,73 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       {/* ラップ調選択（安全追加） */}
       <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
         <h3 className="text-lg font-semibold text-gray-800 mb-3">🎤 ラップ調オプション</h3>
-        <div className="space-y-3">
-          <label className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              checked={includeRap}
-              onChange={(e) => setIncludeRap(e.target.checked)}
-              className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              <strong>ラップセクション([Rap Verse])を含める</strong>
-            </span>
-          </label>
-          <p className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
-            💡 <strong>推奨：</strong>Dragon Ash、RIP SLYME等のヒップホップ系楽曲や、ラップ要素を含むJ-POPの場合にチェック
-          </p>
-          {includeRap && (
+        <div className="space-y-4">
+          <div className="text-sm font-medium text-gray-700 mb-3">
+            <strong>ラップ要素の設定</strong>
+          </div>
+          
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3">
+              <input
+                type="radio"
+                name="rapMode"
+                value="none"
+                checked={rapMode === 'none'}
+                onChange={(e) => setRapMode('none')}
+                className="w-4 h-4 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+              />
+              <span className="text-sm text-gray-700">
+                <strong>ラップなし</strong> - 通常のメロディー楽曲
+              </span>
+            </label>
+
+            <label className="flex items-center space-x-3">
+              <input
+                type="radio"
+                name="rapMode"
+                value="partial"
+                checked={rapMode === 'partial'}
+                onChange={(e) => setRapMode('partial')}
+                className="w-4 h-4 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+              />
+              <span className="text-sm text-gray-700">
+                <strong>一部ラップ</strong> - [Rap Verse]セクションを含む（Dragon Ash風）
+              </span>
+            </label>
+
+            <label className="flex items-center space-x-3">
+              <input
+                type="radio"
+                name="rapMode"
+                value="full"
+                checked={rapMode === 'full'}
+                onChange={(e) => setRapMode('full')}
+                className="w-4 h-4 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+              />
+              <span className="text-sm text-gray-700">
+                <strong>全面ラップ</strong> - 完全なヒップホップ・ラップ楽曲
+              </span>
+            </label>
+          </div>
+
+          {rapMode === 'partial' && (
             <div className="bg-purple-100 p-3 rounded border-l-4 border-purple-400">
               <p className="text-sm text-purple-800">
-                ✅ <strong>ラップ機能有効</strong><br/>
+                ✅ <strong>一部ラップモード</strong><br/>
+                • メロディーセクション + [Rap Verse]セクションの組み合わせ<br/>
                 • 日本語ラップ技法（母音韻、脚韻、パンチライン）を使用<br/>
-                • [Rap Verse]タグで明確にセクション分け<br/>
-                • 楽曲のテーマに沿った韻踏み歌詞を生成
+                • Dragon Ash、RIP SLYME等のスタイルに最適
+              </p>
+            </div>
+          )}
+
+          {rapMode === 'full' && (
+            <div className="bg-orange-100 p-3 rounded border-l-4 border-orange-400">
+              <p className="text-sm text-orange-800">
+                🔥 <strong>全面ラップモード</strong><br/>
+                • 楽曲全体がラップで構成（歌メロディーなし）<br/>
+                • SUNO「rap-only」最適化指示を適用<br/>
+                • フリースタイル・ヒップホップ楽曲として生成
               </p>
             </div>
           )}

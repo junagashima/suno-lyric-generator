@@ -91,7 +91,9 @@ interface GenerateRequest {
   contentReflection?: 'literal' | 'metaphorical' | 'balanced' // Step D: 安全に追加（オプショナル）
   songLength: string
   vocal: VocalSettings
-  // ユーザー明示的ラップ選択（安全追加）
+  // ラップモード選択（拡張版）
+  rapMode?: 'none' | 'partial' | 'full'
+  // 後方互換性のため保持
   includeRap?: boolean
   // Step I: 楽曲構造情報を受け取る
   analyzedStructure?: {
@@ -113,9 +115,13 @@ export async function POST(request: NextRequest) {
       contentReflection = 'literal', // Step D: 安全なデフォルト値
       songLength,
       vocal,
-      includeRap = false, // 安全なデフォルト値
+      rapMode = 'none', // 新しいラップモード
+      includeRap = false, // 後方互換性のため保持
       analyzedStructure // Step I: 楽曲構造情報
     }: GenerateRequest = await request.json()
+
+    // 後方互換性: includeRapがtrueの場合はpartialに変換
+    const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
 
     if (!theme || !content) {
       return NextResponse.json(
@@ -165,24 +171,47 @@ contentReflection === 'metaphorical' ?
 }
 
 ## ラップセクション対応
-${includeRap || analyzedStructure?.hasRap ? `
-   **この楽曲にはRAP要素を含める指定です**
-   ${includeRap ? '- **ユーザー明示的選択**: ラップセクション必須' : ''}
+${finalRapMode === 'full' ? `
+   **🔥 全面ラップ楽曲モード 🔥**
+   **この楽曲は完全なヒップホップ・ラップ楽曲として作成してください**
+
+   **CRITICAL: 歌メロディーは一切使用せず、全セクションをラップで構成**
+   - **禁止事項**: [Chorus]での歌メロディー、サビでの歌唱、メロディアスなパート
+   - **必須構成**: [Intro] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Verse] → [Rap Hook/Chorus] → [Outro]
+   - **ラップのみ**: 全てのボーカルパートはラップ・フロー・韻踏みで構成
+
+   **日本語フリースタイルラップ技法（全面適用）:**
+   - **連続フロー**: 途切れない韻とリズムの流れ
+   - **多層韻**: 内韻・脚韻・頭韻の組み合わせ
+   - **ストーリーテリング**: テーマ「${theme}」に沿った物語性のある歌詞
+   - **パンチライン**: セクションごとに印象的な決め台詞
+   - **ビート合わせ**: ヒップホップビートに完全に同調したシラブル調整
+
+   **全面ラップ構成要件:**
+   - 各[Rap Verse]は8-16行の充実したフロー
+   - [Rap Hook/Chorus]はキャッチーで反復可能なラップフレーズ
+   - 楽曲全体を通してメロディーではなくリズムと韻で構成
+   - テーマ「${theme}」を中心とした一貫したメッセージ
+` : finalRapMode === 'partial' || analyzedStructure?.hasRap ? `
+   **この楽曲にはRAP要素を含める指定です（一部ラップモード）**
+   ${finalRapMode === 'partial' ? '- **ユーザー選択**: 一部ラップモード（Dragon Ash風）' : ''}
    ${analyzedStructure?.hasRap ? `- **楽曲分析検出**: ${analyzedStructure.genre} / ${analyzedStructure.vocalStyle}` : ''}
+
    **MANDATORY: [Rap Verse]タグを必ず歌詞に含めてください**
    - **[Rap Verse]セクションをメロディーセクションとは別に作成**
    - **推奨構成**: Intro → Verse → Pre-Chorus → Chorus → [Rap Verse] → Chorus → Outro
+
    **日本語ラップ基本技法:**
    - **母音合わせ**: 行末の母音を統一（例：「未来/誓い/走りたい」でa-i音）
    - **脚韻**: 行の終わりの音を揃える（最も効果的）
    - **パンチライン**: キャッチーな決め台詞を1-2箇所に配置
    - **リズム調整**: ビートに合わせた語感重視の歌詞構成
+
    **[Rap Verse]作成要件（4-8行）:**
    - 内容テーマに沿った自己表現・主張を含める
    - 韻踏みパターンを必ず使用
    - パワフルで印象的な語彙選択
-   
-   **重要**: [Rap Verse]セクションでは絵文字や装飾記号を一切使用せず、純粋な歌詞のみを出力してください
+   - 絵文字や装飾記号は使用せず、純粋な歌詞のみを出力
 ` : ''}
 
 ## 作詞要件
@@ -279,10 +308,30 @@ Suno AIで楽曲を生成するための最適化された英語スタイル指�
 ## 追加情報
 - 歌唱技法: ${vocal.techniques.join(', ')}
 - 詳細スタイル: ${musicStyle}
+- **ラップモード**: ${finalRapMode} (none: 通常楽曲, partial: 一部ラップ, full: 全面ラップ)
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ楽曲用 SUNO最適化指示（ChatGPT実証済み）
+
+### 全面ラップ専用テンプレート適用
+以下のテンプレートを参考に、SUNOの「歌モード引っ張られ」を回避した完全ラップ指示を生成：
+
+**必須要素:**
+- **Style**: "Hip-hop rap-only track" を冒頭に明記
+- **Purpose**: "freestyle-style rap performance" でラップ性を強調  
+- **Vocals**: "continuous rap throughout, no melodic singing" で歌禁止徹底
+- **Rap Style**: "rhythmic, punchy, conversational flow, clear end rhymes"
+- **Forbidden**: "sung chorus, autotuned melodies, pop-style singing" を必須記載
+
+### 全面ラップ最適化ポイント:
+- SUNOは歌に寄りやすいため「rap-only」「no singing」を複数回強調
+- テンポは90-110BPM程度の中速〜速めが自然
+- 楽器はシンプル（ドラム＋ベース中心）、軽くギターやシンセ追加
+- 雰囲気: urban/energetic/confident/aggressive/chill等から選択
+` : `
 ## Suno AI最適化指示作成方針
 
-### 1. 核10項目による一筆書き設計図作成
+### 1. 核10項目による一筆書き設計図作成`}
 - **Purpose指定**: "BGM for meeting", "MV style track", "Opening theme"
 - **Length明記**: "about 75 seconds", "30-35 seconds"  
 - **Language明記**: "Japanese lyrics", "instrumental only"
@@ -344,6 +393,9 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 
 **ダークJ-Rock系（SPECIALZ Style）:**
 "Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
+
+**🔥 全面ラップ系（Hip-hop Rap-only Style）:**
+"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
 
 ## 厳守必須フォーマット（ChatGPT実証済み）：
 
