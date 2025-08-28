@@ -5,36 +5,74 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 })
 
-// テーマと雰囲気に基づいてフォールバックタイトルを生成
+// プロ仕様タイトル生成（J-POPヒットノウハウ統合版）
 function generateFallbackTitles(theme: string, mood: string, content: string): string[] {
   const titles: string[] = []
   
-  // テーマベースのタイトル
+  // 🎯 戦略1: 短く口にしやすい（2-4語以内）
+  const shortTitles = []
+  
+  // 🎨 戦略2: 視覚的イメージ重視（色・季節・場所）
+  const visualTitles = []
+  
+  // 💫 戦略3: 感情直球ワード
+  const emotionalTitles = []
+  
+  // テーマ別戦略的タイトル生成
   if (theme.includes('恋') || theme.includes('愛')) {
-    titles.push('君への想い', '恋の調べ', '心のメロディー')
+    shortTitles.push('君だけ', 'LOVE', 'キミ', '愛')
+    visualTitles.push('桜色の恋', '夜空と君', '赤い糸', '恋の季節')
+    emotionalTitles.push('君への想い', '愛をこめて', '恋心', '切ない愛')
   } else if (theme.includes('卒業') || theme.includes('別れ')) {
-    titles.push('旅立ちの日に', '新しい扉', '思い出の彼方')
+    shortTitles.push('さよなら', 'Goodbye', '旅立ち', '門出')
+    visualTitles.push('桜散る日', '青春の扉', '夕暮れ道', '春の別れ')
+    emotionalTitles.push('涙の卒業式', '思い出たち', '新しい明日', 'ありがとう')
   } else if (theme.includes('友情') || theme.includes('仲間')) {
-    titles.push('かけがえのない時間', '絆の歌', 'ともに歩もう')
+    shortTitles.push('友達', 'Together', '仲間', '絆')
+    visualTitles.push('虹の向こう', '青い空と', '街角で', '夏の友達')
+    emotionalTitles.push('かけがえのない時間', '友情の歌', 'ずっと一緒', '心の友')
   } else if (theme.includes('家族')) {
-    titles.push('ありがとうの歌', '家族の絆', '温かい場所')
+    shortTitles.push('家族', 'Family', 'ありがとう', '母')
+    visualTitles.push('温かい家', '夕飯の時間', '帰り道', '家族写真')
+    emotionalTitles.push('ありがとうの歌', '家族の愛', '温もり', 'おかえり')
   } else if (theme.includes('夢') || theme.includes('希望')) {
-    titles.push('明日への扉', '輝く未来', '夢の向こう側')
+    shortTitles.push('夢', 'Dream', '希望', 'Believe')
+    visualTitles.push('虹のかなた', '星空の夢', '明日の空', '光の道')
+    emotionalTitles.push('諦めない心', '夢を追いかけて', '希望の光', '未来への扉')
   }
-  
-  // 雰囲気ベースのタイトル
+
+  // 雰囲気別タイトル強化
   if (mood.includes('切ない') || mood.includes('悲しい')) {
-    titles.push('心の雨', '涙の調べ', '静かな想い')
-  } else if (mood.includes('希望') || mood.includes('前向き')) {
-    titles.push('光の道', '新しい朝', '希望の歌')
+    shortTitles.push('涙', '想い', '雨', '夜')
+    visualTitles.push('雨の日', '夜の街', '灰色の空', '静かな部屋')
+    emotionalTitles.push('心の雨', '涙そうそう', '切ない想い', '孤独な夜')
+  } else if (mood.includes('希望') || mood.includes('前向き') || mood.includes('エネルギッシュ')) {
+    shortTitles.push('光', 'Shine', '今日', '明日')
+    visualTitles.push('青い空', '太陽の歌', '新しい朝', '虹色の日')
+    emotionalTitles.push('輝く未来', '負けないで', '新しいスタート', '希望の歌')
   } else if (mood.includes('温かい') || mood.includes('優しい')) {
-    titles.push('やさしい時間', '温もり', '心の安らぎ')
+    shortTitles.push('優しさ', 'Heart', '温もり', '笑顔')
+    visualTitles.push('春の陽だまり', '夕焼け空', '花畑', '暖かい部屋')
+    emotionalTitles.push('やさしい時間', '心の温もり', '愛のうた', '安らぎ')
   }
+
+  // 🎵 戦略4: 音の響き・リズム重視
+  const rhythmicTitles = ['ワンダフル', 'キラキラ', 'ドキドキ', 'ワクワク', 'メロディー']
   
-  // 一般的なフォールバック
-  titles.push('今日という日', '心の歌', '大切なもの', '新しい始まり', '永遠の瞬間')
-  
-  return titles
+  // 🌟 戦略5: 抽象的・余白のあるタイトル
+  const abstractTitles = ['物語', 'ココロ', 'カタチ', '軌跡', 'かけら', '瞬間', '記憶']
+
+  // ノウハウ統合: バランス良く選出
+  const allTitles = [
+    ...shortTitles.slice(0, 2),      // 短さ重視
+    ...visualTitles.slice(0, 2),     // 視覚的
+    ...emotionalTitles.slice(0, 2),  // 感情的
+    ...rhythmicTitles.slice(0, 1),   // 音響的
+    ...abstractTitles.slice(0, 1)    // 抽象的
+  ].filter(Boolean)
+
+  // 重複排除して返却
+  return [...new Set(allTitles)]
 }
 
 interface VocalSettings {
@@ -198,9 +236,22 @@ ${includeRap || analyzedStructure?.hasRap ? `
 [Outro]
 [Fade out]
 
+## J-POPヒット楽曲タイトル生成ガイドライン
+タイトルは「聞く前の第一印象」かつ「聞いた後に記憶を固定するフック」として以下を参考に：
+
+### 🎯 効果的タイトルの要素（自然に活用）
+1. **長さとリズム**: 2-4語以内を目安に、口にしやすい響き
+2. **イメージ喚起**: 色・季節・場所などの視覚的要素で映像化
+3. **感情トリガー**: 「愛」「涙」「夢」「希望」等の感情直球ワード
+4. **楽曲連動**: サビや印象的歌詞フレーズからの自然な抽出
+5. **音の美しさ**: オノマトペや韻、日英ミックスの新鮮さ
+6. **適度な抽象性**: リスナーが想像を膨らませられる余白
+
+**重要**: 上記は参考であり、楽曲の本質とテーマ「${theme}」を最優先してください
+
 ## 重要な出力要件
-※ **必ずタイトル候補を3つ**最初に出力してください
-※ タイトルは楽曲のテーマと雰囲気を反映した魅力的なものにしてください
+※ **必ずタイトル候補を3つ**最初に出力してください（上記ガイドライン参考）
+※ タイトルは楽曲のテーマと雰囲気を反映した魅力的で記憶に残るものに
 ※ **「**歌詞（Sunoタグ付き）:**」セクション以降は純粋な歌詞とタグのみ**を出力してください
 ※ **絵文字や装飾記号（🔥、📝、🎵等）は歌詞部分で一切使用禁止**
 ※ Sunoタグは効果的に配置し、楽曲の流れを明確に示してください
