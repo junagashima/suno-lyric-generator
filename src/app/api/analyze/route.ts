@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
         }
       ],
       temperature: 0.2,  // 精度重視で温度をさらに下げる
-      max_tokens: 400,   // 詳細分析のためトークン数を増加
+      max_tokens: 600,   // 詳細分析の途中切断防止のため大幅増加
       response_format: { type: "json_object" }
     })
 

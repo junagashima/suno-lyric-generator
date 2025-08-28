@@ -469,6 +469,19 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 **🔥 全面ラップ系（Hip-hop Rap-only Style）:**
 "Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ専用厳守フォーマット：
+
+**全面ラップ楽曲用構造で必ず出力:**
+"Style: Hip-hop rap-only track inspired by [参考スタイル]. 
+Purpose: [freestyle rap performance/uplifting anthem], about [X seconds]. 
+Vocals: [人数] [性別] voice(s), [call-and-response/solo] rap, no singing. 
+Rap style: [conversational/aggressive/smooth], [punchy lines/flowing], [simple/complex] rhymes. 
+Tempo: medium-fast with [groovy/driving] head-nod beat. 
+Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/synth]. 
+Mood: [urban/positive/energetic], [nostalgic/confident/aggressive]. 
+Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections."
+` : `
 ## 厳守必須フォーマット（ChatGPT実証済み）：
 
 **必ず以下の構造で出力:**
@@ -479,6 +492,7 @@ Instruments: [楽器名] + [楽器名] + [楽器名]. [追加楽器指定].
 Structure: [intro] → [verse] → [chorus] → [closing]. 
 Vocals: [性別] voice, [表情], [技法]. 
 Forbidden: [禁止要素], [禁止要素], [禁止要素]."
+`}
 
 **絶対に使用禁止の表現:**
 - "musical journey", "soundscape", "emotional depth"
@@ -491,10 +505,18 @@ Forbidden: [禁止要素], [禁止要素], [禁止要素]."
 - "solitary evening walk", "echoes with memories"
 - キー名（F minor等）、BPM数値、音域指定
 
+${finalRapMode === 'full' ? `
+## ⚡ 全面ラップ専用出力命令（必須遵守）：
+必ず「Style: Hip-hop rap-only track」で始まり、「Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections.」で終わる構造化された指示のみ出力せよ。
+詩的表現・比喩・長い修飾句は一切使用するな。
+ラップスタイル・楽器名・禁止要素を具体的に明記せよ。
+**CRITICAL**: 「singing」「melodic」「chorus」を禁止要素に必ず含めよ。
+` : `
 ## ⚡ 出力命令（必須遵守）：
 必ず「Purpose: 」で始まり、「Forbidden: 」で終わる構造化された指示のみ出力せよ。
 詩的表現・比喩・長い修飾句は一切使用するな。
 楽器名と禁止要素を具体的に明記せよ。
+`}
 `
 
     // 歌詞生成
