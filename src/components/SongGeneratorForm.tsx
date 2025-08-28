@@ -18,6 +18,12 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [content, setContent] = useState('')
   const [songLength, setSongLength] = useState('3-4分')
   
+  // Step B: 内容反映度の状態管理
+  const [contentReflection, setContentReflection] = useState('literal')
+  
+  // Step H: 楽曲分析結果の構造情報
+  const [analyzedStructure, setAnalyzedStructure] = useState<any>(null)
+  
   // ボーカル設定
   const [vocalGender, setVocalGender] = useState('女性')
   const [vocalAge, setVocalAge] = useState('20代')
@@ -69,6 +75,8 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       const data = await response.json()
       setMood(data.mood || '')
       setMusicStyle(data.style || '')
+      // Step H: 楽曲構造情報を保存
+      setAnalyzedStructure(data.structure || null)
     } catch (error) {
       console.error('Error analyzing reference song:', error)
       alert('楽曲分析中にエラーが発生しました。手動で設定してください。')
@@ -97,13 +105,16 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           musicStyle,
           theme,
           content,
+          contentReflection, // Step C: 安全に追加
           songLength,
           vocal: {
             gender: vocalGender,
             age: vocalAge,
             nationality: vocalNationality,
             techniques: vocalTechniques
-          }
+          },
+          // Step H: 楽曲構造情報を歌詞生成に渡す
+          analyzedStructure
         }),
       })
 
@@ -356,6 +367,60 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           placeholder="歌詞に表現したい感情、情景、メッセージなどを自由に記述してください。長文でも構いません。"
           required
         />
+      </div>
+
+      {/* 内容反映度調整（Step A: 表示のみ） */}
+      <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">📝 内容反映度設定</h3>
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            上記内容の歌詞への反映方法
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="contentReflection"
+                value="literal"
+                checked={contentReflection === 'literal'}
+                onChange={(e) => setContentReflection(e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">
+                <strong>忠実反映</strong>：専門用語・固有名詞をそのまま歌詞に使用
+              </span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="contentReflection"
+                value="metaphorical"
+                checked={contentReflection === 'metaphorical'}
+                onChange={(e) => setContentReflection(e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">
+                <strong>比喩的表現</strong>：内容を詩的・象徴的に表現
+              </span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="contentReflection"
+                value="balanced"
+                checked={contentReflection === 'balanced'}
+                onChange={(e) => setContentReflection(e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">
+                <strong>バランス型</strong>：重要部分は忠実、他は比喩的に
+              </span>
+            </label>
+          </div>
+          <p className="text-xs text-green-600 bg-green-100 p-2 rounded">
+            ✅ 内容反映度機能が実装されました。選択した方法で歌詞生成に反映されます。
+          </p>
+        </div>
       </div>
 
       {/* 生成ボタン */}

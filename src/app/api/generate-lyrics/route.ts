@@ -50,8 +50,15 @@ interface GenerateRequest {
   musicStyle: string
   theme: string
   content: string
+  contentReflection?: 'literal' | 'metaphorical' | 'balanced' // Step D: 安全に追加（オプショナル）
   songLength: string
   vocal: VocalSettings
+  // Step I: 楽曲構造情報を受け取る
+  analyzedStructure?: {
+    hasRap: boolean
+    vocalStyle: string
+    genre: string
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -62,8 +69,10 @@ export async function POST(request: NextRequest) {
       musicStyle,
       theme,
       content,
+      contentReflection = 'literal', // Step D: 安全なデフォルト値
       songLength,
-      vocal
+      vocal,
+      analyzedStructure // Step I: 楽曲構造情報
     }: GenerateRequest = await request.json()
 
     if (!theme || !content) {
@@ -105,6 +114,14 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 ## 歌詞に盛り込みたい内容
 ${content}
 
+## Step E: 内容反映方法（${contentReflection}）
+${contentReflection === 'literal' ? 
+  '- **専門用語・固有名詞・数字をそのまま歌詞に使用**してください\n- **具体的な内容を抽象化せず**、リズムに合わせて自然に歌詞化\n- **「スプデブ」「1-2ヶ月」等のキーワードを必ず含める**' :
+contentReflection === 'metaphorical' ?
+  '- **内容を詩的・象徴的に表現**し、直接的な専門用語は避ける\n- **比喩やメタファーを活用**して内容の本質を美しく表現\n- **抽象的な言葉で核心メッセージを伝達**' :
+  '- **重要なキーワードは忠実に保持**、説明部分は詩的に表現\n- **専門用語の一部は残し**、周辺内容は美化して表現\n- **技術性と詩的表現のバランス**を取る'
+}
+
 ## 作詞要件
 以下の要素を考慮してJ-POPヒット曲として成功する歌詞を作成してください：
 
@@ -116,7 +133,7 @@ ${content}
    - 現代のJ-POPトレンドを反映した語彙選択
 
 2. **Suno AIタグの効果的活用**
-   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]
+   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]${analyzedStructure?.hasRap ? ', [Rap Verse]' : ''}
    - 演出タグ: [Fade in], [Fade out], [Instrumental Break]
    - ボーカル指示タグ: [Vocal harmony], [Ad libs], [Whispered], [Belted]
    - 楽器指示タグ: [Piano solo], [Guitar riff], [String section]
@@ -126,6 +143,20 @@ ${content}
      songLength === '3-4分' ? '標準的な楽曲構成（Intro-Verse-Pre-Chorus-Chorus-Verse-Pre-Chorus-Chorus-Bridge-Chorus-Outro）' :
      songLength === '4-5分' ? '充実した楽曲構成（複数のセクション、Cメロ、間奏を含む）' :
      '長い楽曲構成（複数の展開、インストゥルメンタル部分を含む）'}
+
+## Step I: ラップセクション対応
+${analyzedStructure?.hasRap ? `
+   **🔥 この楽曲にはRAP要素が検出されました 🔥**
+   - ジャンル: ${analyzedStructure.genre}
+   - ボーカルスタイル: ${analyzedStructure.vocalStyle}
+   - **[Rap Verse]タグを使用してラップセクションを明確に配置**
+   - **ラップ部分は韻を踏んだリズミカルな歌詞構成を使用**
+   - **歌い部分（メロディー）とラップ部分を明確に区別**
+   - **楽曲構成例**: Intro → Verse(歌) → Pre-Chorus → Chorus → Rap Verse → Chorus → Bridge → Chorus → Outro
+` : `
+   - この楽曲は通常の歌唱スタイルで構成します
+   - メロディー重視の楽曲構成を使用
+`}
 
 ## 出力形式
 必ず以下の形式で回答してください（タイトル候補は必須）：

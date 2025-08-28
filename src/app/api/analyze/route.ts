@@ -94,9 +94,20 @@ export async function POST(request: NextRequest) {
       
       let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
       
+      // Step G: 歌詞構成用の構造情報を追加
+      const hasRapElements = knownMusicData.genre.includes('ヒップホップ') || 
+                           knownMusicData.artist.includes('Dragon Ash') ||
+                           knownMusicData.artist.includes('RIP SLYME')
+      
       return NextResponse.json({
         mood,
         style,
+        // Step G: 安全に構造情報を追加
+        structure: {
+          hasRap: hasRapElements,
+          vocalStyle: knownMusicData.vocal,
+          genre: knownMusicData.genre
+        },
         debug: {
           source: 'database',
           originalData: knownMusicData,
