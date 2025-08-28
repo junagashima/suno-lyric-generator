@@ -214,6 +214,30 @@ ${finalRapMode === 'full' ? `
    - 絵文字や装飾記号は使用せず、純粋な歌詞のみを出力
 ` : ''}
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ楽曲作詞要件 🔥
+**この楽曲は完全なヒップホップ・ラップ楽曲として作詞してください**
+
+1. **ヒップホップ・ラップ作詞戦略**
+   - **フロー重視**: ビートに合わせたリズミカルな言葉選び
+   - **韻踏み必須**: 内韻・脚韻・頭韻を効果的に使用
+   - **ストーリーテリング**: テーマに沿った一貫したメッセージ
+   - **パンチライン**: 印象的で記憶に残るフレーズを各セクションに配置
+   - **リアルな表現**: 具体的で直球な言葉遣い
+
+2. **全面ラップ専用Sunoタグ**
+   - **楽曲構成タグ**: [Intro], [Rap Verse], [Rap Hook/Chorus], [Outro] ※[Verse], [Pre-Chorus], [Chorus]は使用禁止
+   - **演出タグ**: [Beat drop], [Instrumental Break], [Scratch sounds]
+   - **ボーカル指示タグ**: [Aggressive delivery], [Smooth flow], [Rapid fire], [Whispered rap]
+   - **楽器指示タグ**: [Heavy bass], [Drum pattern], [Scratch effects]
+
+3. **全面ラップ楽曲構成（MANDATORY）**
+   - **短め(2-3分)**: [Intro] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Verse] → [Rap Hook/Chorus] → [Outro]
+   - **標準(3-4分)**: [Intro] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Bridge] → [Rap Hook/Chorus] → [Outro]
+   - **長め(4-5分+)**: [Intro] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Verse] → [Rap Hook/Chorus] → [Rap Bridge] → [Rap Verse] → [Rap Hook/Chorus] → [Outro]
+
+**CRITICAL: メロディックな[Verse], [Pre-Chorus], [Chorus]タグは絶対に使用しないでください**
+` : `
 ## 作詞要件
 以下の要素を考慮してJ-POPヒット曲として成功する歌詞を作成してください：
 
@@ -225,7 +249,7 @@ ${finalRapMode === 'full' ? `
    - 現代のJ-POPトレンドを反映した語彙選択
 
 2. **Suno AIタグの効果的活用**
-   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]${includeRap || analyzedStructure?.hasRap ? ', [Rap Verse]' : ''}
+   - 楽曲構成タグ: [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]${finalRapMode === 'partial' || analyzedStructure?.hasRap ? ', [Rap Verse]' : ''}
    - 演出タグ: [Fade in], [Fade out], [Instrumental Break]
    - ボーカル指示タグ: [Vocal harmony], [Ad libs], [Whispered], [Belted]
    - 楽器指示タグ: [Piano solo], [Guitar riff], [String section]
@@ -235,7 +259,41 @@ ${finalRapMode === 'full' ? `
      songLength === '3-4分' ? '標準的な楽曲構成（Intro-Verse-Pre-Chorus-Chorus-Verse-Pre-Chorus-Chorus-Bridge-Chorus-Outro）' :
      songLength === '4-5分' ? '充実した楽曲構成（複数のセクション、Cメロ、間奏を含む）' :
      '長い楽曲構成（複数の展開、インストゥルメンタル部分を含む）'}
+`}
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ楽曲出力形式 🔥
+必ず以下の形式で回答してください：
+
+**タイトル候補:**
+1. タイトル1（ヒップホップらしいタイトル）
+2. タイトル2（パンチのあるタイトル）
+3. タイトル3（ストリート感のあるタイトル）
+
+**歌詞（全面ラップSunoタグ付き）:**
+[Intro]
+[Beat starts] [Heavy bass]
+
+[Rap Verse]
+8-16行のフリースタイルラップ歌詞
+（韻踏み・フロー・パンチライン必須）
+
+[Rap Hook/Chorus]
+4-8行のキャッチーなラップフック
+（繰り返し可能な印象的フレーズ）
+
+[Rap Verse]
+8-16行のフリースタイルラップ歌詞
+（テーマ展開・ストーリー継続）
+
+[Rap Hook/Chorus]
+4-8行のキャッチーなラップフック
+
+[Outro]
+[Beat fade] [Bass out]
+
+**CRITICAL: [Verse], [Pre-Chorus], [Chorus]タグは絶対に使用禁止**
+` : `
 ## 出力形式
 必ず以下の形式で回答してください：
 
@@ -257,13 +315,14 @@ ${finalRapMode === 'full' ? `
 [Chorus]
 歌詞内容...
 
-[Rap Verse]
+${finalRapMode === 'partial' || analyzedStructure?.hasRap ? `[Rap Verse]
 歌詞内容（ラップセクション、絵文字や装飾記号なし）...
 
-[続きのセクション...]
+` : ''}[続きのセクション...]
 
 [Outro]
 [Fade out]
+`}
 
 ## J-POPヒット楽曲タイトル生成ガイドライン
 タイトルは「聞く前の第一印象」かつ「聞いた後に記憶を固定するフック」として以下を参考に：
@@ -278,6 +337,18 @@ ${finalRapMode === 'full' ? `
 
 **重要**: 上記は参考であり、楽曲の本質とテーマ「${theme}」を最優先してください
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ楽曲重要出力要件 🔥
+※ **必ずタイトル候補を3つ**最初に出力（ヒップホップらしいタイトル）
+※ **「**歌詞（全面ラップSunoタグ付き）:**」以降は純粋なラップ歌詞とタグのみ**
+※ **絶対禁止**: [Verse], [Pre-Chorus], [Chorus]タグの使用
+※ **必須タグ**: [Rap Verse], [Rap Hook/Chorus]のみ使用
+※ **絵文字や装飾記号は歌詞部分で一切使用禁止**
+※ **韻踏み・フロー・パンチラインを必須で含める**
+※ **各[Rap Verse]は8-16行、[Rap Hook/Chorus]は4-8行**
+※ **メロディックな歌詞は一切書かず、全てラップフローで作詞**
+※ **ビートに合わせたリズミカルな言葉選びを重視**
+` : `
 ## 重要な出力要件
 ※ **必ずタイトル候補を3つ**最初に出力してください（上記ガイドライン参考）
 ※ タイトルは楽曲のテーマと雰囲気を反映した魅力的で記憶に残るものに
@@ -286,7 +357,8 @@ ${finalRapMode === 'full' ? `
 ※ Sunoタグは効果的に配置し、楽曲の流れを明確に示してください
 ※ 日本語の美しい表現と現代的な感覚を両立させてください
 ※ リスナーが口ずさみたくなるようなキャッチーなフレーズを含めてください
-※ **[Rap Verse]セクションでは、タグ以外は純粋な歌詞のみ**を記述してください
+${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]セクションでは、タグ以外は純粋な歌詞のみ**を記述してください' : ''}
+`}
 `
 
     // 英語スタイル指示生成プロンプト（表現力強化）
