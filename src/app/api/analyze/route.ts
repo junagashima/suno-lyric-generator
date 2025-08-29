@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
 - 楽曲の核となる楽器構成と質感を具体的に指定
 - ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
+- ※絶対禁止: synth pad, atmospheric pad, ambient pad等の汎用パッド音色
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -407,7 +408,13 @@ export async function POST(request: NextRequest) {
       let instruments = parsedResponse.instruments || "guitar, bass, drums"
       const forbidden = parsedResponse.forbidden || "No comedic tones"
       
-      // 🔧 instruments フィールドからもsynth pad除去
+      // 🔧 instruments フィールドからもsynth pad除去（強化版）
+      const unwantedInstruments = [
+        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
+        'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
+        'background pad', 'string pad', 'warm pad', 'lush pad'
+      ];
+      
       unwantedInstruments.forEach(unwanted => {
         const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
         instruments = instruments.replace(regex, '');
@@ -415,8 +422,18 @@ export async function POST(request: NextRequest) {
         instruments = instruments.replace(commaRegex, '');
         const preCommaRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
         instruments = instruments.replace(preCommaRegex, '');
+        // +区切り形式にも対応
+        const plusRegex = new RegExp(`\\s*\\+\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
+        instruments = instruments.replace(plusRegex, '');
+        const prePlusRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*\\+`, 'gi');
+        instruments = instruments.replace(prePlusRegex, '');
       });
-      instruments = instruments.replace(/[,、]\s*[,、]+/g, ',').replace(/\s+/g, ' ').trim();
+      instruments = instruments.replace(/[,、]\s*[,、]+/g, ',').replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*[,+]\s*|\s*[,+]\s*$/g, '').replace(/\s+/g, ' ').trim();
+      
+      console.log('🔧 Instruments除去処理:', {
+        original: parsedResponse.instruments,
+        processed: instruments
+      });
 
       // 診断ログ: AIが新4要素を出力しているかチェック
       console.log('=== 新4要素診断 ===');
