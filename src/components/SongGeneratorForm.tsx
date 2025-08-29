@@ -24,6 +24,14 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   // Step H: 楽曲分析結果の構造情報
   const [analyzedStructure, setAnalyzedStructure] = useState<any>(null)
   
+  // 新4要素分析結果（安全な追加実装）
+  const [analyzedDetails, setAnalyzedDetails] = useState<{
+    tempo?: string
+    rhythm?: string  
+    instruments?: string
+    forbidden?: string
+  } | null>(null)
+  
   // ラップモード選択の状態管理（拡張版）
   const [rapMode, setRapMode] = useState<'none' | 'partial' | 'full'>('none')
   
@@ -80,6 +88,14 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       setMusicStyle(data.style || '')
       // Step H: 楽曲構造情報を保存
       setAnalyzedStructure(data.structure || null)
+      
+      // 新4要素の安全な保存（フォールバック付き）
+      setAnalyzedDetails({
+        tempo: data.tempo || null,
+        rhythm: data.rhythm || null,
+        instruments: data.instruments || null,
+        forbidden: data.forbidden || null
+      })
     } catch (error) {
       console.error('Error analyzing reference song:', error)
       alert('楽曲分析中にエラーが発生しました。手動で設定してください。')
@@ -256,6 +272,44 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           </p>
         )}
       </div>
+
+      {/* 新4要素表示（安全な追加実装） */}
+      {mode === 'simple' && analyzedDetails && (
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+            🔍 詳細分析結果 (Suno AI最適化)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            {analyzedDetails.tempo && (
+              <div className="bg-white p-2 rounded border">
+                <strong className="text-blue-700">テンポ:</strong>
+                <div className="text-gray-700 mt-1">{analyzedDetails.tempo}</div>
+              </div>
+            )}
+            {analyzedDetails.rhythm && (
+              <div className="bg-white p-2 rounded border">
+                <strong className="text-blue-700">リズム:</strong>
+                <div className="text-gray-700 mt-1">{analyzedDetails.rhythm}</div>
+              </div>
+            )}
+            {analyzedDetails.instruments && (
+              <div className="bg-white p-2 rounded border">
+                <strong className="text-blue-700">楽器構成:</strong>
+                <div className="text-gray-700 mt-1">{analyzedDetails.instruments}</div>
+              </div>
+            )}
+            {analyzedDetails.forbidden && (
+              <div className="bg-white p-2 rounded border">
+                <strong className="text-blue-700">禁止要素:</strong>
+                <div className="text-gray-700 mt-1">{analyzedDetails.forbidden}</div>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-blue-600 mt-2">
+            💡 この詳細情報はSuno AIでより正確な楽曲生成に活用されます
+          </p>
+        </div>
+      )}
 
       {/* ボーカル設定 */}
       <div className="bg-green-50 p-4 rounded-lg">
