@@ -33,7 +33,13 @@ export async function POST(request: NextRequest) {
       // 汎用synth系（具体性のない電子音色指示）
       'synth', 'シンセ', 'dark synth', 'minimal synth', 'lead synth', 'bass synth',
       // 汎用的すぎる楽器名
-      'electronic sounds', 'synthetic sounds', 'digital sounds'
+      'electronic sounds', 'synthetic sounds', 'digital sounds',
+      // ボーカル関連（楽器構成から除外）
+      'vocals', 'vocal', 'voice', 'voices', 'singing', 'singer', 'vocalist',
+      'male vocals', 'female vocals', 'lead vocals', 'backing vocals',
+      'expressive vocals', 'expressive male vocals', 'expressive female vocals',
+      'powerful vocals', 'soft vocals', 'emotional vocals', 'passionate vocals',
+      'ボーカル', 'ヴォーカル', '歌声', '歌', 'ボイス', '男性ボーカル', '女性ボーカル'
     ];
 
     // まず楽曲データベースから正確な情報を検索
@@ -224,8 +230,10 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式は絶対�
 - 🎯【分析原則】楽曲に実際に使用されている楽器構成のみを正確に記述
 - ※推測による楽器追加や削除は禁止
 - ⚠️【注意】「synth pad」のような汎用パッド音色は避け、より具体的な楽器名を使用
+- 🚫【絶対禁止】ボーカル要素の記述禁止: vocals, voice, singing, male vocals, female vocals等は一切記述しない
 - ✅【推奨】: electric guitar, bass guitar, drum kit, piano, strings, brass, synthesizer（実際に使用されている場合）
 - 🔄【品質重視】汎用的でなく、楽曲の特徴を表す具体的な楽器名と質感描写
+- 🎵【重要】楽器のみを記述し、ボーカル・歌声・声に関する要素は除外する
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -588,7 +596,8 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
         original: parsedResponse.instruments,
         originalAssigned: instrumentsOriginal,
         processed: instruments,
-        removedSynthPad: instrumentsOriginal !== instruments
+        removedUnwanted: instrumentsOriginal !== instruments,
+        removedItems: instrumentsOriginal !== instruments ? '不要楽器・ボーカル要素を除去' : 'なし'
       });
 
       // 診断ログ: AIが新4要素を出力しているかチェック
