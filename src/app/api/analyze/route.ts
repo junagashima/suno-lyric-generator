@@ -116,9 +116,31 @@ export async function POST(request: NextRequest) {
                            knownMusicData.artist.includes('Dragon Ash') ||
                            knownMusicData.artist.includes('RIP SLYME')
       
+      // 🔍 データベース処理でのsynth pad検査
+      console.log('=== データベース処理 Synth Pad検査 ===');
+      const dbSynthPadCheck = {
+        moodHasSynthPad: /synth\s*pad/i.test(mood),
+        styleHasSynthPad: /synth\s*pad/i.test(style),
+        instrumentsHasSynthPad: /synth\s*pad/i.test(instruments)
+      };
+      console.log('データベース Synth pad検査:', dbSynthPadCheck);
+      
+      if (dbSynthPadCheck.moodHasSynthPad || dbSynthPadCheck.styleHasSynthPad || dbSynthPadCheck.instrumentsHasSynthPad) {
+        console.log('⚠️ データベース警告: synth padが残っています！', {
+          mood, style, instruments
+        });
+      } else {
+        console.log('✅ データベース処理: synth pad除去完了');
+      }
+      
       return NextResponse.json({
         mood,
         style,
+        // 新4要素をデータベース処理でも提供
+        tempo: knownMusicData.tempo || "medium/steady (85-100 BPM)",
+        rhythm: "steady 4/4 beat", // データベースには詳細リズムがないためデフォルト
+        instruments: instruments,
+        forbidden: "No comedic tones, No inappropriate instruments",
         // Step G: 安全に構造情報を追加
         structure: {
           hasRap: hasRapElements,
@@ -128,7 +150,8 @@ export async function POST(request: NextRequest) {
         debug: {
           source: 'database',
           originalData: knownMusicData,
-          confidence: 'high'
+          confidence: 'high',
+          synthPadRemoved: true
         }
       })
     }
@@ -182,11 +205,13 @@ export async function POST(request: NextRequest) {
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
 - 楽曲の核となる楽器構成と質感を具体的に指定
 - ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
-- ※絶対禁止: synth pad, atmospheric pad, ambient pad等の汎用パッド音色
+- ⚠️【重要】絶対禁止楽器: synth pad, synthpad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等のあらゆるパッド音色
+- 代替指示: パッド音色の代わりに具体的楽器名を使用（strings, piano, guitar等）
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
 - 楽曲スタイルに不適切な要素を明確に排除
+- 必須追加: "No ambient pads" - あらゆるパッド音色の使用を禁止
 
 **style**: 総合補足（オプション）
 - 上記4要素で表現しきれない音楽的特徴を補足
@@ -329,7 +354,7 @@ export async function POST(request: NextRequest) {
       // 音楽スタイルを200文字以内に制限（詳細分析を保持）
       let style = parsedResponse.style || 'J-POP, ミディアムテンポ, アコースティック'
       
-      // 🔧 不要楽器の除去処理（synth pad問題の解決）
+      // 🔧 不要楽器の除去処理（synth pad問題の解決）- 第1段階
       // AIが生成しがちな不適切な楽器指示を除去
       
       unwantedInstruments.forEach(unwanted => {
@@ -344,14 +369,29 @@ export async function POST(request: NextRequest) {
         // 前にカンマがある場合の処理  
         const preCommaRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
         style = style.replace(preCommaRegex, '');
+        
+        // +記号区切り形式にも対応
+        const plusRegex = new RegExp(`\\s*\\+\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
+        style = style.replace(plusRegex, '');
+        const prePlusRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*\\+`, 'gi');
+        style = style.replace(prePlusRegex, '');
       });
       
-      // 連続するカンマや余分な空白を整理
-      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s+/g, ' ').trim();
+      // 連続するカンマや余分な空白を整理（第1段階）
+      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*[,+]\s*|\s*[,+]\s*$/g, '').replace(/\s+/g, ' ').trim();
+      
+      console.log('🔧 Style第1段階除去処理:', {
+        original: parsedResponse.style,
+        afterUnwanted: style
+      });
       
       // 🔧 styleフィールドから楽器名を除去（instrumentsフィールドと重複防止）
       const commonInstruments = [
         'synthesizer', 'シンセサイザー', 'synth', 'シンセ',
+        // synth pad系の楽器を追加（unwantedInstruments と同じリスト）
+        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
+        'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
+        'background pad', 'string pad', 'warm pad', 'lush pad',
         'guitar', 'ギター', 'electric guitar', 'エレキギター', 'acoustic guitar', 'アコースティックギター',
         'bass', 'ベース', 'bass guitar', 'ベースギター',
         'drums', 'ドラム', 'ドラムス', 'percussion', 'パーカッション',
@@ -359,6 +399,7 @@ export async function POST(request: NextRequest) {
         'strings', 'ストリングス', 'violin', 'バイオリン'
       ];
       
+      const styleBeforeCommon = style;
       commonInstruments.forEach(instrument => {
         const regex = new RegExp(`\\b${instrument.replace(/\s+/g, '\\s*')}\\b`, 'gi');
         style = style.replace(regex, '');
@@ -366,10 +407,20 @@ export async function POST(request: NextRequest) {
         style = style.replace(commaRegex, '');
         const preCommaRegex = new RegExp(`${instrument.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
         style = style.replace(preCommaRegex, '');
+        // +記号区切り形式にも対応
+        const plusRegex = new RegExp(`\\s*\\+\\s*${instrument.replace(/\s+/g, '\\s*')}`, 'gi');
+        style = style.replace(plusRegex, '');
+        const prePlusRegex = new RegExp(`${instrument.replace(/\s+/g, '\\s*')}\\s*\\+`, 'gi');
+        style = style.replace(prePlusRegex, '');
       });
       
       // 再度整理
-      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s+/g, ' ').trim();
+      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*[,+]\s*|\s*[,+]\s*$/g, '').replace(/\s+/g, ' ').trim();
+      
+      console.log('🔧 Style第2段階除去処理:', {
+        beforeCommon: styleBeforeCommon,
+        afterCommon: style
+      });
       
       // スタイルが長文になっている場合の処理
       if (style.length > 200) {
@@ -408,6 +459,7 @@ export async function POST(request: NextRequest) {
       const forbidden = parsedResponse.forbidden || "No comedic tones"
       
       // 🔧 instruments フィールドからもsynth pad除去（強化版）
+      const instrumentsOriginal = instruments;
       
       unwantedInstruments.forEach(unwanted => {
         const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
@@ -426,7 +478,9 @@ export async function POST(request: NextRequest) {
       
       console.log('🔧 Instruments除去処理:', {
         original: parsedResponse.instruments,
-        processed: instruments
+        originalAssigned: instrumentsOriginal,
+        processed: instruments,
+        removedSynthPad: instrumentsOriginal !== instruments
       });
 
       // 診断ログ: AIが新4要素を出力しているかチェック
@@ -437,6 +491,25 @@ export async function POST(request: NextRequest) {
       console.log('- rhythm:', parsedResponse.rhythm ? '✅ AI出力' : '❌ フォールバック'); 
       console.log('- instruments:', parsedResponse.instruments ? '✅ AI出力' : '❌ フォールバック');
       console.log('- forbidden:', parsedResponse.forbidden ? '✅ AI出力' : '❌ フォールバック');
+      
+      // 🔍 最終チェック: synth pad が完全に除去されているか確認
+      console.log('=== 最終Synth Pad検査 ===');
+      const finalSynthPadCheck = {
+        moodHasSynthPad: /synth\s*pad/i.test(mood),
+        styleHasSynthPad: /synth\s*pad/i.test(style),
+        instrumentsHasSynthPad: /synth\s*pad/i.test(instruments),
+        forbiddenHasSynthPad: /synth\s*pad/i.test(forbidden)
+      };
+      console.log('Synth pad残存検査:', finalSynthPadCheck);
+      
+      if (finalSynthPadCheck.moodHasSynthPad || finalSynthPadCheck.styleHasSynthPad || 
+          finalSynthPadCheck.instrumentsHasSynthPad || finalSynthPadCheck.forbiddenHasSynthPad) {
+        console.log('⚠️ 警告: まだsynth padが残っています！', {
+          mood, style, instruments, forbidden
+        });
+      } else {
+        console.log('✅ synth pad除去完了');
+      }
 
       return NextResponse.json({
         // 既存フィールド（後方互換性）
