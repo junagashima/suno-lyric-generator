@@ -163,9 +163,9 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           // SUNO最適化ボーカル設定（新機能）
           vocalConfiguration: useNewVocalSystem ? {
             useNewSystem: true,
-            selectedElements: vocalConfiguration?.selectedElements || [],
-            sunoText: vocalConfiguration?.sunoText || '',
-            mode: vocalConfiguration?.mode || 'simple',
+            selectedElements: vocalConfiguration?.selectedElements?.map((el: any) => el.label) || [],
+            sunoText: vocalConfiguration?.generatedText || '',
+            mode: mode,
             presetId: vocalConfiguration?.presetId || null
           } : null,
           // 混合言語設定（新機能）

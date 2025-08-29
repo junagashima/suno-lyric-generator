@@ -38,6 +38,7 @@ export default function VocalElementSelector({
   // 選択変更時にコールバック実行
   useEffect(() => {
     const generatedText = generateSunoVocalText(selectedElements, gender)
+    console.log('🎤 VocalElementSelector更新:', { selectedElements, generatedText })
     onSelectionChange({
       selectedElements,
       generatedText

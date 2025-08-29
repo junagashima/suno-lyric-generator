@@ -216,6 +216,9 @@ export async function POST(request: NextRequest) {
     const determineVocalSettings = () => {
       if (vocalConfiguration?.useNewSystem && vocalConfiguration.sunoText) {
         // SUNO最適化システム使用時
+        console.log('✅ SUNO最適化システムを使用')
+        console.log('🎯 SUNOテキスト:', vocalConfiguration.sunoText)
+        console.log('🎵 選択要素:', vocalConfiguration.selectedElements)
         return {
           vocalDescription: vocalConfiguration.sunoText,
           isNewSystem: true,
@@ -234,6 +237,7 @@ export async function POST(request: NextRequest) {
 
     const vocalSettings = determineVocalSettings()
     console.log('🎤 ボーカル設定:', vocalSettings)
+    console.log('📨 受信したvocalConfiguration:', JSON.stringify(vocalConfiguration, null, 2))
 
     // 混合言語制御ロジック（新機能）
     const determineLanguageSettings = () => {
