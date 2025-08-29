@@ -178,6 +178,7 @@ export async function POST(request: NextRequest) {
 - 形式: "primary instruments + quality descriptors" 
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
 - 楽曲の核となる楽器構成と質感を具体的に指定
+- ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -185,6 +186,7 @@ export async function POST(request: NextRequest) {
 
 **style**: 総合補足（オプション）
 - 上記4要素で表現しきれない音楽的特徴を補足
+- ※楽器構成はinstrumentsフィールドのみに記述し、styleには含めない
 
 ## 重要な表現方針（全楽曲対応）
 - **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
@@ -198,7 +200,8 @@ export async function POST(request: NextRequest) {
 - **比喩・イメージを活用**: 「真夜中のビル街で踊るような」
 - **動的な表現**: 「静から動へ」「緊張から解放へ」
 - **質感の描写**: 「ヘビーで歪んだ」「クリアで透明感のある」
-- **Suno AIネイティブな英語表現で直接指示**`
+- **Suno AIネイティブな英語表現で直接指示**
+- **重要**: styleフィールドに楽器名を含めない（instrumentsフィールドのみに記述）`
         },
         {
           role: "user",
@@ -344,6 +347,28 @@ export async function POST(request: NextRequest) {
       });
       
       // 連続するカンマや余分な空白を整理
+      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s+/g, ' ').trim();
+      
+      // 🔧 styleフィールドから楽器名を除去（instrumentsフィールドと重複防止）
+      const commonInstruments = [
+        'synthesizer', 'シンセサイザー', 'synth', 'シンセ',
+        'guitar', 'ギター', 'electric guitar', 'エレキギター', 'acoustic guitar', 'アコースティックギター',
+        'bass', 'ベース', 'bass guitar', 'ベースギター',
+        'drums', 'ドラム', 'ドラムス', 'percussion', 'パーカッション',
+        'piano', 'ピアノ', 'keyboard', 'キーボード',
+        'strings', 'ストリングス', 'violin', 'バイオリン'
+      ];
+      
+      commonInstruments.forEach(instrument => {
+        const regex = new RegExp(`\\b${instrument.replace(/\s+/g, '\\s*')}\\b`, 'gi');
+        style = style.replace(regex, '');
+        const commaRegex = new RegExp(`[,、]\\s*${instrument.replace(/\s+/g, '\\s*')}`, 'gi');
+        style = style.replace(commaRegex, '');
+        const preCommaRegex = new RegExp(`${instrument.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
+        style = style.replace(preCommaRegex, '');
+      });
+      
+      // 再度整理
       style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s+/g, ' ').trim();
       
       // スタイルが長文になっている場合の処理
