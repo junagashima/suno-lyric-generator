@@ -163,7 +163,10 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
+          content: `🚫【最重要】絶対禁止事項：
+あらゆる「pad」系楽器（synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等）の使用は完全に禁止されています。これらの楽器名を出力に含めてはいけません。
+
+あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
 ## 分析の目的
 - **Suno AIでの楽曲再現**のためのスタイル指示作成
@@ -205,8 +208,9 @@ export async function POST(request: NextRequest) {
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
 - 楽曲の核となる楽器構成と質感を具体的に指定
 - ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
-- ⚠️【重要】絶対禁止楽器: synth pad, synthpad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等のあらゆるパッド音色
-- 代替指示: パッド音色の代わりに具体的楽器名を使用（strings, piano, guitar等）
+- 🚫【絶対禁止】pad系楽器を含めることは厳禁（synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等）
+- ✅【許可楽器例】: electric guitar, acoustic guitar, bass, drums, piano, strings, brass, woodwinds
+- 代替指示: パッド音色が必要な場合は「strings」「piano」「guitar」等の具体的楽器名で代替
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -216,6 +220,7 @@ export async function POST(request: NextRequest) {
 **style**: 総合補足（オプション）
 - 上記4要素で表現しきれない音楽的特徴を補足
 - ※楽器構成はinstrumentsフィールドのみに記述し、styleには含めない
+- 🚫【重要】styleフィールドにもpad系楽器名を含めることは禁止
 
 ## 重要な表現方針（全楽曲対応）
 - **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
@@ -230,11 +235,19 @@ export async function POST(request: NextRequest) {
 - **動的な表現**: 「静から動へ」「緊張から解放へ」
 - **質感の描写**: 「ヘビーで歪んだ」「クリアで透明感のある」
 - **Suno AIネイティブな英語表現で直接指示**
-- **重要**: styleフィールドに楽器名を含めない（instrumentsフィールドのみに記述）`
+- **重要**: styleフィールドに楽器名を含めない（instrumentsフィールドのみに記述）
+
+## 🚫【Suno AI特化】絶対守るべき重要ルール
+1. あらゆる「pad」を含む楽器名（synth pad, atmospheric pad等）は完全禁止
+2. パッド系音色が必要な場合は「strings」「piano」「soft guitar」等の具体的楽器で代替
+3. instrumentsフィールドとstyleフィールドの両方でpad系楽器を避ける
+4. Suno AIは「pad」指示を嫌うため、この指示を厳格に守る`
         },
         {
           role: "user",
-          content: `楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
+          content: `🚫【重要】synth pad, atmospheric pad等のあらゆる「pad」系楽器名は絶対に使用禁止です。
+
+楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
 ## 分析の目的
 この楽曲をSuno AIで再現・参考にするためのスタイル指示を作成したい
@@ -254,8 +267,10 @@ export async function POST(request: NextRequest) {
    - イントロからアウトロまでの「感情の動き」
    - 静と動、緊張と解放の変化
 
-4. **サウンドの特徴を感覚で表現**
-   - 「ヘビーで歪んだ」「クリアで透明感のある」等
+4. **楽器構成と音の特徴（重要）**
+   - 🚫【絶対禁止】pad系楽器（synth pad, atmospheric pad等）は一切使用しない
+   - ✅【推奨楽器】electric guitar, acoustic guitar, bass, drums, piano, strings, brass等の具体的楽器のみ
+   - 「ヘビーで歪んだ」「クリアで透明感のある」等の質感表現
    - 楽器の「役割と印象」（数値より感覚）
 
 5. **ボーカルの表現力・感情**
@@ -282,7 +297,8 @@ export async function POST(request: NextRequest) {
 - 体感比喩: "head-nod groove"(Hip-Hop), "driving rock beat"
 
 **禁止要素**:
-- 必ず追加: "No EDM drops", "No comedic tones", "No swing"等
+- 必須項目: "No ambient pads" - pad系楽器の使用を完全禁止
+- 追加禁止: "No EDM drops", "No comedic tones", "No swing"等（楽曲に応じて）
 
 **必須JSON出力例**:
 {
@@ -290,7 +306,7 @@ export async function POST(request: NextRequest) {
   "tempo": "slow/relaxed (70-75 BPM)",
   "rhythm": "laid-back groove with steady 4/4 beat", 
   "instruments": "soft piano, gentle strings, subtle percussion",
-  "forbidden": "No EDM drops, No comedic tones, No fast tempo",
+  "forbidden": "No EDM drops, No ambient pads, No comedic tones",
   "style": "穏やかなピアノバラード、感情の深い流れを表現"
 }
 
