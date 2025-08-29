@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         forbiddenElements = "comedic tones, light instrumentation, swing rhythm"
       }
       
-      let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Instruments: ${instruments}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
+      let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
       
       // Step G: 歌詞構成用の構造情報を追加
       const hasRapElements = knownMusicData.genre.includes('ヒップホップ') || 
@@ -175,11 +175,11 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `🎯【最重要】分析精度優先：
-楽曲の実際の楽器構成を正確に分析し、推測や追加は一切行わないでください。
-- 実際に聞こえる楽器のみを分析対象とする
-- instrumentsフィールドとstyleフィールドで一貫した楽器構成を出力する
-- 不明確な場合は汎用的でない具体的な楽器名を使用する
+          content: `🎯【最重要】フィールド分離：
+楽器構成はinstrumentsフィールドのみに記述し、styleフィールドには一切含めないでください。
+- instrumentsフィールド：楽器構成と質感のみ
+- styleフィールド：ジャンル、雰囲気、プロダクション手法のみ（楽器名・Purpose・Structure等は禁止）
+- 「Purpose:」「Instruments:」「Structure:」等の形式は絶対に使用しない
 
 あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
@@ -232,12 +232,13 @@ export async function POST(request: NextRequest) {
 - 楽曲スタイルに不適切な要素を明確に排除
 - 必須追加: "No ambient pads" - あらゆるパッド音色の使用を禁止
 
-**style**: 総合補足（オプション）
-- 上記4要素で表現しきれない音楽的特徴を補足
-- 🚫【絶対禁止】楽器構成は一切含めない（「Instruments:」「楽器:」等の記述も完全禁止）
-- 🚫【絶対禁止】いかなる楽器名も含めない（guitar, bass, drums, piano等も禁止）
-- ✅【記述内容のみ】ジャンル名、雰囲気・感情、プロダクション手法、ボーカルスタイルのみ
-- ✅【例】「エネルギッシュなロック、ドライビングなサウンドプロダクション、力強い男性ボーカル」
+**style**: ジャンル・雰囲気のみ（オプション）
+- 🚫【絶対禁止】以下は一切含めない：
+  - 楽器名（guitar, bass, drums, piano, synth等）
+  - Purpose、Instruments、Structure、Vocals等の構造化記述
+  - 「Purpose:」「Instruments:」「Structure:」等の形式
+- ✅【記述内容のみ】ジャンル名、雰囲気・感情、プロダクション手法のみ
+- ✅【例】「エネルギッシュなロック、ドライビングなプロダクション」
 
 ## 重要な表現方針（全楽曲対応）
 - **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
@@ -335,7 +336,7 @@ export async function POST(request: NextRequest) {
   "rhythm": "laid-back groove with steady 4/4 beat", 
   "instruments": "soft acoustic piano, gentle acoustic strings, subtle percussion",
   "forbidden": "No ambient pads, No EDM drops, No comedic tones",
-  "style": "穏やかなバラード調、オーガニックなプロダクション、感情豊かな男性ボーカル"
+  "style": "穏やかなバラード調、オーガニックなプロダクション"
 }
 
 **その他要件**:
@@ -482,9 +483,13 @@ export async function POST(request: NextRequest) {
         style = style.replace(endPunctRegex, '.');
       });
       
-      // 🔧 楽器セクション完全除去（根本的解決）
-      // 「Instruments:」セクション全体を削除
-      style = style.replace(/(Instruments?|楽器)[:：][^.]*(\.)?/gi, '');
+      // 🔧 構造化記述完全除去（根本的解決）
+      // Purpose、Instruments、Structure等の形式を完全削除
+      style = style.replace(/(Purpose|Instruments?|Structure|Vocals?|楽器|構成)[:：][^.]*(\.)?/gi, '');
+      // Purpose形式全体を削除
+      style = style.replace(/Purpose:[^.]*\./gi, '');
+      // 楽器名を含む文を削除
+      style = style.replace(/[^.]*\b(guitar|bass|drums|piano|synth|keyboard|strings|brass|vocals?)\b[^.]*/gi, '');
       
       // 🔧 強化版最終整理
       style = style
