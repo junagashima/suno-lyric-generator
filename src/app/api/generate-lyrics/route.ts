@@ -82,6 +82,11 @@ interface VocalSettings {
   techniques: string[]
 }
 
+interface LanguageSettings {
+  englishMixLevel: 'none' | 'light' | 'moderate' | 'heavy'
+  languagePreference: 'auto' | 'japanese' | 'english' | 'mixed'
+}
+
 interface GenerateRequest {
   mode: 'simple' | 'custom'
   mood: string
@@ -91,6 +96,8 @@ interface GenerateRequest {
   contentReflection?: 'literal' | 'metaphorical' | 'balanced' // Step D: 安全に追加（オプショナル）
   songLength: string
   vocal: VocalSettings
+  // 混合言語設定（新機能）
+  languageSettings?: LanguageSettings
   // ラップモード選択（拡張版）
   rapMode?: 'none' | 'partial' | 'full'
   // 後方互換性のため保持
@@ -115,6 +122,7 @@ export async function POST(request: NextRequest) {
       contentReflection = 'literal', // Step D: 安全なデフォルト値
       songLength,
       vocal,
+      languageSettings, // 新機能：混合言語設定
       rapMode = 'none', // 新しいラップモード
       includeRap = false, // 後方互換性のため保持
       analyzedStructure // Step I: 楽曲構造情報
@@ -122,6 +130,110 @@ export async function POST(request: NextRequest) {
 
     // 後方互換性: includeRapがtrueの場合はpartialに変換
     const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
+
+    // 混合言語制御ロジック（新機能）
+    const determineLanguageSettings = () => {
+      // デフォルト値設定（後方互換性）
+      if (!languageSettings) {
+        return {
+          primaryLanguage: 'japanese',
+          englishMixLevel: 'none',
+          languageInstructions: ''
+        }
+      }
+
+      let primaryLanguage = 'japanese'
+      let englishMixLevel = languageSettings.englishMixLevel
+
+      // 基本言語設定による決定
+      switch (languageSettings.languagePreference) {
+        case 'auto':
+          // 国籍に基づく自動決定
+          if (vocal.nationality === 'アメリカ' || vocal.nationality === 'イギリス') {
+            primaryLanguage = 'english'
+            englishMixLevel = 'heavy' // 英語圏の場合は英語重視
+          } else if (vocal.nationality === '韓国') {
+            primaryLanguage = 'japanese'
+            englishMixLevel = languageSettings.englishMixLevel // 設定に従う
+          } else {
+            primaryLanguage = 'japanese'
+          }
+          break
+        case 'english':
+          primaryLanguage = 'english'
+          englishMixLevel = 'heavy'
+          break
+        case 'mixed':
+          primaryLanguage = 'mixed'
+          englishMixLevel = languageSettings.englishMixLevel
+          break
+        default:
+          primaryLanguage = 'japanese'
+      }
+
+      // 言語指示文生成
+      let languageInstructions = ''
+      
+      if (primaryLanguage === 'english') {
+        languageInstructions = `
+## 🌐 言語設定: 英語メイン楽曲
+- **基本言語**: 英語で作詞してください
+- **歌詞スタイル**: 英語圏のポップス・ロックの自然な表現を使用
+- **日本語要素**: ${englishMixLevel === 'heavy' ? '必要最小限に留める' : '効果的なアクセントとして部分使用可'}
+- **語彙選択**: 英語ネイティブが自然に感じる表現・韻律・リズム感
+- **文化的配慮**: 英語圏の音楽文化に適したテーマ展開とメッセージ性`
+
+      } else if (primaryLanguage === 'mixed') {
+        languageInstructions = `
+## 🌐 言語設定: バイリンガル楽曲
+- **基本構成**: 日本語と英語を自然にミックスした歌詞
+- **混在パターン**: セクションごとに言語を使い分け、または1つのセクション内で混在
+- **英語使用レベル**: ${
+  englishMixLevel === 'light' ? '20-30%程度（決めフレーズやサビで効果的に使用）' :
+  englishMixLevel === 'moderate' ? '40-50%程度（コーラス部分を英語、Verseは日本語など）' :
+  '60-70%程度（英語メインで日本語をアクセントとして使用）'
+}
+- **自然な切り替え**: 言語の切り替えが歌詞の流れを損なわないよう配慮
+- **文化的配慮**: 両言語の特性を活かした表現選択`
+
+      } else {
+        // japanese がデフォルト
+        if (englishMixLevel !== 'none') {
+          languageInstructions = `
+## 🌐 言語設定: 日本語メイン + 英語混在
+- **基本言語**: 日本語で作詞
+- **英語混在レベル**: ${
+  englishMixLevel === 'light' ? '軽度（10-20%程度）\n  * キーフレーズや決め台詞で英語を使用\n  * 「Dream」「Love」「Future」等の感情表現ワード\n  * サビの一部や印象的なフレーズに限定使用' :
+  englishMixLevel === 'moderate' ? '中程度（30-50%程度）\n  * コーラス部分やサビで積極的に英語使用\n  * セクション単位での言語切り替え\n  * 「Verse: 日本語 → Chorus: 英語」のような構成' :
+  '高度（50-70%程度）\n  * 歌詞の大部分に英語を含める\n  * 日本語は重要なメッセージ部分や情感表現に使用\n  * バイリンガル楽曲として自然な言語ミックス'
+}
+- **使用方針**: 
+  * 英語部分も日本語の歌詞リズムに自然に融合
+  * 意味の一貫性を保ちながら言語を切り替え
+  * 英語フレーズは発音しやすく覚えやすいものを選択
+- **具体例**: 
+  ${englishMixLevel === 'light' ? '「今日という日を Dream のように」「君との Love Story」' :
+    englishMixLevel === 'moderate' ? '「[Verse: 日本語歌詞] → [Chorus: Flying high to the sky, never gonna cry]」' :
+    '「[Mix: 君の Heart に届け my soul, 永遠の Promise we made]」'}
+`
+        } else {
+          languageInstructions = `
+## 🌐 言語設定: 純日本語楽曲
+- **基本言語**: 完全に日本語のみで作詞
+- **語彙選択**: 日本語の美しい表現、情感豊かな言葉選び
+- **英語要素**: 一切使用しない（外来語の日本語化された単語は可）
+- **表現スタイル**: 日本の伝統的・現代的な歌詞文化に根ざした自然な日本語`
+        }
+      }
+
+      return {
+        primaryLanguage,
+        englishMixLevel,
+        languageInstructions
+      }
+    }
+
+    const { primaryLanguage, englishMixLevel: finalEnglishMixLevel, languageInstructions } = determineLanguageSettings()
 
     if (!theme || !content) {
       return NextResponse.json(
@@ -186,6 +298,8 @@ ${songLength === '2-3分' ?
 ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエット') || vocal.gender.includes('コーラス') ? 
   '※ このボーカル構成では、ハーモニー・コーラスワーク・対話的歌唱を効果的に活用した歌詞構成を心がけてください' : 
   '※ ソロボーカルの表現力を活かした歌詞構成を心がけてください'}
+
+${languageInstructions}
 
 ## 歌詞に必ず盛り込む具体的な内容・メッセージ
 ※ 以下の内容は歌詞の中核として必ず反映させてください：
