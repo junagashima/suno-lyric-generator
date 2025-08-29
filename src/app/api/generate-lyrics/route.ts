@@ -131,6 +131,52 @@ export async function POST(request: NextRequest) {
     // 後方互換性: includeRapがtrueの場合はpartialに変換
     const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
 
+    // 不要な楽器を除去する関数（改良版）
+    const removeUnwantedInstruments = (styleText: string): string => {
+      const unwantedInstruments = [
+        'synth pad', 'synthpad', 'シンセパッド',
+        'vocals', 'vocal', 'ボーカル', 'song', 'singing', '歌'
+      ]
+      
+      let filteredStyle = styleText
+      
+      unwantedInstruments.forEach(instrument => {
+        // 特殊文字をエスケープ
+        const escapedInstrument = instrument.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        
+        // より精密なパターンマッチング
+        const patterns = [
+          // 区切り文字に囲まれた楽器名
+          new RegExp(`\\s*[+,&]\\s*${escapedInstrument}\\s*[+,&]\\s*`, 'gi'),
+          new RegExp(`\\s*[+,&]\\s*${escapedInstrument}\\s*$`, 'gi'),
+          new RegExp(`^\\s*${escapedInstrument}\\s*[+,&]\\s*`, 'gi'),
+          // 単独の楽器名
+          new RegExp(`\\b${escapedInstrument}\\b`, 'gi'),
+          // "and"で接続された楽器名
+          new RegExp(`\\s*and\\s*${escapedInstrument}\\b`, 'gi'),
+          new RegExp(`\\b${escapedInstrument}\\s*and\\s*`, 'gi')
+        ]
+        
+        patterns.forEach(pattern => {
+          filteredStyle = filteredStyle.replace(pattern, ' ')
+        })
+      })
+      
+      // クリーンアップ: 連続した区切り文字や余分な空白を削除
+      filteredStyle = filteredStyle
+        .replace(/\s*[+,&]\s*[+,&]\s*/g, ' + ')  // 複数の区切り文字を単一の+に
+        .replace(/\s+/g, ' ')                     // 複数の空白を単一の空白に
+        .replace(/^\s*[+,&]\s*|[+,&]\s*$/g, '')  // 先頭や末尾の区切り文字を削除
+        .replace(/\s*[+,&]\s*$/g, '')            // 末尾の区切り文字を削除
+        .replace(/^\s*[+,&]\s*/g, '')            // 先頭の区切り文字を削除
+        .trim()
+      
+      return filteredStyle
+    }
+
+    // musicStyleから不要な楽器を除去
+    const cleanMusicStyle = removeUnwantedInstruments(musicStyle)
+
     // 混合言語制御ロジック（新機能）
     const determineLanguageSettings = () => {
       // デフォルト値設定（後方互換性）
@@ -277,7 +323,7 @@ ${songLength === '2-3分' ?
 
 ## 音楽スタイルを歌詞に反映（必須）
 ※ 以下の音楽スタイルを歌詞のリズム、語感、構成に必ず反映させてください：
-- 音楽スタイル: ${musicStyle}
+- 音楽スタイル: ${cleanMusicStyle}
 
 **スタイル反映方法**：
 - BPM・テンポ：歌詞のリズム感に反映（速い→短いフレーズ、遅い→ゆったりしたフレーズ）
@@ -526,16 +572,16 @@ Suno AIで楽曲を生成するための最適化された英語スタイル指�
 2. **Length（長さ）**: ${songLength}
 3. **Language（言語）**: 日本語歌詞
 4. **Vocals（ボーカル）**: ${vocal.gender}、${vocal.age}、${vocal.nationality}
-5. **Tempo（テンポ帯）**: ${musicStyle}から抽出
+5. **Tempo（テンポ帯）**: ${cleanMusicStyle}から抽出
 6. **Rhythm（リズム質感）**: 楽曲スタイルに応じて設定
-7. **Instruments（楽器）**: ${musicStyle}から主要楽器を抽出
+7. **Instruments（楽器）**: ${cleanMusicStyle}から主要楽器を抽出
 8. **Structure（構成）**: ${songLength}に応じた構成
 9. **Mood（感情3語）**: ${mood}から3つまでに絞る
 10. **Forbidden（禁止要素）**: ジャンルに応じて設定
 
 ## 追加情報
 - 歌唱技法: ${vocal.techniques.join(', ')}
-- 詳細スタイル: ${musicStyle}
+- 詳細スタイル: ${cleanMusicStyle}
 - **ラップモード**: ${finalRapMode} (none: 通常楽曲, partial: 一部ラップ, full: 全面ラップ)
 
 ${finalRapMode === 'full' ? `
@@ -568,7 +614,7 @@ ${finalRapMode === 'full' ? `
 - **Length明記**: "about 75 seconds", "30-35 seconds"  
 - **Language明記**: "Japanese lyrics", "instrumental only"
 - **禁止要素必須**: "No rap", "No EDM drops", "No comedic tones"
-- **楽器は3-4個**: "guitar + bass + drums + synth pad"
+- **楽器は3-4個**: "guitar + bass + drums + electric piano"
 - **テンポ帯表現**: "medium-fast", "relaxed", "driving beat"
 
 ### 2. 音の質感・雰囲気の英語表現
@@ -624,10 +670,10 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 "Purpose: MV style track, about 75 seconds, Japanese lyrics. Mood: bittersweet warmth, quiet build, nocturnal reflection. Tempo: medium, gentle 8-beat. Instruments: delicate banjo phrases + nostalgic enka-style melody + guitar/bass/drums. Structure: intro → verse → pre-chorus → chorus → closing. Vocals: soft male voice, half-sad whisper. Forbidden: comedic tones, heavy EDM, fast bluegrass banjo."
 
 **ダークJ-Rock系（SPECIALZ Style）:**
-"Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
+"Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + dark electric piano. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects, synth pad."
 
 **🔥 全面ラップ系（Hip-hop Rap-only Style）:**
-"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Intro: begin with short hype ad-libs such as "Yo!", "Yeah!", "Let's go!" before the first verse starts. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
+"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Intro: begin with short hype ad-libs such as "Yo!", "Yeah!", "Let's go!" before the first verse starts. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or electric piano for texture. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections, synth pad."
 
 ${finalRapMode === 'full' ? `
 ## 🔥 全面ラップ専用厳守フォーマット：
@@ -639,7 +685,7 @@ Vocals: [人数] [性別] voice(s), [call-and-response/solo] rap, no singing.
 Intro: begin with short hype ad-libs such as "Yo!", "Yeah!", "Let's go!", "Uh!", "Check it!" before the first verse starts. 
 Rap style: [conversational/aggressive/smooth], [punchy lines/flowing], [simple/complex] rhymes. 
 Tempo: medium-fast with [groovy/driving] head-nod beat. 
-Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/synth]. 
+Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/electric piano]. 
 Structure: [intro] → [rap verse] → [rap hook] → [rap verse] → [rap hook] → [outro]. 
 Mood: [urban/positive/energetic], [nostalgic/confident/aggressive]. 
 Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections."
@@ -810,7 +856,7 @@ ${finalRapMode === 'full' ? `
       mode,
       settings: {
         mood,
-        musicStyle,
+        musicStyle: cleanMusicStyle,
         theme,
         vocal
       }
