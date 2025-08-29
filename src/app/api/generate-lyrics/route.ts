@@ -404,6 +404,10 @@ ${finalRapMode === 'full' ? `
 **必須要素:**
 - **Style**: "Hip-hop rap-only track" を冒頭に明記
 - **Purpose**: "freestyle-style rap performance" でラップ性を強調  
+- **Intro**: 必ず掛け声指示を含める - 楽曲の雰囲気に応じて以下から選択：
+  * エネルギッシュ系: "Yo!", "Yeah!", "Let's go!", "Uh!", "Check it!"
+  * アグレッシブ系: "Bring it!", "Come on!", "What's up!", "Uh-huh!"
+  * チル系: "Alright", "Here we go", "Listen up", "Yo, check this"
 - **Vocals**: "continuous rap throughout, no melodic singing" で歌禁止徹底
 - **Rap Style**: "rhythmic, punchy, conversational flow, clear end rhymes"
 - **Forbidden**: "sung chorus, autotuned melodies, pop-style singing" を必須記載
@@ -480,7 +484,7 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 "Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
 
 **🔥 全面ラップ系（Hip-hop Rap-only Style）:**
-"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
+"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Intro: begin with short hype ad-libs such as "Yo!", "Yeah!", "Let's go!" before the first verse starts. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
 
 ${finalRapMode === 'full' ? `
 ## 🔥 全面ラップ専用厳守フォーマット：
@@ -489,6 +493,7 @@ ${finalRapMode === 'full' ? `
 "Style: Hip-hop rap-only track inspired by [参考スタイル]. 
 Purpose: [freestyle rap performance/uplifting anthem], about [X seconds]. 
 Vocals: [人数] [性別] voice(s), [call-and-response/solo] rap, no singing. 
+Intro: begin with short hype ad-libs such as "Yo!", "Yeah!", "Let's go!", "Uh!", "Check it!" before the first verse starts. 
 Rap style: [conversational/aggressive/smooth], [punchy lines/flowing], [simple/complex] rhymes. 
 Tempo: medium-fast with [groovy/driving] head-nod beat. 
 Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/synth]. 
