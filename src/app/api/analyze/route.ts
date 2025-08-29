@@ -24,21 +24,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 🔧 synth系楽器完全除去用配列（全処理で使用）
+    // 🔧 汎用パッド音色除去用配列（具体的でない楽器名のみ対象）
     const unwantedInstruments = [
-      // pad系楽器（原則禁止）
+      // pad系楽器（汎用的で不明確な音色）
       'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
       'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
       'background pad', 'string pad', 'warm pad', 'lush pad',
-      // synthesizer系楽器（汎用シンセも禁止）
-      'synthesizer', 'シンセサイザー', 'synth', 'シンセ',
-      'electronic synthesizer', 'analog synthesizer', 'digital synthesizer',
-      'lead synthesizer', 'bass synthesizer', 'poly synthesizer',
-      // keyboard系（ピアノ以外のシンセ系）
-      'electronic keyboard', 'synthetic keyboard', 'synth keyboard',
-      // その他のシンセ系音色
-      'electronic sounds', 'synthetic sounds', 'digital sounds',
-      'synth lead', 'synth bass', 'synth strings', 'synth choir'
+      // 汎用的すぎる楽器名
+      'electronic sounds', 'synthetic sounds', 'digital sounds'
     ];
 
     // まず楽曲データベースから正確な情報を検索
@@ -173,12 +166,11 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `🚫【最重要】絶対禁止事項：
-あらゆるsynth系・電子楽器の使用は完全に禁止されています：
-- pad系: synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等
-- synthesizer系: synthesizer, synth, electronic synthesizer, analog synthesizer, digital synthesizer等
-- keyboard系: electronic keyboard, synthetic keyboard, synth keyboard等
-これらの楽器名を出力に含めることは厳禁です。
+          content: `🎯【最重要】分析精度優先：
+楽曲の実際の楽器構成を正確に分析し、推測や追加は一切行わないでください。
+- 実際に聞こえる楽器のみを分析対象とする
+- instrumentsフィールドとstyleフィールドで一貫した楽器構成を出力する
+- 不明確な場合は汎用的でない具体的な楽器名を使用する
 
 あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
@@ -220,14 +212,11 @@ export async function POST(request: NextRequest) {
 **instruments**: Suno楽器指示（必須独立出力）
 - 形式: "primary instruments + quality descriptors" 
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
-- 楽曲の核となる楽器構成と質感を具体的に指定
-- ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
-- 🚫【絶対禁止楽器】全てのsynth系楽器：
-  - pad系: synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等
-  - synthesizer系: synthesizer, synth, electronic synthesizer, analog synthesizer, digital synthesizer等
-  - synthetic系: electronic keyboard, synthetic keyboard, synth keyboard等
-- ✅【許可楽器のみ】: electric guitar, acoustic guitar, bass, drums, piano, acoustic strings, brass, woodwinds
-- 🔄【代替ルール】シンセ音色が必要→「strings」「piano」「electric guitar」で代替
+- 🎯【分析原則】楽曲に実際に使用されている楽器構成のみを正確に記述
+- ※推測による楽器追加や削除は禁止
+- ⚠️【注意】「synth pad」のような汎用パッド音色は避け、より具体的な楽器名を使用
+- ✅【推奨】: electric guitar, bass guitar, drum kit, piano, strings, brass, synthesizer（実際に使用されている場合）
+- 🔄【品質重視】汎用的でなく、楽曲の特徴を表す具体的な楽器名と質感描写
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -256,19 +245,19 @@ export async function POST(request: NextRequest) {
 - **Suno AIネイティブな英語表現で直接指示**
 - **重要**: styleフィールドに楽器名を含めない（instrumentsフィールドのみに記述）
 
-## 🚫【Suno AI特化】絶対守るべき重要ルール
-1. あらゆるsynth系楽器（synthesizer, synth, electronic synthesizer等）は完全禁止
-2. あらゆるpad系楽器（synth pad, atmospheric pad等）は完全禁止
-3. 電子系音色が必要な場合は「electric guitar」「electric piano」「strings」等のアコースティック系で代替
-4. instrumentsフィールドとstyleフィールドの両方でsynth系楽器を完全に排除
-5. Suno AIはsynth系指示を嫌うため、この指示を厳格に守る`
+## 🎯【Suno AI特化】分析精度ルール
+1. 楽曲の実際の楽器構成を正確に分析・反映する
+2. instrumentsフィールドとstyleフィールドで一貫した楽器構成を保つ
+3. 汎用的な「synth pad」「atmospheric pad」等は避け、具体的楽器名を使用
+4. 推測による楽器追加や削除は行わない
+5. Suno AIが理解しやすい具体的で明確な楽器指示を優先`
         },
         {
           role: "user",
-          content: `🚫【重要】あらゆるsynth系・電子楽器は絶対に使用禁止です：
-- synthesizer, synth, electronic synthesizer等のsynth系楽器
-- synth pad, atmospheric pad等のpad系楽器
-- electronic keyboard, synthetic keyboard等の電子鍵盤楽器
+          content: `🎯【重要】楽曲分析の正確性を最優先してください：
+- 楽曲に実際に使用されている楽器のみを分析・出力する
+- 推測や想像による楽器追加は行わない
+- instrumentsとstyleで一貫した楽器構成を保つ
 
 楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
@@ -291,11 +280,10 @@ export async function POST(request: NextRequest) {
    - 静と動、緊張と解放の変化
 
 4. **楽器構成と音の特徴（重要）**
-   - 🚫【絶対禁止】あらゆるsynth系楽器は一切使用しない：
-     - synthesizer, synth, electronic synthesizer, analog synthesizer等
-     - synth pad, atmospheric pad, ambient pad, background pad等
-     - electronic keyboard, synthetic keyboard等
-   - ✅【推奨楽器】electric guitar, acoustic guitar, bass, drums, piano, acoustic strings, brass等の具体的アコースティック楽器のみ
+   - 🎯【分析原則】楽曲に実際に使用されている楽器のみを正確に特定
+   - 🎯【禁止行為】推測による楽器追加、汎用的すぎる楽器名の使用
+   - ✅【具体的分析】electric guitar, acoustic guitar, bass guitar, drum kit, piano, strings, brass, vocals等の具体的楽器名
+   - ⚠️【注意事項】「synth pad」のような汎用パッド音色は避け、具体的な楽器名を優先
    - 「ヘビーで歪んだ」「クリアで透明感のある」等の質感表現
    - 楽器の「役割と印象」（数値より感覚）
 
@@ -327,10 +315,9 @@ export async function POST(request: NextRequest) {
 - 体感比喩: "head-nod groove"(Hip-Hop), "driving rock beat"
 
 **禁止要素**:
-- 必須項目1: "No synthesizers" - あらゆるsynth系楽器の完全禁止
-- 必須項目2: "No ambient pads" - pad系楽器の使用を完全禁止  
-- 必須項目3: "No electronic sounds" - 電子音全般の禁止
-- 追加禁止: "No EDM drops", "No comedic tones", "No swing"等（楽曲に応じて）
+- 必須項目: "No ambient pads" - 汎用パッド音色の禁止（具体的楽器名を優先）
+- 追加禁止: "No EDM drops", "No comedic tones", "No swing"等（楽曲スタイルに不適切な要素）
+- 楽曲分析に基づく適切な禁止要素の選定
 
 **必須JSON出力例**:
 {
@@ -338,7 +325,7 @@ export async function POST(request: NextRequest) {
   "tempo": "slow/relaxed (70-75 BPM)",
   "rhythm": "laid-back groove with steady 4/4 beat", 
   "instruments": "soft acoustic piano, gentle acoustic strings, subtle percussion",
-  "forbidden": "No synthesizers, No ambient pads, No electronic sounds, No EDM drops",
+  "forbidden": "No ambient pads, No EDM drops, No comedic tones",
   "style": "穏やかなバラード調、オーガニックなプロダクション、感情豊かな男性ボーカル"
 }
 
