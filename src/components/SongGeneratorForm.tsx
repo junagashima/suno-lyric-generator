@@ -41,6 +41,11 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [vocalNationality, setVocalNationality] = useState('日本')
   const [vocalTechniques, setVocalTechniques] = useState<string[]>([])
   
+  // 新しいSUNO 4要素ボーカル設定
+  const [useNewVocalSystem, setUseNewVocalSystem] = useState(false)
+  const [vocalConfiguration, setVocalConfiguration] = useState<any>(null)
+  const [analyzedVocalResult, setAnalyzedVocalResult] = useState<any>(null)
+  
   // 混合言語設定（新機能）
   const [englishMixLevel, setEnglishMixLevel] = useState('none')
   const [languagePreference, setLanguagePreference] = useState('auto') // auto, japanese, english, mixed
