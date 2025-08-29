@@ -145,13 +145,20 @@ export async function POST(request: NextRequest) {
 - **比喩的表現**を用いた雰囲気の描写
 - 楽曲が描く**情景・シーン**の表現
 
-**style**: Suno AIが理解する音楽的特徴
-1. **テンポ感覚（重要）**: 楽曲の時間の流れ方・速度感
-   - ゆったり（バラード系）/ 穏やか（ミッドテンポ）/ 活発（アップテンポ）
-   - 「歩くような」「流れるような」「駆け抜けるような」等の感覚表現
-2. **リズムパターン（重要）**: ビートの特性とグルーブ
-   - 「重厚で安定した」「軽やかで弾む」「流麗で滑らか」等
-   - シンコペーションや特徴的なリズム要素
+**style**: Suno AIが理解する音楽的特徴（Sunoネイティブ表現使用）
+1. **Sunoテンポ指示（最重要）**: 「形容詞 (BPM帯)」形式で出力
+   - **slow/relaxed (65-80 BPM)**: Dragon Ash "Graceful Days"等のバラード系
+   - **medium/steady (85-100 BPM)**: 穏やかなミッドテンポ
+   - **medium-fast/upbeat (100-120 BPM)**: 活発なポップス
+   - **fast/driving (120+ BPM)**: 疾走感のある楽曲
+2. **Sunoリズム指示（重要）**: ビートタイプで指定
+   - **steady 4/4 beat**: 基本ロック/ポップ
+   - **swing 4/4**: ジャズ感グルーブ
+   - **syncopated groove**: ファンク/R&B系
+   - **head-nod groove**: ヒップホップ系
+   - **driving rock beat**: 疾走感8ビート
+   - **laid-back groove**: リラックスグルーブ
+3. **楽器役割指示**: "tight kick, sharp snare, steady hi-hat"等の形式
 3. **サウンドの質感**: 音の重厚さ、軽やかさ、ダークさ、明るさ
 4. **楽器の役割と効果**: 各楽器が楽曲に与える印象・役割
 5. **ボーカルの表現力**: 歌唱の感情的特徴、技法の効果
@@ -160,17 +167,17 @@ export async function POST(request: NextRequest) {
 8. **プロダクションの特色**: 音作りの方向性、現代性
 
 ## 重要な表現方針
-- **テンポの正確な識別**: 楽曲の実際のスピード感を慎重に分析
-  - バラード系: 「ゆったり」「穏やか」「瞑想的なテンポ」
-  - ミッドテンポ: 「歩くような」「自然な流れ」
-  - アップテンポ: 「活発な」「エネルギッシュな」
-- **リズムの質感**: ビートの実際の感じ方を表現
-  - 「重厚で安定」「軽やか」「流麗」「跳ねる」等
+- **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
+  - 例: "medium-fast (100-110 BPM)" 「単体BPM数値禁止」
+  - Dragon Ash "Graceful Days" = "slow/relaxed (70-75 BPM)"
+- **Sunoネイティブリズム表現**: ビートタイプで指定
+  - "steady 4/4 beat" | "swing 4/4" | "syncopated groove" 等
+- **禁止要素の明示**: "No EDM drops", "No comedic tones"等を必ず追加
 - **感覚的表現を重視**: 「120BPM」→「疾走感のある中高速テンポ」
 - **比喩・イメージを活用**: 「真夜中のビル街で踊るような」
 - **動的な表現**: 「静から動へ」「緊張から解放へ」
 - **質感の描写**: 「ヘビーで歪んだ」「クリアで透明感のある」
-- **Suno AIが理解する英語表現につながる分析**`
+- **Suno AIネイティブな英語表現で直接指示**`
         },
         {
           role: "user",
@@ -211,8 +218,19 @@ export async function POST(request: NextRequest) {
 - 楽曲: ${song}
 - アーティスト: ${artist}
 
-## 出力要件
-- Suno AIが理解できる「英語表現」につながる日本語分析
+## Suno AIネイティブ出力要件（必須）
+**テンポ指示**:
+- 必ず「形容詞 (BPM帯)」形式: "slow/relaxed (70-75 BPM)"
+- 単体BPM数値は絶対禁止: ×"75 BPM" ○"slow (70-75 BPM)"
+
+**リズム指示**:
+- ビートタイプで指定: "steady 4/4 beat", "swing 4/4", "syncopated groove"
+- 体感比喩: "head-nod groove"(Hip-Hop), "driving rock beat"
+
+**禁止要素**:
+- 必ず追加: "No EDM drops", "No comedic tones", "No swing"等
+
+**その他要件**:
 - 技術データより「聴覚的印象・感情体験」を重視
 - 楽曲の「魂・エッセンス」を捉えた表現`
         }
