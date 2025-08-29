@@ -238,6 +238,16 @@ export async function POST(request: NextRequest) {
 **禁止要素**:
 - 必ず追加: "No EDM drops", "No comedic tones", "No swing"等
 
+**必須JSON出力例**:
+{
+  "mood": "静かで瞑想的な雰囲気、心の奥深くに響く叙情性",
+  "tempo": "slow/relaxed (70-75 BPM)",
+  "rhythm": "laid-back groove with steady 4/4 beat", 
+  "instruments": "soft piano, gentle strings, subtle percussion",
+  "forbidden": "No EDM drops, No comedic tones, No fast tempo",
+  "style": "穏やかなピアノバラード、感情の深い流れを表現"
+}
+
 **その他要件**:
 - 技術データより「聴覚的印象・感情体験」を重視
 - 楽曲の「魂・エッセンス」を捉えた表現`
