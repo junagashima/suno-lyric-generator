@@ -149,34 +149,37 @@ export async function POST(request: NextRequest) {
 - **比喩的表現**を用いた雰囲気の描写
 - 楽曲が描く**情景・シーン**の表現
 
-**style**: Suno AIが理解する音楽的特徴（Sunoネイティブ表現使用）
-1. **Sunoテンポ指示（最重要）**: 「形容詞 (BPM帯)」形式で出力
-   - **slow/relaxed (65-80 BPM)**: Dragon Ash "Graceful Days"等のバラード系
-   - **medium/steady (85-100 BPM)**: 穏やかなミッドテンポ
-   - **medium-fast/upbeat (100-120 BPM)**: 活発なポップス
-   - **fast/driving (120+ BPM)**: 疾走感のある楽曲
-2. **Sunoリズム指示（重要）**: ビートタイプで指定
-   - **steady 4/4 beat**: 基本ロック/ポップ
-   - **swing 4/4**: ジャズ感グルーブ
-   - **syncopated groove**: ファンク/R&B系
-   - **head-nod groove**: ヒップホップ系
-   - **driving rock beat**: 疾走感8ビート
-   - **laid-back groove**: リラックスグルーブ
-3. **楽器役割指示**: "tight kick, sharp snare, steady hi-hat"等の形式
-3. **サウンドの質感**: 音の重厚さ、軽やかさ、ダークさ、明るさ
-4. **楽器の役割と効果**: 各楽器が楽曲に与える印象・役割
-5. **ボーカルの表現力**: 歌唱の感情的特徴、技法の効果
-6. **音響的印象**: 空間の広がり、密度、音圧の特徴
-7. **楽曲の展開**: セクション間の感情の変化、構成の効果
-8. **プロダクションの特色**: 音作りの方向性、現代性
+**新4要素構造の分析指示**:
 
-## 重要な表現方針
+**tempo**: Sunoテンポ指示（必須独立出力）
+- 必ず「形容詞 (BPM帯)」形式: slow/relaxed (65-80 BPM)
+- バラード系: slow/relaxed | ミッドテンポ: medium/steady | 活発系: medium-fast/upbeat | 疾走系: fast/driving
+- 楽曲の実際の時間感覚を正確に判定（全ジャンル対応）
+
+**rhythm**: Sunoリズム指示（必須独立出力） 
+- ビートタイプ: steady 4/4 beat | swing 4/4 | syncopated groove | head-nod groove | driving rock beat | laid-back groove
+- 楽曲のグルーブ感を的確に表現（全音楽スタイル対応）
+
+**instruments**: Suno楽器指示（必須独立出力）
+- 形式: "primary instruments + quality descriptors" 
+- 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
+- 楽曲の核となる楽器構成と質感を具体的に指定
+
+**forbidden**: Suno禁止要素（必須独立出力）
+- ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
+- 楽曲スタイルに不適切な要素を明確に排除
+
+**style**: 総合補足（オプション）
+- 上記4要素で表現しきれない音楽的特徴を補足
+
+## 重要な表現方針（全楽曲対応）
 - **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
-  - 例: "medium-fast (100-110 BPM)" 「単体BPM数値禁止」
-  - Dragon Ash "Graceful Days" = "slow/relaxed (70-75 BPM)"
+  - 例: "medium-fast (100-110 BPM)" 「単体BPM数値は絶対禁止」
+  - バラード系="slow/relaxed (70-80 BPM)" | ポップス="medium-fast (100-120 BPM)"
 - **Sunoネイティブリズム表現**: ビートタイプで指定
-  - "steady 4/4 beat" | "swing 4/4" | "syncopated groove" 等
+  - "steady 4/4 beat" | "swing 4/4" | "syncopated groove" | "head-nod groove"等
 - **禁止要素の明示**: "No EDM drops", "No comedic tones"等を必ず追加
+- **全ジャンル対応**: J-POP、ロック、バラード、ヒップホップ、アニソン等に幅広く対応
 - **感覚的表現を重視**: 「120BPM」→「疾走感のある中高速テンポ」
 - **比喩・イメージを活用**: 「真夜中のビル街で踊るような」
 - **動的な表現**: 「静から動へ」「緊張から解放へ」
@@ -213,10 +216,11 @@ export async function POST(request: NextRequest) {
    - 歌唱の「感情的特徴」と「表現技法の効果」
    - 性別・年代は正確に
 
-## テンポ分析の正確な例（参考）
-- **ゆったり系**: Dragon Ash「Graceful Days」、禁断のボーイフレンド「桃色吻日」
-- **穏やか系**: あいみょん「マリーゴールド」、福山雅治「桜坂」
-- **活発系**: Official髪男dism「Pretender」、星野源「恋」
+## 全ジャンル対応テンポ分析指針
+- **slow/relaxed (65-80 BPM)**: バラード、叙情的楽曲全般
+- **medium/steady (80-100 BPM)**: ミッドテンポJ-POP、フォーク系
+- **medium-fast/upbeat (100-120 BPM)**: 標準的ポップス、軽快なロック
+- **fast/driving (120+ BPM)**: エネルギッシュなロック、アニソン、一部ヒップホップ
 
 ## 分析対象楽曲
 - 楽曲: ${song}
