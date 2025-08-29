@@ -1,8 +1,8 @@
 // 楽曲分析に基づく最適なボーカル要素自動選択
 
+import { AnalyzedVocalResult } from '../types/vocal'
 import { 
   VocalElement, 
-  AnalyzedVocalResult,
   toneOptions,
   deliveryOptions,
   emotionOptions,
