@@ -476,7 +476,7 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 "Purpose: Opening theme style, 60-70 seconds, Japanese lyrics. Mood: tension, chaos, release. Tempo: medium-fast, driving beat. Instruments: heavy distorted guitar riffs + rumbling bass + sharp snare + low ominous synth. Vocals: male, calm in verse, explosive in chorus. Forbidden: EDM drops, bright brass, comic sound effects."
 
 **🔥 全面ラップ系（Hip-hop Rap-only Style）:**
-"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
+"Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
 
 ${finalRapMode === 'full' ? `
 ## 🔥 全面ラップ専用厳守フォーマット：
@@ -488,6 +488,7 @@ Vocals: [人数] [性別] voice(s), [call-and-response/solo] rap, no singing.
 Rap style: [conversational/aggressive/smooth], [punchy lines/flowing], [simple/complex] rhymes. 
 Tempo: medium-fast with [groovy/driving] head-nod beat. 
 Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/synth]. 
+Structure: [intro] → [rap verse] → [rap hook] → [rap verse] → [rap hook] → [outro]. 
 Mood: [urban/positive/energetic], [nostalgic/confident/aggressive]. 
 Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections."
 ` : `
