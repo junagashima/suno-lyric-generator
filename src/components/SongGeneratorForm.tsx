@@ -455,64 +455,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           </div>
         </div>
 
-        {/* 混合言語設定（新機能） */}
-        <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h4 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
-            🌐 言語・多言語設定 <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">NEW</span>
-          </h4>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">基本言語設定</label>
-              <select
-                value={languagePreference}
-                onChange={(e) => setLanguagePreference(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="auto">国籍に基づく自動選択</option>
-                <option value="japanese">日本語メイン</option>
-                <option value="english">英語メイン</option>
-                <option value="mixed">多言語混合</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">英語混在レベル</label>
-              <select
-                value={englishMixLevel}
-                onChange={(e) => setEnglishMixLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={languagePreference === 'english'}
-              >
-                <option value="none">英語なし（純日本語）</option>
-                <option value="light">少し混在（10-20%程度）</option>
-                <option value="moderate">中程度混在（30-50%程度）</option>
-                <option value="heavy">多く混在（50-70%程度）</option>
-              </select>
-            </div>
-          </div>
-
-          {/* 説明テキスト */}
-          <div className="mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-            <div className="space-y-1">
-              <div><strong>国籍設定連動:</strong> 
-                {vocalNationality === 'アメリカ' || vocalNationality === 'イギリス' ? 
-                  '英語圏の国籍のため、英語歌詞の生成が優先されます' :
-                  vocalNationality === '韓国' ? 
-                  '韓国の国籍のため、韓国語要素が含まれる場合があります' :
-                  '日本の国籍のため、日本語歌詞が基本となります'
-                }
-              </div>
-              <div><strong>英語混在レベル:</strong> 
-                {englishMixLevel === 'none' ? '完全に日本語のみで作詞します' :
-                 englishMixLevel === 'light' ? 'サビや決めフレーズで部分的に英語を使用' :
-                 englishMixLevel === 'moderate' ? 'コーラス部分や重要セクションで英語を積極使用' :
-                 'バイリンガル楽曲として日英を自然にミックス'}
-              </div>
-            </div>
-          </div>
-        </div>
-
             {/* 歌唱技法（複数選択） */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -566,6 +508,64 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
             />
           </div>
         )}
+      </div>
+
+      {/* 言語・多言語設定（共通設定） */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h4 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
+          🌐 言語・多言語設定 <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">NEW</span>
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">基本言語設定</label>
+            <select
+              value={languagePreference}
+              onChange={(e) => setLanguagePreference(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="auto">国籍に基づく自動選択</option>
+              <option value="japanese">日本語メイン</option>
+              <option value="english">英語メイン</option>
+              <option value="mixed">多言語混合</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">英語混在レベル</label>
+            <select
+              value={englishMixLevel}
+              onChange={(e) => setEnglishMixLevel(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={languagePreference === 'english'}
+            >
+              <option value="none">英語なし（純日本語）</option>
+              <option value="light">少し混在（10-20%程度）</option>
+              <option value="moderate">中程度混在（30-50%程度）</option>
+              <option value="heavy">多く混在（50-70%程度）</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 説明テキスト */}
+        <div className="mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
+          <div className="space-y-1">
+            <div><strong>国籍設定連動:</strong> 
+              {vocalNationality === 'アメリカ' || vocalNationality === 'イギリス' ? 
+                '英語圏の国籍のため、英語歌詞の生成が優先されます' :
+                vocalNationality === '韓国' ? 
+                '韓国の国籍のため、韓国語要素が含まれる場合があります' :
+                '日本の国籍のため、日本語歌詞が基本となります'
+              }
+            </div>
+            <div><strong>英語混在レベル:</strong> 
+              {englishMixLevel === 'none' ? '完全に日本語のみで作詞します' :
+               englishMixLevel === 'light' ? 'サビや決めフレーズで部分的に英語を使用' :
+               englishMixLevel === 'moderate' ? 'コーラス部分や重要セクションで英語を積極使用' :
+               'バイリンガル楽曲として日英を自然にミックス'}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ラップ調選択（安全追加） */}
