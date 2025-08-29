@@ -175,11 +175,11 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `🎯【最重要】フィールド分離：
-楽器構成はinstrumentsフィールドのみに記述し、styleフィールドには一切含めないでください。
-- instrumentsフィールド：楽器構成と質感のみ
-- styleフィールド：ジャンル、雰囲気、プロダクション手法のみ（楽器名・Purpose・Structure等は禁止）
-- 「Purpose:」「Instruments:」「Structure:」等の形式は絶対に使用しない
+          content: `🎯【最重要】styleフィールド制限：
+styleフィールドでは「Purpose:」「Instruments:」等の形式は絶対に禁止です。
+- styleフィールド：「ジャンル名、プロダクション手法」のみの短い記述
+- 例：「エネルギッシュなロック、ドライビングなプロダクション」
+- 禁止：Purpose、Instruments、Structure、Vocals、Forbidden等のあらゆる構造化記述
 
 あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
@@ -264,10 +264,11 @@ export async function POST(request: NextRequest) {
         },
         {
           role: "user",
-          content: `🎯【重要】楽曲分析の正確性を最優先してください：
-- 楽曲に実際に使用されている楽器のみを分析・出力する
-- 推測や想像による楽器追加は行わない
-- instrumentsとstyleで一貫した楽器構成を保つ
+          content: `🎯【重要】styleフィールド出力制限：
+styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対に使用しないでください。
+- styleフィールド：ジャンル名とプロダクション手法のみの簡潔な記述
+- 楽器情報は全てinstrumentsフィールドに記述する
+- 構造化された長文形式は禁止
 
 楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
@@ -336,8 +337,13 @@ export async function POST(request: NextRequest) {
   "rhythm": "laid-back groove with steady 4/4 beat", 
   "instruments": "soft acoustic piano, gentle acoustic strings, subtle percussion",
   "forbidden": "No ambient pads, No EDM drops, No comedic tones",
-  "style": "穏やかなバラード調、オーガニックなプロダクション"
+  "style": "穏やかなバラード、オーガニックプロダクション"
 }
+
+🚫【絶対禁止例】styleフィールドで以下は出力しない：
+❌ "Purpose: Opening theme, 3-4 minutes... Instruments: guitar + bass..."
+❌ "Mood: energetic... Tempo: fast... Instruments: distorted guitar..."
+✅ "エネルギッシュなロック、ドライビングプロダクション"
 
 **その他要件**:
 - 技術データより「聴覚的印象・感情体験」を重視
@@ -483,13 +489,24 @@ export async function POST(request: NextRequest) {
         style = style.replace(endPunctRegex, '.');
       });
       
-      // 🔧 構造化記述完全除去（根本的解決）
-      // Purpose、Instruments、Structure等の形式を完全削除
-      style = style.replace(/(Purpose|Instruments?|Structure|Vocals?|楽器|構成)[:：][^.]*(\.)?/gi, '');
-      // Purpose形式全体を削除
-      style = style.replace(/Purpose:[^.]*\./gi, '');
-      // 楽器名を含む文を削除
-      style = style.replace(/[^.]*\b(guitar|bass|drums|piano|synth|keyboard|strings|brass|vocals?)\b[^.]*/gi, '');
+      // 🔧 Purpose形式完全除去（最終解決）
+      // Purpose形式が含まれている場合、ジャンル部分のみを抽出
+      if (style.includes('Purpose:') || style.includes('Mood:') || style.includes('Instruments:')) {
+        // Purpose形式の場合、完全に新しいスタイル記述に置き換え
+        const genre = style.match(/(rock|pop|ballad|folk|jazz|blues|electronic|hip.?hop|r&b|soul|classical|country|metal|punk|indie|alternative|ロック|ポップ|バラード|フォーク|ジャズ|ブルース)/gi)?.[0] || 'ロック';
+        const productionStyle = parsedResponse.tempo?.includes('fast') ? 'ドライビングなプロダクション' : 
+                               parsedResponse.tempo?.includes('slow') ? 'オーガニックなプロダクション' : 'ダイナミックなプロダクション';
+        style = `エネルギッシュな${genre}、${productionStyle}`;
+        
+        console.log('🔧 Purpose形式を簡潔スタイルに置換:', {
+          detected: 'Purpose format detected',
+          newStyle: style
+        });
+      } else {
+        // 通常の除去処理
+        style = style.replace(/(Purpose|Instruments?|Structure|Vocals?|Mood|Tempo|Forbidden|楽器|構成)[:：][^.]*(\.)?/gi, '');
+        style = style.replace(/[^.]*\b(guitar|bass|drums|piano|synth|keyboard|strings|brass|vocals?)\b[^.]*/gi, '');
+      }
       
       // 🔧 強化版最終整理
       style = style
