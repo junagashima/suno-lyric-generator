@@ -155,7 +155,9 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           // ラップモード選択（拡張版）
           rapMode,
           // Step H: 楽曲構造情報を歌詞生成に渡す
-          analyzedStructure
+          analyzedStructure,
+          // 楽曲分析の詳細結果を歌詞生成に渡す
+          analyzedDetails
         }),
       })
 

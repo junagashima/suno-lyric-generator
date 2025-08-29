@@ -109,6 +109,13 @@ interface GenerateRequest {
     genre: string
     isDragonAshStyle?: boolean
   }
+  // 楽曲分析の詳細結果
+  analyzedDetails?: {
+    tempo?: string | null
+    rhythm?: string | null
+    instruments?: string | null
+    forbidden?: string | null
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -125,7 +132,8 @@ export async function POST(request: NextRequest) {
       languageSettings, // 新機能：混合言語設定
       rapMode = 'none', // 新しいラップモード
       includeRap = false, // 後方互換性のため保持
-      analyzedStructure // Step I: 楽曲構造情報
+      analyzedStructure, // Step I: 楽曲構造情報
+      analyzedDetails // 楽曲分析の詳細結果
     }: GenerateRequest = await request.json()
 
     // 後方互換性: includeRapがtrueの場合はpartialに変換
@@ -174,8 +182,23 @@ export async function POST(request: NextRequest) {
       return filteredStyle
     }
 
-    // musicStyleから不要な楽器を除去
+    // 楽器構成の優先度付き取得
+    // 1. analyzedDetails.instruments（楽曲分析結果）を最優先
+    // 2. フォールバック: musicStyleから抽出
+    const getInstrumentsConfiguration = (): string => {
+      if (analyzedDetails?.instruments) {
+        console.log('🎵 楽器構成: 分析結果を使用 -', analyzedDetails.instruments)
+        return removeUnwantedInstruments(analyzedDetails.instruments)
+      } else {
+        console.log('🎵 楽器構成: musicStyleから抽出 -', musicStyle)
+        return removeUnwantedInstruments(musicStyle)
+      }
+    }
+
+    const actualInstruments = getInstrumentsConfiguration()
     const cleanMusicStyle = removeUnwantedInstruments(musicStyle)
+    
+    console.log('🎵 最終楽器構成:', actualInstruments)
 
     // 混合言語制御ロジック（新機能）
     const determineLanguageSettings = () => {
@@ -572,16 +595,17 @@ Suno AIで楽曲を生成するための最適化された英語スタイル指�
 2. **Length（長さ）**: ${songLength}
 3. **Language（言語）**: 日本語歌詞
 4. **Vocals（ボーカル）**: ${vocal.gender}、${vocal.age}、${vocal.nationality}
-5. **Tempo（テンポ帯）**: ${cleanMusicStyle}から抽出
-6. **Rhythm（リズム質感）**: 楽曲スタイルに応じて設定
-7. **Instruments（楽器）**: ${cleanMusicStyle}から主要楽器を抽出
+5. **Tempo（テンポ帯）**: ${analyzedDetails?.tempo || 'medium'}
+6. **Rhythm（リズム質感）**: ${analyzedDetails?.rhythm || '楽曲スタイルに応じて設定'}
+7. **Instruments（楽器）**: ${actualInstruments} （楽曲分析結果をそのまま使用）
 8. **Structure（構成）**: ${songLength}に応じた構成
 9. **Mood（感情3語）**: ${mood}から3つまでに絞る
-10. **Forbidden（禁止要素）**: ジャンルに応じて設定
+10. **Forbidden（禁止要素）**: ${analyzedDetails?.forbidden || 'ジャンルに応じて設定'}
 
 ## 追加情報
 - 歌唱技法: ${vocal.techniques.join(', ')}
 - 詳細スタイル: ${cleanMusicStyle}
+- 分析された楽器構成: ${actualInstruments}
 - **ラップモード**: ${finalRapMode} (none: 通常楽曲, partial: 一部ラップ, full: 全面ラップ)
 
 ${finalRapMode === 'full' ? `
@@ -614,7 +638,7 @@ ${finalRapMode === 'full' ? `
 - **Length明記**: "about 75 seconds", "30-35 seconds"  
 - **Language明記**: "Japanese lyrics", "instrumental only"
 - **禁止要素必須**: "No rap", "No EDM drops", "No comedic tones"
-- **楽器は3-4個**: "guitar + bass + drums + electric piano"
+- **楽器構成**: "${actualInstruments}" (楽曲分析結果をそのまま使用、勝手に楽器を追加・変更しない)
 - **テンポ帯表現**: "medium-fast", "relaxed", "driving beat"
 
 ### 2. 音の質感・雰囲気の英語表現
@@ -723,6 +747,12 @@ ${finalRapMode === 'full' ? `
 ## ⚡ 出力命令（必須遵守）：
 必ず「Purpose: 」で始まり、「Forbidden: 」で終わる構造化された指示のみ出力せよ。
 詩的表現・比喩・長い修飾句は一切使用するな。
+
+## 🎵 楽器構成の厳守命令：
+**CRITICAL**: Instrumentsセクションには「${actualInstruments}」をそのまま使用すること。
+- 楽器を勝手に追加してはならない（electric piano, synth pad等を追加禁止）
+- 楽器を勝手に変更してはならない（guitar → electric guitarへの変更等禁止）  
+- 分析された楽器構成「${actualInstruments}」を正確に反映すること
 楽器名と禁止要素を具体的に明記せよ。
 `}
 `
