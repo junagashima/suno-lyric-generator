@@ -255,10 +255,18 @@ ${finalRapMode === 'full' ? `
    - 楽器指示タグ: [Piano solo], [Guitar riff], [String section]
 
 3. **楽曲構成**
-   ${songLength === '2-3分' ? '短めの楽曲構成（Intro-Verse-Chorus-Verse-Chorus-Outro）' :
-     songLength === '3-4分' ? '標準的な楽曲構成（Intro-Verse-Pre-Chorus-Chorus-Verse-Pre-Chorus-Chorus-Bridge-Chorus-Outro）' :
-     songLength === '4-5分' ? '充実した楽曲構成（複数のセクション、Cメロ、間奏を含む）' :
-     '長い楽曲構成（複数の展開、インストゥルメンタル部分を含む）'}
+   以下の多様な構成パターンから、楽曲の雰囲気とテーマに最適な構成を選択してください：
+   
+   **クラシック構成**: Intro → Verse → Chorus → Verse → Chorus → Bridge → Chorus → Outro
+   **シンプル構成**: Intro → Verse → Chorus → Verse → Chorus → Outro
+   **プリコーラス構成**: Intro → Verse → Pre-Chorus → Chorus → Verse → Pre-Chorus → Chorus → Bridge → Chorus → Outro
+   **ダブルコーラス構成**: Intro → Verse → Chorus → Verse → Chorus → Chorus → Outro
+   **Cメロ構成**: Intro → Verse → Chorus → Verse → Chorus → Cメロ → Chorus → Outro
+   **インスト構成**: Intro → Verse → Chorus → Instrumental Break → Verse → Chorus → Outro
+   **モーダル構成**: Intro → Verse → Chorus → Interlude → Verse → Bridge → Chorus → Outro
+   **アーティスティック構成**: Intro → Verse → Verse → Chorus → Verse → Bridge → Outro
+   
+   楽曲の長さ：${songLength}
 `}
 
 ${finalRapMode === 'full' ? `
@@ -352,6 +360,7 @@ ${finalRapMode === 'full' ? `
 ## 重要な出力要件
 ※ **必ずタイトル候補を3つ**最初に出力してください（上記ガイドライン参考）
 ※ タイトルは楽曲のテーマと雰囲気を反映した魅力的で記憶に残るものに
+※ **楽曲構成は必ず変化させてください**：単調なパターンは避け、異なる構成を使用
 ※ **「**歌詞（Sunoタグ付き）:**」セクション以降は純粋な歌詞とタグのみ**を出力してください
 ※ **絵文字や装飾記号（🔥、📝、🎵等）は歌詞部分で一切使用禁止**
 ※ Sunoタグは効果的に配置し、楽曲の流れを明確に示してください
@@ -469,6 +478,19 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 **🔥 全面ラップ系（Hip-hop Rap-only Style）:**
 "Purpose: Hip-hop rap-only track, freestyle-style rap performance, about 90 seconds, Japanese lyrics. Mood: urban, energetic, confident. Tempo: medium-fast (90–110 BPM), head-nod groove. Instruments: strong drum beat + deep bassline + optional light guitar or synth for texture. Vocals: continuous rap throughout, no melodic singing, rhythmic punchy conversational flow with clear end rhymes. Forbidden: sung chorus, autotuned melodies, EDM drops, pop-style singing, melodic sections."
 
+${finalRapMode === 'full' ? `
+## 🔥 全面ラップ専用厳守フォーマット：
+
+**全面ラップ楽曲用構造で必ず出力:**
+"Style: Hip-hop rap-only track inspired by [参考スタイル]. 
+Purpose: [freestyle rap performance/uplifting anthem], about [X seconds]. 
+Vocals: [人数] [性別] voice(s), [call-and-response/solo] rap, no singing. 
+Rap style: [conversational/aggressive/smooth], [punchy lines/flowing], [simple/complex] rhymes. 
+Tempo: medium-fast with [groovy/driving] head-nod beat. 
+Instruments: [live drums/drum beat] + [bass/bassline] + [light guitar/synth]. 
+Mood: [urban/positive/energetic], [nostalgic/confident/aggressive]. 
+Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections."
+` : `
 ## 厳守必須フォーマット（ChatGPT実証済み）：
 
 **必ず以下の構造で出力:**
@@ -479,6 +501,7 @@ Instruments: [楽器名] + [楽器名] + [楽器名]. [追加楽器指定].
 Structure: [intro] → [verse] → [chorus] → [closing]. 
 Vocals: [性別] voice, [表情], [技法]. 
 Forbidden: [禁止要素], [禁止要素], [禁止要素]."
+`}
 
 **絶対に使用禁止の表現:**
 - "musical journey", "soundscape", "emotional depth"
@@ -491,10 +514,18 @@ Forbidden: [禁止要素], [禁止要素], [禁止要素]."
 - "solitary evening walk", "echoes with memories"
 - キー名（F minor等）、BPM数値、音域指定
 
+${finalRapMode === 'full' ? `
+## ⚡ 全面ラップ専用出力命令（必須遵守）：
+必ず「Style: Hip-hop rap-only track」で始まり、「Forbidden: melodic chorus, autotuned pop vocals, EDM drops, sung sections.」で終わる構造化された指示のみ出力せよ。
+詩的表現・比喩・長い修飾句は一切使用するな。
+ラップスタイル・楽器名・禁止要素を具体的に明記せよ。
+**CRITICAL**: 「singing」「melodic」「chorus」を禁止要素に必ず含めよ。
+` : `
 ## ⚡ 出力命令（必須遵守）：
 必ず「Purpose: 」で始まり、「Forbidden: 」で終わる構造化された指示のみ出力せよ。
 詩的表現・比喩・長い修飾句は一切使用するな。
 楽器名と禁止要素を具体的に明記せよ。
+`}
 `
 
     // 歌詞生成
@@ -503,14 +534,14 @@ Forbidden: [禁止要素], [禁止要素], [禁止要素]."
       messages: [
         {
           role: "system",
-          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。Suno AIに最適化された、日本のヒット曲の要素を持つ歌詞を作成することができます。J-POPの作詞戦略、リスナーの心理、現代のトレンドを深く理解しています。必ず「**タイトル候補:**」セクションから始めて、魅力的なタイトルを3つ提案し、その後に歌詞を続けてください。"
+          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。Suno AIに最適化された、日本のヒット曲の要素を持つ歌詞を作成することができます。J-POPの作詞戦略、リスナーの心理、現代のトレンドを深く理解しています。楽曲の雰囲気とテーマに基づいて、最適な構成を選択し、創造的で多様なパターンを使用することができます。楽曲構成は単調にならないよう、異なる構成を使用してください。必ず「**タイトル候補:**」セクションから始めて、魅力的なタイトルを3つ提案し、その後に歌詞を続けてください。"
         },
         {
           role: "user",
           content: lyricsPrompt
         }
       ],
-      temperature: 0.8,
+      temperature: 0.9,
       max_tokens: 2000
     })
 
