@@ -255,10 +255,18 @@ ${finalRapMode === 'full' ? `
    - 楽器指示タグ: [Piano solo], [Guitar riff], [String section]
 
 3. **楽曲構成**
-   ${songLength === '2-3分' ? '短めの楽曲構成（Intro-Verse-Chorus-Verse-Chorus-Outro）' :
-     songLength === '3-4分' ? '標準的な楽曲構成（Intro-Verse-Pre-Chorus-Chorus-Verse-Pre-Chorus-Chorus-Bridge-Chorus-Outro）' :
-     songLength === '4-5分' ? '充実した楽曲構成（複数のセクション、Cメロ、間奏を含む）' :
-     '長い楽曲構成（複数の展開、インストゥルメンタル部分を含む）'}
+   以下の多様な構成パターンから、楽曲の雰囲気とテーマに最適な構成を選択してください：
+   
+   **クラシック構成**: Intro → Verse → Chorus → Verse → Chorus → Bridge → Chorus → Outro
+   **シンプル構成**: Intro → Verse → Chorus → Verse → Chorus → Outro
+   **プリコーラス構成**: Intro → Verse → Pre-Chorus → Chorus → Verse → Pre-Chorus → Chorus → Bridge → Chorus → Outro
+   **ダブルコーラス構成**: Intro → Verse → Chorus → Verse → Chorus → Chorus → Outro
+   **Cメロ構成**: Intro → Verse → Chorus → Verse → Chorus → Cメロ → Chorus → Outro
+   **インスト構成**: Intro → Verse → Chorus → Instrumental Break → Verse → Chorus → Outro
+   **モーダル構成**: Intro → Verse → Chorus → Interlude → Verse → Bridge → Chorus → Outro
+   **アーティスティック構成**: Intro → Verse → Verse → Chorus → Verse → Bridge → Outro
+   
+   楽曲の長さ：${songLength}
 `}
 
 ${finalRapMode === 'full' ? `
@@ -352,6 +360,7 @@ ${finalRapMode === 'full' ? `
 ## 重要な出力要件
 ※ **必ずタイトル候補を3つ**最初に出力してください（上記ガイドライン参考）
 ※ タイトルは楽曲のテーマと雰囲気を反映した魅力的で記憶に残るものに
+※ **楽曲構成は必ず変化させてください**：単調なパターンは避け、異なる構成を使用
 ※ **「**歌詞（Sunoタグ付き）:**」セクション以降は純粋な歌詞とタグのみ**を出力してください
 ※ **絵文字や装飾記号（🔥、📝、🎵等）は歌詞部分で一切使用禁止**
 ※ Sunoタグは効果的に配置し、楽曲の流れを明確に示してください
@@ -525,14 +534,14 @@ ${finalRapMode === 'full' ? `
       messages: [
         {
           role: "system",
-          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。Suno AIに最適化された、日本のヒット曲の要素を持つ歌詞を作成することができます。J-POPの作詞戦略、リスナーの心理、現代のトレンドを深く理解しています。必ず「**タイトル候補:**」セクションから始めて、魅力的なタイトルを3つ提案し、その後に歌詞を続けてください。"
+          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。Suno AIに最適化された、日本のヒット曲の要素を持つ歌詞を作成することができます。J-POPの作詞戦略、リスナーの心理、現代のトレンドを深く理解しています。楽曲の雰囲気とテーマに基づいて、最適な構成を選択し、創造的で多様なパターンを使用することができます。楽曲構成は単調にならないよう、異なる構成を使用してください。必ず「**タイトル候補:**」セクションから始めて、魅力的なタイトルを3つ提案し、その後に歌詞を続けてください。"
         },
         {
           role: "user",
           content: lyricsPrompt
         }
       ],
-      temperature: 0.8,
+      temperature: 0.9,
       max_tokens: 2000
     })
 
