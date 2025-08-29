@@ -154,21 +154,20 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           content,
           contentReflection, // Step C: 安全に追加
           songLength,
-          vocal: useNewVocalSystem ? {
+          vocal: {
             gender: vocalGender,
             age: vocalAge,
             nationality: vocalNationality,
-            techniques: vocalTechniques,
-            // 新SUNO 4要素システム
-            useNewSystem: true,
-            vocalConfiguration: vocalConfiguration
-          } : {
-            gender: vocalGender,
-            age: vocalAge,
-            nationality: vocalNationality,
-            techniques: vocalTechniques,
-            useNewSystem: false
+            techniques: vocalTechniques
           },
+          // SUNO最適化ボーカル設定（新機能）
+          vocalConfiguration: useNewVocalSystem ? {
+            useNewSystem: true,
+            selectedElements: vocalConfiguration?.selectedElements || [],
+            sunoText: vocalConfiguration?.sunoText || '',
+            mode: vocalConfiguration?.mode || 'simple',
+            presetId: vocalConfiguration?.presetId || null
+          } : null,
           // 混合言語設定（新機能）
           languageSettings: {
             englishMixLevel,

@@ -82,6 +82,15 @@ interface VocalSettings {
   techniques: string[]
 }
 
+// SUNO 4要素システム用インターフェース
+interface VocalConfiguration {
+  useNewSystem: boolean // SUNO最適化システムを使用するかどうか
+  selectedElements?: string[] // 選択された要素（例: ["Raw / Rough（生々しい・荒い）", "Shouting（叫び気味）", "Energetic（エネルギッシュ）"]）
+  sunoText?: string // 生成されたSUNOテキスト（例: "male voice, raw, rough, shouting, energetic"）
+  mode?: 'simple' | 'custom' // 簡単モード（自動選択）またはカスタムモード（手動選択）
+  presetId?: string // 使用されたプリセットID（プリセット使用時）
+}
+
 interface LanguageSettings {
   englishMixLevel: 'none' | 'light' | 'moderate' | 'heavy'
   languagePreference: 'auto' | 'japanese' | 'english' | 'mixed'
@@ -96,6 +105,8 @@ interface GenerateRequest {
   contentReflection?: 'literal' | 'metaphorical' | 'balanced' // Step D: 安全に追加（オプショナル）
   songLength: string
   vocal: VocalSettings
+  // SUNO最適化ボーカル設定（新機能）
+  vocalConfiguration?: VocalConfiguration
   // 混合言語設定（新機能）
   languageSettings?: LanguageSettings
   // ラップモード選択（拡張版）
@@ -129,6 +140,7 @@ export async function POST(request: NextRequest) {
       contentReflection = 'literal', // Step D: 安全なデフォルト値
       songLength,
       vocal,
+      vocalConfiguration, // 新機能：SUNO最適化ボーカル設定
       languageSettings, // 新機能：混合言語設定
       rapMode = 'none', // 新しいラップモード
       includeRap = false, // 後方互換性のため保持
@@ -200,6 +212,29 @@ export async function POST(request: NextRequest) {
     
     console.log('🎵 最終楽器構成:', actualInstruments)
 
+    // ボーカル設定の決定（SUNO最適化 vs 従来）
+    const determineVocalSettings = () => {
+      if (vocalConfiguration?.useNewSystem && vocalConfiguration.sunoText) {
+        // SUNO最適化システム使用時
+        return {
+          vocalDescription: vocalConfiguration.sunoText,
+          isNewSystem: true,
+          selectedElements: vocalConfiguration.selectedElements || []
+        } as const
+      } else {
+        // 従来システム使用時
+        return {
+          vocalDescription: `${vocal.gender}, ${vocal.age}, ${vocal.nationality}`,
+          isNewSystem: false,
+          techniques: vocal.techniques || [],
+          selectedElements: [] // 従来システムでは空配列
+        } as const
+      }
+    }
+
+    const vocalSettings = determineVocalSettings()
+    console.log('🎤 ボーカル設定:', vocalSettings)
+
     // 混合言語制御ロジック（新機能）
     const determineLanguageSettings = () => {
       // デフォルト値設定（後方互換性）
@@ -217,14 +252,19 @@ export async function POST(request: NextRequest) {
       // 基本言語設定による決定
       switch (languageSettings.languagePreference) {
         case 'auto':
-          // 国籍に基づく自動決定
-          if (vocal.nationality === 'アメリカ' || vocal.nationality === 'イギリス') {
-            primaryLanguage = 'english'
-            englishMixLevel = 'heavy' // 英語圏の場合は英語重視
-          } else if (vocal.nationality === '韓国') {
-            primaryLanguage = 'japanese'
-            englishMixLevel = languageSettings.englishMixLevel // 設定に従う
+          // 国籍に基づく自動決定（従来システムのみ）
+          if (!vocalSettings.isNewSystem) {
+            if (vocal.nationality === 'アメリカ' || vocal.nationality === 'イギリス') {
+              primaryLanguage = 'english'
+              englishMixLevel = 'heavy' // 英語圏の場合は英語重視
+            } else if (vocal.nationality === '韓国') {
+              primaryLanguage = 'japanese'
+              englishMixLevel = languageSettings.englishMixLevel // 設定に従う
+            } else {
+              primaryLanguage = 'japanese'
+            }
           } else {
+            // SUNO最適化の場合は設定に従う
             primaryLanguage = 'japanese'
           }
           break
@@ -358,6 +398,16 @@ ${songLength === '2-3分' ?
 - テーマ・使用場面: ${theme}
 
 ## ボーカル設定
+${vocalSettings.isNewSystem ? `
+**🎤 SUNO最適化システム使用**
+- ボーカル指示: ${vocalSettings.vocalDescription}
+- 選択要素: ${vocalSettings.selectedElements?.join(', ') || 'なし'}
+- 特徴: SUNO AIの4要素システム（tone, delivery, emotion, pronunciation）によって最適化された設定
+
+## SUNO最適化ボーカルの特徴
+※ この設定では、SUNO AIが認識しやすい具体的なボーカル指示が含まれています。歌詞はこれらの特徴を活かした表現を心がけてください。
+※ 特に以下の要素が重要です: ${vocalSettings.selectedElements?.join('、') || 'なし'}` : `
+**🎵 従来システム使用**
 - 構成: ${vocal.gender}
 - 年齢: ${vocal.age}
 - 国籍: ${vocal.nationality}
@@ -366,7 +416,7 @@ ${songLength === '2-3分' ?
 ## ボーカル構成の特徴
 ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエット') || vocal.gender.includes('コーラス') ? 
   '※ このボーカル構成では、ハーモニー・コーラスワーク・対話的歌唱を効果的に活用した歌詞構成を心がけてください' : 
-  '※ ソロボーカルの表現力を活かした歌詞構成を心がけてください'}
+  '※ ソロボーカルの表現力を活かした歌詞構成を心がけてください'}`}
 
 ${languageInstructions}
 
@@ -594,7 +644,7 @@ Suno AIで楽曲を生成するための最適化された英語スタイル指�
 1. **Purpose（用途）**: ${theme}をテーマとした楽曲
 2. **Length（長さ）**: ${songLength}
 3. **Language（言語）**: 日本語歌詞
-4. **Vocals（ボーカル）**: ${vocal.gender}、${vocal.age}、${vocal.nationality}
+4. **Vocals（ボーカル）**: ${vocalSettings.vocalDescription}
 5. **Tempo（テンポ帯）**: ${analyzedDetails?.tempo || 'medium'}
 6. **Rhythm（リズム質感）**: ${analyzedDetails?.rhythm || '楽曲スタイルに応じて設定'}
 7. **Instruments（楽器）**: ${actualInstruments} （楽曲分析結果をそのまま使用）
@@ -603,10 +653,26 @@ Suno AIで楽曲を生成するための最適化された英語スタイル指�
 10. **Forbidden（禁止要素）**: ${analyzedDetails?.forbidden || 'ジャンルに応じて設定'}
 
 ## 追加情報
+${vocalSettings.isNewSystem ? `
+**🎤 SUNO最適化ボーカル情報:**
+- システム: SUNO 4要素システム使用
+- 選択要素: ${vocalSettings.selectedElements?.join(', ') || 'なし'}
+- SUNOテキスト: "${vocalSettings.vocalDescription}"
+- 特記事項: SUNO AIが認識しやすい具体的なボーカル指示を使用` : `
+**🎵 従来ボーカル情報:**
 - 歌唱技法: ${vocal.techniques.join(', ')}
+- システム: 従来の年齢・国籍ベース設定`}
 - 詳細スタイル: ${cleanMusicStyle}
 - 分析された楽器構成: ${actualInstruments}
 - **ラップモード**: ${finalRapMode} (none: 通常楽曲, partial: 一部ラップ, full: 全面ラップ)
+
+${vocalSettings.isNewSystem ? `
+## 🎯 SUNO最適化ボーカル指示の活用
+選択された要素「${vocalSettings.selectedElements?.join('、') || 'なし'}」を以下のように英語スタイル指示に反映:
+- これらの要素を SUNO AI が理解しやすい英語表現に変換
+- 音楽スタイルと組み合わせて最適な Vocals セクションを生成
+- Raw/Rough → "raw, rough" / Shouting → "shouting, powerful" / Energetic → "energetic, dynamic" 等の変換を適用
+- **重要**: 一般的な「expressive, emotional delivery」ではなく、具体的な要素を使用` : ''}
 
 ${finalRapMode === 'full' ? `
 ## 🔥 全面ラップ楽曲用 SUNO最適化指示（ChatGPT実証済み）
@@ -652,7 +718,26 @@ ${finalRapMode === 'full' ? `
 - **ドラム**: punchy, driving, sharp snares, powerful kicks
 - **ボーカル**: soaring, passionate, restrained-to-explosive, layered harmonies
 
-### 3.1. グループボーカル表現技法（${vocal.gender}の場合）
+### 3.1. ボーカル表現技法（${vocalSettings.isNewSystem ? 'SUNO最適化' : '従来システム'}）
+${vocalSettings.isNewSystem ? `
+**🎤 SUNO最適化ボーカル指示の英語変換:**
+${(vocalSettings.selectedElements || []).map(element => {
+  if (element.includes('Raw') || element.includes('Rough')) return '- **Raw/Rough**: raw vocals, rough texture, unpolished edge, gritty delivery'
+  if (element.includes('Shouting')) return '- **Shouting**: shouting style, powerful projection, intense vocal delivery'
+  if (element.includes('Energetic')) return '- **Energetic**: energetic performance, dynamic vocals, high-energy delivery'
+  if (element.includes('Smooth')) return '- **Smooth**: smooth vocals, flowing delivery, polished technique'
+  if (element.includes('Whispered')) return '- **Whispered**: whispered vocals, intimate delivery, soft approach'
+  if (element.includes('Emotional')) return '- **Emotional**: deeply emotional, heartfelt delivery, expressive range'
+  if (element.includes('Confident')) return '- **Confident**: confident vocals, assertive delivery, strong presence'
+  if (element.includes('Melancholic')) return '- **Melancholic**: melancholic tone, wistful delivery, bittersweet emotion'
+  if (element.includes('Aggressive')) return '- **Aggressive**: aggressive vocals, fierce delivery, intense energy'
+  if (element.includes('Clear')) return '- **Clear**: clear pronunciation, crisp articulation, precise delivery'
+  if (element.includes('Slurred')) return '- **Slurred**: slightly slurred, relaxed articulation, casual delivery'
+  if (element.includes('Breathy')) return '- **Breathy**: breathy vocals, airy delivery, intimate texture'
+  return `- **${element}**: vocal characteristic to be applied`
+}).join('\\n')}
+
+**重要**: 上記の具体的な特徴を "Vocals" セクションで使用し、一般的な "expressive, emotional delivery" は避ける。` : `
 ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエット') || vocal.gender.includes('コーラス') ? `
 - **ハーモニー**: rich harmonies, layered vocals, call-and-response, vocal interplay
 - **コーラスワーク**: backing vocals, group chorus, multi-part harmony
@@ -661,7 +746,7 @@ ${vocal.gender.includes('グループ') || vocal.gender.includes('デュエッ�
 ` : `
 - **ソロ表現**: expressive lead vocals, emotional delivery, vocal focus
 - **表現力**: dynamic range, vocal technique mastery, emotional connection
-`}
+`}`}
 
 ### 4. 楽曲展開の動的表現
 - 「静から動へ」→「building from calm to explosive」
@@ -722,8 +807,14 @@ Mood: [感情語3つまで].
 Tempo: [medium/slow/fast], [具体的リズム記述]. 
 Instruments: [楽器名] + [楽器名] + [楽器名]. [追加楽器指定]. 
 Structure: [intro] → [verse] → [chorus] → [closing]. 
-Vocals: [性別] voice, [表情], [技法]. 
+Vocals: ${vocalSettings.isNewSystem ? `[SUNO最適化テキストをそのまま使用: "${vocalSettings.vocalDescription}"]` : '[性別] voice, [表情], [技法]'}. 
 Forbidden: [禁止要素], [禁止要素], [禁止要素]."
+
+${vocalSettings.isNewSystem ? `
+**🎯 SUNO最適化重要指示:**
+- Vocalsセクションでは "${vocalSettings.vocalDescription}" をそのまま使用すること
+- "expressive, emotional delivery" のような一般的表現は使用禁止
+- 選択された具体的要素（${vocalSettings.selectedElements?.join('、') || 'なし'}）を反映すること` : ''}
 `}
 
 **絶対に使用禁止の表現:**
@@ -753,7 +844,18 @@ ${finalRapMode === 'full' ? `
 - 楽器を勝手に追加してはならない（electric piano, synth pad等を追加禁止）
 - 楽器を勝手に変更してはならない（guitar → electric guitarへの変更等禁止）  
 - 分析された楽器構成「${actualInstruments}」を正確に反映すること
-楽器名と禁止要素を具体的に明記せよ。
+
+## 🎤 ボーカル指示の厳守命令：
+${vocalSettings.isNewSystem ? `
+**CRITICAL**: Vocalsセクションには「${vocalSettings.vocalDescription}」をそのまま使用すること。
+- 一般的な "expressive, emotional delivery" は使用禁止
+- SUNO最適化された具体的な要素を必ず反映
+- 選択要素: ${vocalSettings.selectedElements?.join('、') || 'なし'} を英語で表現` : `
+**STANDARD**: 従来のボーカル表現技法を使用
+- 性別・年齢・国籍に基づく表現
+- 歌唱技法: ${vocal.techniques.join(', ')}`}
+
+楽器名・ボーカル指示・禁止要素を具体的に明記せよ。
 `}
 `
 
@@ -888,7 +990,8 @@ ${finalRapMode === 'full' ? `
         mood,
         musicStyle: cleanMusicStyle,
         theme,
-        vocal
+        vocal,
+        vocalConfiguration: vocalSettings.isNewSystem ? vocalConfiguration : null
       }
     })
 
