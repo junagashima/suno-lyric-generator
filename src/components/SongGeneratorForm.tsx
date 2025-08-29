@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import VocalElementSelector from './VocalElementSelector'
+import { VocalConfiguration, AnalyzedVocalResult } from '../types/vocal'
 
 interface Props {
   onGenerate: (data: any) => void
@@ -116,6 +118,12 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       
       console.log('🔍 診断: state保存値:', newDetails)
       setAnalyzedDetails(newDetails)
+
+      // 新しいボーカル分析結果を保存
+      if (data.vocalAnalysis) {
+        console.log('🎤 ボーカル分析結果:', data.vocalAnalysis)
+        setAnalyzedVocalResult(data.vocalAnalysis)
+      }
     } catch (error) {
       console.error('Error analyzing reference song:', error)
       alert('楽曲分析中にエラーが発生しました。手動で設定してください。')
@@ -146,11 +154,20 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           content,
           contentReflection, // Step C: 安全に追加
           songLength,
-          vocal: {
+          vocal: useNewVocalSystem ? {
             gender: vocalGender,
             age: vocalAge,
             nationality: vocalNationality,
-            techniques: vocalTechniques
+            techniques: vocalTechniques,
+            // 新SUNO 4要素システム
+            useNewSystem: true,
+            vocalConfiguration: vocalConfiguration
+          } : {
+            gender: vocalGender,
+            age: vocalAge,
+            nationality: vocalNationality,
+            techniques: vocalTechniques,
+            useNewSystem: false
           },
           // 混合言語設定（新機能）
           languageSettings: {
@@ -345,8 +362,37 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
 
       {/* ボーカル設定 */}
       <div className="bg-green-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">🎤 ボーカル設定</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-semibold text-gray-800">🎤 ボーカル設定</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">設定方法:</span>
+            <button
+              onClick={() => setUseNewVocalSystem(false)}
+              className={`px-3 py-1 text-sm rounded ${
+                !useNewVocalSystem 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              従来方式
+            </button>
+            <button
+              onClick={() => setUseNewVocalSystem(true)}
+              className={`px-3 py-1 text-sm rounded ${
+                useNewVocalSystem 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              SUNO最適化
+            </button>
+          </div>
+        </div>
+        
+        {!useNewVocalSystem ? (
+          /* 従来方式のボーカル設定 */
+          <div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">ボーカル構成</label>
             <select
@@ -467,25 +513,59 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           </div>
         </div>
 
-        {/* 歌唱技法（複数選択） */}
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            歌唱技法（複数選択可）
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {vocalTechniqueOptions.map((option) => (
-              <label key={option.value} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={vocalTechniques.includes(option.value)}
-                  onChange={() => handleVocalTechniqueChange(option.value)}
-                  className="rounded border-gray-300 focus:ring-2 focus:ring-green-500"
-                />
-                <span className="text-sm text-gray-700">{option.label}</span>
+            {/* 歌唱技法（複数選択） */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                歌唱技法（複数選択可）
               </label>
-            ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {vocalTechniqueOptions.map((option) => (
+                  <label key={option.value} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={vocalTechniques.includes(option.value)}
+                      onChange={() => handleVocalTechniqueChange(option.value)}
+                      className="rounded border-gray-300 focus:ring-2 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* SUNO最適化ボーカル設定 */
+          <div>
+            {/* 基本設定（性別のみ、年齢・国籍は新システムで自動最適化） */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">ボーカル構成</label>
+              <select
+                value={vocalGender}
+                onChange={(e) => setVocalGender(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="女性">女性（ソロ）</option>
+                <option value="男性">男性（ソロ）</option>
+                <option value="中性的">中性的（ソロ）</option>
+                <option value="男女デュエット">男女デュエット</option>
+                <option value="女性デュエット">女性デュエット</option>
+                <option value="男性デュエット">男性デュエット</option>
+                <option value="女性グループ">女性グループ（3人以上）</option>
+                <option value="男性グループ">男性グループ（3人以上）</option>
+                <option value="男女混合グループ">男女混合グループ</option>
+                <option value="コーラス重視">コーラス重視（複数ボーカル）</option>
+              </select>
+            </div>
+            
+            {/* SUNO 4要素選択コンポーネント */}
+            <VocalElementSelector
+              gender={vocalGender}
+              mode={mode}
+              analyzedResult={analyzedVocalResult}
+              onSelectionChange={(config: VocalConfiguration) => setVocalConfiguration(config)}
+            />
+          </div>
+        )}
       </div>
 
       {/* ラップ調選択（安全追加） */}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { findMusicData } from './musicDatabase'
+import { analyzeOptimalVocalElements } from '../../../utils/vocalAnalyzer'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -151,6 +152,17 @@ export async function POST(request: NextRequest) {
         console.log('✅ データベース処理: synth pad除去完了');
       }
       
+      // ボーカル要素の自動分析
+      const vocalAnalysisResult = analyzeOptimalVocalElements({
+        genre: knownMusicData.genre,
+        mood,
+        style,
+        tempo: knownMusicData.tempo,
+        rhythm: "steady 4/4 beat",
+        instruments: instruments,
+        forbidden: "No comedic tones, No inappropriate instruments"
+      }, 'male'); // デフォルトで男性、フロントエンドで性別に応じて再分析
+
       return NextResponse.json({
         mood,
         style,
@@ -159,6 +171,8 @@ export async function POST(request: NextRequest) {
         rhythm: "steady 4/4 beat", // データベースには詳細リズムがないためデフォルト
         instruments: instruments,
         forbidden: "No comedic tones, No inappropriate instruments",
+        // 新しいボーカル要素分析結果
+        vocalAnalysis: vocalAnalysisResult,
         // Step G: 安全に構造情報を追加
         structure: {
           hasRap: hasRapElements,
@@ -637,6 +651,16 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
         console.log('✅ synth pad除去完了');
       }
 
+      // ボーカル要素の自動分析
+      const vocalAnalysisResult = analyzeOptimalVocalElements({
+        mood,
+        style,
+        tempo,
+        rhythm,
+        instruments,
+        forbidden
+      }, 'male'); // デフォルトで男性、フロントエンドで性別に応じて再分析
+
       return NextResponse.json({
         // 既存フィールド（後方互換性）
         mood,
@@ -646,6 +670,8 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
         rhythm, 
         instruments,
         forbidden,
+        // 新しいボーカル要素分析結果
+        vocalAnalysis: vocalAnalysisResult,
         debug: {
           originalMood: parsedResponse.mood,
           originalStyle: parsedResponse.style,
