@@ -90,12 +90,23 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       setAnalyzedStructure(data.structure || null)
       
       // 新4要素の安全な保存（フォールバック付き）
-      setAnalyzedDetails({
+      console.log('🔍 診断: APIレスポンス全体:', data)
+      console.log('🔍 診断: 新4要素抽出:', {
+        tempo: data.tempo,
+        rhythm: data.rhythm, 
+        instruments: data.instruments,
+        forbidden: data.forbidden
+      })
+      
+      const newDetails = {
         tempo: data.tempo || null,
         rhythm: data.rhythm || null,
         instruments: data.instruments || null,
         forbidden: data.forbidden || null
-      })
+      }
+      
+      console.log('🔍 診断: state保存値:', newDetails)
+      setAnalyzedDetails(newDetails)
     } catch (error) {
       console.error('Error analyzing reference song:', error)
       alert('楽曲分析中にエラーが発生しました。手動で設定してください。')
@@ -279,6 +290,11 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
             🔍 詳細分析結果 (Suno AI最適化)
           </h3>
+          
+          {/* 診断表示（一時的） */}
+          <div className="bg-yellow-100 p-2 mb-2 rounded text-xs">
+            <strong>診断:</strong> analyzedDetails = {JSON.stringify(analyzedDetails)}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             {analyzedDetails.tempo && (
               <div className="bg-white p-2 rounded border">
