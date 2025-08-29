@@ -80,9 +80,23 @@ export async function POST(request: NextRequest) {
       // 感情語（3つまで）
       const moodWords = knownMusicData.mood.slice(0, 3).join(', ')
       
-      // 楽器（具体的に）
-      const instruments = knownMusicData.instruments.length > 0 ? 
+      // 楽器（具体的に）- synth pad除去処理付き
+      let instrumentsRaw = knownMusicData.instruments.length > 0 ? 
         knownMusicData.instruments.join(' + ') : "guitar + bass + drums"
+      
+      // データベース楽器構成からもsynth pad除去  
+      const unwantedInstruments = [
+        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
+        'pad synth', 'atmospheric pad', 'ambient pad'
+      ];
+      
+      unwantedInstruments.forEach(unwanted => {
+        const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
+        instrumentsRaw = instrumentsRaw.replace(regex, '');
+        instrumentsRaw = instrumentsRaw.replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*\+\s*|\s*\+\s*$/g, '').trim();
+      });
+      
+      const instruments = instrumentsRaw || "guitar + bass + drums"
       
       // 禁止要素（ジャンルに応じて）
       let forbiddenElements = "comedic tones, heavy EDM, fast tempo changes"
@@ -308,6 +322,30 @@ export async function POST(request: NextRequest) {
       // 音楽スタイルを200文字以内に制限（詳細分析を保持）
       let style = parsedResponse.style || 'J-POP, ミディアムテンポ, アコースティック'
       
+      // 🔧 不要楽器の除去処理（synth pad問題の解決）
+      // AIが生成しがちな不適切な楽器指示を除去
+      const unwantedInstruments = [
+        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
+        'pad synth', 'atmospheric pad', 'ambient pad'
+      ];
+      
+      unwantedInstruments.forEach(unwanted => {
+        // 大文字小文字を区別しない正規表現で除去
+        const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
+        style = style.replace(regex, '');
+        
+        // カンマの後に続く場合の処理
+        const commaRegex = new RegExp(`[,、]\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
+        style = style.replace(commaRegex, '');
+        
+        // 前にカンマがある場合の処理  
+        const preCommaRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
+        style = style.replace(preCommaRegex, '');
+      });
+      
+      // 連続するカンマや余分な空白を整理
+      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s+/g, ' ').trim();
+      
       // スタイルが長文になっている場合の処理
       if (style.length > 200) {
         // 最初の200文字で切って、最後のカンマまたは句点まで適切に処理
@@ -341,8 +379,19 @@ export async function POST(request: NextRequest) {
       // 新しい4要素構造に対応（後方互換性保持）
       const tempo = parsedResponse.tempo || "medium/steady (85-100 BPM)"
       const rhythm = parsedResponse.rhythm || "steady 4/4 beat"
-      const instruments = parsedResponse.instruments || "guitar, bass, drums"
+      let instruments = parsedResponse.instruments || "guitar, bass, drums"
       const forbidden = parsedResponse.forbidden || "No comedic tones"
+      
+      // 🔧 instruments フィールドからもsynth pad除去
+      unwantedInstruments.forEach(unwanted => {
+        const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
+        instruments = instruments.replace(regex, '');
+        const commaRegex = new RegExp(`[,、]\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
+        instruments = instruments.replace(commaRegex, '');
+        const preCommaRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
+        instruments = instruments.replace(preCommaRegex, '');
+      });
+      instruments = instruments.replace(/[,、]\s*[,、]+/g, ',').replace(/\s+/g, ' ').trim();
 
       // 診断ログ: AIが新4要素を出力しているかチェック
       console.log('=== 新4要素診断 ===');
