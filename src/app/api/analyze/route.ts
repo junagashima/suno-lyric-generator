@@ -334,6 +334,15 @@ export async function POST(request: NextRequest) {
       const instruments = parsedResponse.instruments || "guitar, bass, drums"
       const forbidden = parsedResponse.forbidden || "No comedic tones"
 
+      // 診断ログ: AIが新4要素を出力しているかチェック
+      console.log('=== 新4要素診断 ===');
+      console.log('AI原始応答:', JSON.stringify(parsedResponse, null, 2));
+      console.log('新要素出力状況:');
+      console.log('- tempo:', parsedResponse.tempo ? '✅ AI出力' : '❌ フォールバック');
+      console.log('- rhythm:', parsedResponse.rhythm ? '✅ AI出力' : '❌ フォールバック'); 
+      console.log('- instruments:', parsedResponse.instruments ? '✅ AI出力' : '❌ フォールバック');
+      console.log('- forbidden:', parsedResponse.forbidden ? '✅ AI出力' : '❌ フォールバック');
+
       return NextResponse.json({
         // 既存フィールド（後方互換性）
         mood,
