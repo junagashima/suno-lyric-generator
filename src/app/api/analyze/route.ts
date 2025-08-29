@@ -131,10 +131,14 @@ export async function POST(request: NextRequest) {
 - 聴き手の感覚に訴える表現を用いた分析
 - 楽曲の「魂」や「エネルギー」を言語化
 
-## JSON出力形式（必須）
+## JSON出力形式（必須）- Suno AI 4要素構造
 {
   "mood": "感情・雰囲気の詳細表現（最大100文字）",
-  "style": "Suno AI向け音楽的特徴（最大250文字）"
+  "tempo": "Sunoテンポ指示: slow/relaxed (BPM帯) 形式（必須）",
+  "rhythm": "Sunoリズム指示: ビートタイプ + 質感表現（必須）",
+  "instruments": "Suno楽器指示: 具体的な楽器役割と質感（必須）",
+  "forbidden": "Suno禁止要素: No EDM drops等の不要要素（必須）",
+  "style": "総合的な音楽スタイル補足（オプション・最大150文字）"
 }
 
 ## 分析アプローチ（Suno AI最適化）
@@ -320,12 +324,25 @@ export async function POST(request: NextRequest) {
       });
       console.log('品質チェック:', qualityCheck);
 
+      // 新しい4要素構造に対応（後方互換性保持）
+      const tempo = parsedResponse.tempo || "medium/steady (85-100 BPM)"
+      const rhythm = parsedResponse.rhythm || "steady 4/4 beat"
+      const instruments = parsedResponse.instruments || "guitar, bass, drums"
+      const forbidden = parsedResponse.forbidden || "No comedic tones"
+
       return NextResponse.json({
+        // 既存フィールド（後方互換性）
         mood,
         style,
+        // 新しい4要素構造（順次追加）
+        tempo,
+        rhythm, 
+        instruments,
+        forbidden,
         debug: {
           originalMood: parsedResponse.mood,
           originalStyle: parsedResponse.style,
+          newFields: { tempo, rhythm, instruments, forbidden },
           moodLength: mood.length,
           styleLength: style.length,
           processed: true
