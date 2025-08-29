@@ -24,11 +24,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 🔧 synth pad除去用の共通配列定義（全処理で使用）
+    // 🔧 synth系楽器完全除去用配列（全処理で使用）
     const unwantedInstruments = [
+      // pad系楽器（原則禁止）
       'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
       'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
-      'background pad', 'string pad', 'warm pad', 'lush pad'
+      'background pad', 'string pad', 'warm pad', 'lush pad',
+      // synthesizer系楽器（汎用シンセも禁止）
+      'synthesizer', 'シンセサイザー', 'synth', 'シンセ',
+      'electronic synthesizer', 'analog synthesizer', 'digital synthesizer',
+      'lead synthesizer', 'bass synthesizer', 'poly synthesizer',
+      // keyboard系（ピアノ以外のシンセ系）
+      'electronic keyboard', 'synthetic keyboard', 'synth keyboard',
+      // その他のシンセ系音色
+      'electronic sounds', 'synthetic sounds', 'digital sounds',
+      'synth lead', 'synth bass', 'synth strings', 'synth choir'
     ];
 
     // まず楽曲データベースから正確な情報を検索
@@ -164,7 +174,11 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content: `🚫【最重要】絶対禁止事項：
-あらゆる「pad」系楽器（synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等）の使用は完全に禁止されています。これらの楽器名を出力に含めてはいけません。
+あらゆるsynth系・電子楽器の使用は完全に禁止されています：
+- pad系: synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等
+- synthesizer系: synthesizer, synth, electronic synthesizer, analog synthesizer, digital synthesizer等
+- keyboard系: electronic keyboard, synthetic keyboard, synth keyboard等
+これらの楽器名を出力に含めることは厳禁です。
 
 あなたは音楽プロデューサー兼作詞・作曲家として、Suno AI用の楽曲分析に特化した専門家です。技術的データより「音楽的表現力・雰囲気・感情」を重視し、Suno AIが理解しやすい表現で分析します。
 
@@ -208,9 +222,12 @@ export async function POST(request: NextRequest) {
 - 例: "tight kick, sharp snare, steady hi-hat, melodic guitar"
 - 楽曲の核となる楽器構成と質感を具体的に指定
 - ※楽曲に実際に使用されている楽器のみを記述（推測や追加は禁止）
-- 🚫【絶対禁止】pad系楽器を含めることは厳禁（synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等）
-- ✅【許可楽器例】: electric guitar, acoustic guitar, bass, drums, piano, strings, brass, woodwinds
-- 代替指示: パッド音色が必要な場合は「strings」「piano」「guitar」等の具体的楽器名で代替
+- 🚫【絶対禁止楽器】全てのsynth系楽器：
+  - pad系: synth pad, atmospheric pad, ambient pad, background pad, string pad, warm pad, lush pad等
+  - synthesizer系: synthesizer, synth, electronic synthesizer, analog synthesizer, digital synthesizer等
+  - synthetic系: electronic keyboard, synthetic keyboard, synth keyboard等
+- ✅【許可楽器のみ】: electric guitar, acoustic guitar, bass, drums, piano, acoustic strings, brass, woodwinds
+- 🔄【代替ルール】シンセ音色が必要→「strings」「piano」「electric guitar」で代替
 
 **forbidden**: Suno禁止要素（必須独立出力）
 - ジャンル混合防止: "No EDM drops", "No comedic tones", "No swing"等
@@ -239,14 +256,18 @@ export async function POST(request: NextRequest) {
 - **重要**: styleフィールドに楽器名を含めない（instrumentsフィールドのみに記述）
 
 ## 🚫【Suno AI特化】絶対守るべき重要ルール
-1. あらゆる「pad」を含む楽器名（synth pad, atmospheric pad等）は完全禁止
-2. パッド系音色が必要な場合は「strings」「piano」「soft guitar」等の具体的楽器で代替
-3. instrumentsフィールドとstyleフィールドの両方でpad系楽器を避ける
-4. Suno AIは「pad」指示を嫌うため、この指示を厳格に守る`
+1. あらゆるsynth系楽器（synthesizer, synth, electronic synthesizer等）は完全禁止
+2. あらゆるpad系楽器（synth pad, atmospheric pad等）は完全禁止
+3. 電子系音色が必要な場合は「electric guitar」「electric piano」「strings」等のアコースティック系で代替
+4. instrumentsフィールドとstyleフィールドの両方でsynth系楽器を完全に排除
+5. Suno AIはsynth系指示を嫌うため、この指示を厳格に守る`
         },
         {
           role: "user",
-          content: `🚫【重要】synth pad, atmospheric pad等のあらゆる「pad」系楽器名は絶対に使用禁止です。
+          content: `🚫【重要】あらゆるsynth系・電子楽器は絶対に使用禁止です：
+- synthesizer, synth, electronic synthesizer等のsynth系楽器
+- synth pad, atmospheric pad等のpad系楽器
+- electronic keyboard, synthetic keyboard等の電子鍵盤楽器
 
 楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
@@ -269,8 +290,11 @@ export async function POST(request: NextRequest) {
    - 静と動、緊張と解放の変化
 
 4. **楽器構成と音の特徴（重要）**
-   - 🚫【絶対禁止】pad系楽器（synth pad, atmospheric pad等）は一切使用しない
-   - ✅【推奨楽器】electric guitar, acoustic guitar, bass, drums, piano, strings, brass等の具体的楽器のみ
+   - 🚫【絶対禁止】あらゆるsynth系楽器は一切使用しない：
+     - synthesizer, synth, electronic synthesizer, analog synthesizer等
+     - synth pad, atmospheric pad, ambient pad, background pad等
+     - electronic keyboard, synthetic keyboard等
+   - ✅【推奨楽器】electric guitar, acoustic guitar, bass, drums, piano, acoustic strings, brass等の具体的アコースティック楽器のみ
    - 「ヘビーで歪んだ」「クリアで透明感のある」等の質感表現
    - 楽器の「役割と印象」（数値より感覚）
 
@@ -298,7 +322,9 @@ export async function POST(request: NextRequest) {
 - 体感比喩: "head-nod groove"(Hip-Hop), "driving rock beat"
 
 **禁止要素**:
-- 必須項目: "No ambient pads" - pad系楽器の使用を完全禁止
+- 必須項目1: "No synthesizers" - あらゆるsynth系楽器の完全禁止
+- 必須項目2: "No ambient pads" - pad系楽器の使用を完全禁止  
+- 必須項目3: "No electronic sounds" - 電子音全般の禁止
 - 追加禁止: "No EDM drops", "No comedic tones", "No swing"等（楽曲に応じて）
 
 **必須JSON出力例**:
@@ -306,8 +332,8 @@ export async function POST(request: NextRequest) {
   "mood": "静かで瞑想的な雰囲気、心の奥深くに響く叙情性",
   "tempo": "slow/relaxed (70-75 BPM)",
   "rhythm": "laid-back groove with steady 4/4 beat", 
-  "instruments": "soft piano, gentle strings, subtle percussion",
-  "forbidden": "No EDM drops, No ambient pads, No comedic tones",
+  "instruments": "soft acoustic piano, gentle acoustic strings, subtle percussion",
+  "forbidden": "No synthesizers, No ambient pads, No electronic sounds, No EDM drops",
   "style": "穏やかなバラード調、オーガニックなプロダクション、感情の深い流れを表現"
 }
 
@@ -417,17 +443,16 @@ export async function POST(request: NextRequest) {
       });
       
       // 🔧 styleフィールドから楽器名を除去（instrumentsフィールドと重複防止）
+      // 🔧 commonInstruments = unwantedInstruments + 通常楽器（重複防止用）
       const commonInstruments = [
-        'synthesizer', 'シンセサイザー', 'synth', 'シンセ',
-        // synth pad系の楽器を追加（unwantedInstruments と同じリスト）
-        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
-        'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
-        'background pad', 'string pad', 'warm pad', 'lush pad',
+        // unwantedInstrumentsと同じリスト（synth系完全除去）
+        ...unwantedInstruments,
+        // 通常楽器（styleから除去してinstrumentsに分離）
         'guitar', 'ギター', 'electric guitar', 'エレキギター', 'acoustic guitar', 'アコースティックギター',
-        'bass', 'ベース', 'bass guitar', 'ベースギター',
+        'bass', 'ベース', 'bass guitar', 'ベースギター', 'bass guitar', 'drum kit', 'drum set',
         'drums', 'ドラム', 'ドラムス', 'percussion', 'パーカッション',
-        'piano', 'ピアノ', 'keyboard', 'キーボード',
-        'strings', 'ストリングス', 'violin', 'バイオリン'
+        'piano', 'ピアノ', 'keyboard', 'キーボード', 'electric piano',
+        'strings', 'ストリングス', 'violin', 'バイオリン', 'vocals', 'voice', 'vocal'
       ];
       
       const styleBeforeCommon = style;
