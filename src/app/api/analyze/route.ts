@@ -24,6 +24,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 🔧 synth pad除去用の共通配列定義（全処理で使用）
+    const unwantedInstruments = [
+      'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
+      'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
+      'background pad', 'string pad', 'warm pad', 'lush pad'
+    ];
+
     // まず楽曲データベースから正確な情報を検索
     const knownMusicData = findMusicData(song, artist)
     
@@ -84,11 +91,7 @@ export async function POST(request: NextRequest) {
       let instrumentsRaw = knownMusicData.instruments.length > 0 ? 
         knownMusicData.instruments.join(' + ') : "guitar + bass + drums"
       
-      // データベース楽器構成からもsynth pad除去  
-      const unwantedInstruments = [
-        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
-        'pad synth', 'atmospheric pad', 'ambient pad'
-      ];
+      // データベース楽器構成からもsynth pad除去
       
       unwantedInstruments.forEach(unwanted => {
         const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
@@ -328,10 +331,6 @@ export async function POST(request: NextRequest) {
       
       // 🔧 不要楽器の除去処理（synth pad問題の解決）
       // AIが生成しがちな不適切な楽器指示を除去
-      const unwantedInstruments = [
-        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
-        'pad synth', 'atmospheric pad', 'ambient pad'
-      ];
       
       unwantedInstruments.forEach(unwanted => {
         // 大文字小文字を区別しない正規表現で除去
@@ -409,11 +408,6 @@ export async function POST(request: NextRequest) {
       const forbidden = parsedResponse.forbidden || "No comedic tones"
       
       // 🔧 instruments フィールドからもsynth pad除去（強化版）
-      const unwantedInstruments = [
-        'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
-        'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
-        'background pad', 'string pad', 'warm pad', 'lush pad'
-      ];
       
       unwantedInstruments.forEach(unwanted => {
         const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
