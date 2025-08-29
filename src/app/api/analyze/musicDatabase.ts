@@ -39,7 +39,7 @@ export const musicDatabase: Record<string, MusicData> = {
     chord: ['Em', 'C', 'G', 'D', 'Am'],
     structure: 'Intro → Verse(rap) → Chorus(melody) → Verse(rap) → Chorus → Bridge → Chorus → Outro',
     mood: ['nostalgic', 'uplifting', 'summer', 'energetic', 'positive'],
-    instruments: ['electric guitar', 'bass guitar', 'live drums', 'minimal synth']
+    instruments: ['electric guitar', 'bass guitar', 'live drums', 'electric piano']
   },
 
   // ブランデー戦記
@@ -71,7 +71,7 @@ export const musicDatabase: Record<string, MusicData> = {
     musicalFeatures: ['ダークで重厚なサウンド', 'アニメOP特化', '緊張感のある展開'],
     chord: ['Dm', 'Bb', 'F', 'C', 'Gm'],
     mood: ['dark', 'intense', 'dramatic'],
-    instruments: ['heavy guitar', 'driving bass', 'powerful drums', 'dark synth']
+    instruments: ['heavy guitar', 'driving bass', 'powerful drums', 'electric piano']
   }
 }
 

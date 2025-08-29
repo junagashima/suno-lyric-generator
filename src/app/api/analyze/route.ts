@@ -24,12 +24,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 🔧 汎用パッド音色除去用配列（具体的でない楽器名のみ対象）
+    // 🔧 汎用音色除去用配列（不明確・汎用的な楽器名のみ対象）
     const unwantedInstruments = [
       // pad系楽器（汎用的で不明確な音色）
       'synth pad', 'synthpad', 'シンセパッド', 'シンセ パッド',
       'pad synth', 'atmospheric pad', 'ambient pad', 'soft pad',
       'background pad', 'string pad', 'warm pad', 'lush pad',
+      // 汎用synth系（具体性のない電子音色指示）
+      'synth', 'シンセ', 'dark synth', 'minimal synth', 'lead synth', 'bass synth',
       // 汎用的すぎる楽器名
       'electronic sounds', 'synthetic sounds', 'digital sounds'
     ];
@@ -96,10 +98,17 @@ export async function POST(request: NextRequest) {
       
       // データベース楽器構成からもsynth pad除去
       
+      const instrumentsOriginalDB = instrumentsRaw;
       unwantedInstruments.forEach(unwanted => {
         const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
         instrumentsRaw = instrumentsRaw.replace(regex, '');
         instrumentsRaw = instrumentsRaw.replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*\+\s*|\s*\+\s*$/g, '').trim();
+      });
+      
+      console.log('🔧 データベース楽器除去処理:', {
+        original: instrumentsOriginalDB,
+        processed: instrumentsRaw,
+        removedUnwanted: instrumentsOriginalDB !== instrumentsRaw
       });
       
       const instruments = instrumentsRaw || "guitar + bass + drums"
