@@ -219,8 +219,9 @@ export async function POST(request: NextRequest) {
 
 **style**: 総合補足（オプション）
 - 上記4要素で表現しきれない音楽的特徴を補足
-- ※楽器構成はinstrumentsフィールドのみに記述し、styleには含めない
-- 🚫【重要】styleフィールドにもpad系楽器名を含めることは禁止
+- 🚫【禁止】楽器構成は絶対に含めない（「Instruments:」「楽器:」等の記述も禁止）
+- 🚫【禁止】pad系楽器名を含めることは禁止
+- ✅【記述内容】ジャンル、雰囲気、プロダクション手法のみ
 
 ## 重要な表現方針（全楽曲対応）
 - **Sunoネイティブテンポ表現**: 必ず「形容詞 (BPM帯)」で出力
@@ -307,7 +308,7 @@ export async function POST(request: NextRequest) {
   "rhythm": "laid-back groove with steady 4/4 beat", 
   "instruments": "soft piano, gentle strings, subtle percussion",
   "forbidden": "No EDM drops, No ambient pads, No comedic tones",
-  "style": "穏やかなピアノバラード、感情の深い流れを表現"
+  "style": "穏やかなバラード調、オーガニックなプロダクション、感情の深い流れを表現"
 }
 
 **その他要件**:
@@ -374,23 +375,34 @@ export async function POST(request: NextRequest) {
       // AIが生成しがちな不適切な楽器指示を除去
       
       unwantedInstruments.forEach(unwanted => {
-        // 大文字小文字を区別しない正規表現で除去
-        const regex = new RegExp(unwanted.replace(/\s+/g, '\\s*'), 'gi');
-        style = style.replace(regex, '');
+        // 🔧 強化版正規表現 - あらゆる区切り文字と句読点に対応
+        const escapedUnwanted = unwanted.replace(/\s+/g, '\\s*');
         
-        // カンマの後に続く場合の処理
-        const commaRegex = new RegExp(`[,、]\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
-        style = style.replace(commaRegex, '');
+        // 1. 基本形（前後に区切り文字がない場合）
+        const basicRegex = new RegExp(`\\b${escapedUnwanted}\\b`, 'gi');
+        style = style.replace(basicRegex, '');
         
-        // 前にカンマがある場合の処理  
-        const preCommaRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
-        style = style.replace(preCommaRegex, '');
+        // 2. カンマ・句点区切り（,、。;）
+        const punctRegex = new RegExp(`[,、。;]\\s*${escapedUnwanted}(?=[,、。;\\s]|$)`, 'gi');
+        style = style.replace(punctRegex, '');
+        const prePunctRegex = new RegExp(`${escapedUnwanted}\\s*[,、。;]`, 'gi');
+        style = style.replace(prePunctRegex, '');
         
-        // +記号区切り形式にも対応
-        const plusRegex = new RegExp(`\\s*\\+\\s*${unwanted.replace(/\s+/g, '\\s*')}`, 'gi');
+        // 3. +記号区切り（+ synth pad. の形式に対応）
+        const plusRegex = new RegExp(`\\s*\\+\\s*${escapedUnwanted}(?=[.\\s,+]|$)`, 'gi');
         style = style.replace(plusRegex, '');
-        const prePlusRegex = new RegExp(`${unwanted.replace(/\s+/g, '\\s*')}\\s*\\+`, 'gi');
+        const prePlusRegex = new RegExp(`${escapedUnwanted}\\s*\\+`, 'gi');
         style = style.replace(prePlusRegex, '');
+        
+        // 4. ピリオド・感嘆符終端（. ! の直前）
+        const endPunctRegex = new RegExp(`\\s*${escapedUnwanted}\\s*[.!]`, 'gi');
+        style = style.replace(endPunctRegex, '.');
+        
+        // 5. コロン区切り（Instruments: xxx の形式）
+        const colonRegex = new RegExp(`(Instruments?:|楽器[:：])([^.]*?)${escapedUnwanted}([^.]*)`, 'gi');
+        style = style.replace(colonRegex, (match: string, prefix: string, before: string, after: string) => {
+          return prefix + before.replace(/\s*\+\s*$/, '') + after.replace(/^\s*\+\s*/, ' + ').replace(/^\s*[+,]\s*/, '');
+        });
       });
       
       // 連続するカンマや余分な空白を整理（第1段階）
@@ -398,7 +410,10 @@ export async function POST(request: NextRequest) {
       
       console.log('🔧 Style第1段階除去処理:', {
         original: parsedResponse.style,
-        afterUnwanted: style
+        afterUnwanted: style,
+        containsSynthPad: /synth\s*pad/i.test(style),
+        containsPlus: style.includes('+'),
+        hasInstruments: /Instruments?:/i.test(style)
       });
       
       // 🔧 styleフィールドから楽器名を除去（instrumentsフィールドと重複防止）
@@ -417,21 +432,44 @@ export async function POST(request: NextRequest) {
       
       const styleBeforeCommon = style;
       commonInstruments.forEach(instrument => {
-        const regex = new RegExp(`\\b${instrument.replace(/\s+/g, '\\s*')}\\b`, 'gi');
-        style = style.replace(regex, '');
-        const commaRegex = new RegExp(`[,、]\\s*${instrument.replace(/\s+/g, '\\s*')}`, 'gi');
-        style = style.replace(commaRegex, '');
-        const preCommaRegex = new RegExp(`${instrument.replace(/\s+/g, '\\s*')}\\s*[,、]`, 'gi');
-        style = style.replace(preCommaRegex, '');
-        // +記号区切り形式にも対応
-        const plusRegex = new RegExp(`\\s*\\+\\s*${instrument.replace(/\s+/g, '\\s*')}`, 'gi');
+        // 🔧 強化版処理を統一適用
+        const escapedInstrument = instrument.replace(/\s+/g, '\\s*');
+        
+        // 基本形除去
+        const basicRegex = new RegExp(`\\b${escapedInstrument}\\b`, 'gi');
+        style = style.replace(basicRegex, '');
+        
+        // カンマ・句点区切り
+        const punctRegex = new RegExp(`[,、。;]\\s*${escapedInstrument}(?=[,、。;\\s]|$)`, 'gi');
+        style = style.replace(punctRegex, '');
+        const prePunctRegex = new RegExp(`${escapedInstrument}\\s*[,、。;]`, 'gi');
+        style = style.replace(prePunctRegex, '');
+        
+        // +記号区切り（強化版）
+        const plusRegex = new RegExp(`\\s*\\+\\s*${escapedInstrument}(?=[.\\s,+]|$)`, 'gi');
         style = style.replace(plusRegex, '');
-        const prePlusRegex = new RegExp(`${instrument.replace(/\s+/g, '\\s*')}\\s*\\+`, 'gi');
+        const prePlusRegex = new RegExp(`${escapedInstrument}\\s*\\+`, 'gi');
         style = style.replace(prePlusRegex, '');
+        
+        // ピリオド終端
+        const endPunctRegex = new RegExp(`\\s*${escapedInstrument}\\s*[.!]`, 'gi');
+        style = style.replace(endPunctRegex, '.');
       });
       
-      // 再度整理
-      style = style.replace(/[,、]\s*[,、]+/g, '、').replace(/\s*\+\s*\+/g, ' + ').replace(/^\s*[,+]\s*|\s*[,+]\s*$/g, '').replace(/\s+/g, ' ').trim();
+      // 🔧 強化版最終整理
+      style = style
+        // 連続区切り文字の修正
+        .replace(/[,、]\s*[,、]+/g, '、')
+        .replace(/\s*\+\s*\+/g, ' + ')
+        // 空の楽器リスト修正（Instruments: + の形式）
+        .replace(/(Instruments?:|楽器[:：])\s*\+\s*/gi, '$1 ')
+        // 前後の余分な区切り文字除去
+        .replace(/^\s*[,+]\s*|\s*[,+]\s*$/g, '')
+        // 空白の正規化
+        .replace(/\s+/g, ' ')
+        // ピリオド前の空白除去
+        .replace(/\s+\./g, '.')
+        .trim();
       
       console.log('🔧 Style第2段階除去処理:', {
         beforeCommon: styleBeforeCommon,
@@ -513,10 +551,17 @@ export async function POST(request: NextRequest) {
       const finalSynthPadCheck = {
         moodHasSynthPad: /synth\s*pad/i.test(mood),
         styleHasSynthPad: /synth\s*pad/i.test(style),
+        styleHasInstruments: /Instruments?:/i.test(style),
+        styleHasPlus: style.includes('+'),
         instrumentsHasSynthPad: /synth\s*pad/i.test(instruments),
         forbiddenHasSynthPad: /synth\s*pad/i.test(forbidden)
       };
       console.log('Synth pad残存検査:', finalSynthPadCheck);
+      console.log('Style内容詳細:', { 
+        fullStyle: style,
+        length: style.length,
+        containsInstruments: style.match(/Instruments?:[^.]*/gi)
+      });
       
       if (finalSynthPadCheck.moodHasSynthPad || finalSynthPadCheck.styleHasSynthPad || 
           finalSynthPadCheck.instrumentsHasSynthPad || finalSynthPadCheck.forbiddenHasSynthPad) {
