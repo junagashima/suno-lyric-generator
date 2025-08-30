@@ -49,38 +49,25 @@ export default function VocalElementSelector({
     }
   }, [mode, analyzedResult])
 
-  // 選択変更時にコールバック実行（編集モード時は保留）
+  // 🔥 完全分離版useEffect（編集モード中は絶対に実行されない）
   useEffect(() => {
-    console.log('🔍 DEBUG useEffect実行:', {
-      isEditingRecommended,
-      prevEditingMode: prevEditingModeRef.current,
-      selectedElementsLength: selectedElements.length,
-      trigger: 'useEffect executed'
-    })
-    
-    // 編集モード中は親コンポーネントに反映しない
+    // 編集モード中は一切実行しない（early return）
     if (isEditingRecommended) {
-      console.log('🚫 編集モード中のためonSelectionChangeをスキップ')
-      prevEditingModeRef.current = isEditingRecommended
       return
     }
-    
-    // 編集モードから抜けた直後の場合もスキップ
-    if (prevEditingModeRef.current === true && isEditingRecommended === false) {
-      console.log('🚫 編集モード終了直後のためonSelectionChangeをスキップ')
-      prevEditingModeRef.current = isEditingRecommended
-      return
-    }
-    
-    prevEditingModeRef.current = isEditingRecommended
     
     const generatedText = generateSunoVocalText(selectedElements, gender)
-    console.log('✅ onSelectionChange実行:', { selectedElements, generatedText })
+    console.log('🎤 VocalElementSelector更新（通常モードのみ）:', { selectedElements, generatedText })
     onSelectionChange({
       selectedElements,
       generatedText
     })
-  }, [selectedElements, gender, onSelectionChange, isEditingRecommended])
+  }, [selectedElements, gender, onSelectionChange])  // isEditingRecommendedを依存関係から完全削除
+  
+  // 編集モード管理用の別useEffect
+  useEffect(() => {
+    prevEditingModeRef.current = isEditingRecommended
+  }, [isEditingRecommended])
 
   // プリセット選択ハンドラー
   const handlePresetSelect = (presetId: string) => {
@@ -94,28 +81,59 @@ export default function VocalElementSelector({
     }
   }
 
-  // 個別要素選択ハンドラー（編集保留対応版）
+  // 個別要素選択ハンドラー（完全分離版）
   const handleElementToggle = (element: VocalElement) => {
-    console.log('🔍 DEBUG handleElementToggle実行:', {
-      elementId: element.id,
-      elementLabel: element.label,
-      isEditingRecommended,
-      currentSelectedLength: selectedElements.length,
-      currentTempLength: tempEditingElements.length
-    })
-    
     setSelectedPreset('') // プリセット選択を解除
 
-    // 🔑 KEY FIX: 編集モード中は一時状態を操作、通常時は直接操作
-    const currentElements = isEditingRecommended ? tempEditingElements : selectedElements
-    const setCurrentElements = isEditingRecommended ? setTempEditingElements : setSelectedElements
+    // 🔥 CRITICAL: 編集モード中はselectedElementsに絶対に触らない
+    if (isEditingRecommended) {
+      // 編集モード中は一時状態のみ操作
+      const currentElements = tempEditingElements
+      
+      // 既に選択されている場合は選択解除
+      const isAlreadySelected = currentElements.some(el => el.id === element.id)
+      if (isAlreadySelected) {
+        const newElements = currentElements.filter(el => el.id !== element.id)
+        setTempEditingElements(newElements)
+        setHasUnsavedChanges(true)
+        return
+      }
 
+      // 同じカテゴリの他の要素を除去
+      let newElements = currentElements.filter(
+        el => el.category !== element.category
+      )
+      
+      // 新要素を追加
+      newElements.push(element)
+
+      // 3要素を超える場合は最古の要素を削除
+      if (newElements.length > 3) {
+        const oldestElement = currentElements.find(el => 
+          el.category !== element.category && 
+          !newElements.some(newEl => newEl.id === el.id)
+        )
+        if (oldestElement) {
+          newElements = newElements.filter(el => el.id !== oldestElement.id)
+        }
+      }
+
+      const finalElements = newElements.slice(0, 3)
+      setTempEditingElements(finalElements)
+      setHasUnsavedChanges(true)
+      
+      console.log('🔥 編集モード中：tempEditingElementsのみ更新', { finalElements })
+      return
+    }
+    
+    // 通常モード：selectedElementsを直接操作
+    const currentElements = selectedElements
+    
     // 既に選択されている場合は選択解除
     const isAlreadySelected = currentElements.some(el => el.id === element.id)
     if (isAlreadySelected) {
       const newElements = currentElements.filter(el => el.id !== element.id)
-      setCurrentElements(newElements)
-      if (isEditingRecommended) setHasUnsavedChanges(true)
+      setSelectedElements(newElements)
       return
     }
 
@@ -139,8 +157,9 @@ export default function VocalElementSelector({
     }
 
     const finalElements = newElements.slice(0, 3)
-    setCurrentElements(finalElements)
-    if (isEditingRecommended) setHasUnsavedChanges(true)
+    setSelectedElements(finalElements)
+    
+    console.log('🟢 通常モード：selectedElements更新', { finalElements })
   }
 
   // 段階2: 編集モード開始ハンドラー
