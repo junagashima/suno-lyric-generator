@@ -51,3 +51,21 @@ export interface SunoOptimizationSettings {
   songLength: string // 既存のsongLength値を使用（'2-3分', '3-4分', '4-5分', '5分以上'）
   vocalElements: VocalElement[]
 }
+
+// 🌟 新機能：分析結果の信頼度情報
+export interface SongAnalysisResult {
+  mood: string
+  style: string
+  tempo: string
+  rhythm: string
+  instruments: string
+  forbidden: string
+  vocalAnalysis: AnalyzedVocalResult
+  // 信頼度情報
+  confidence: 'high' | 'medium' | 'low'
+  confidenceReason: string
+  analysisType: 'database' | 'web_enhanced' | 'ai_estimation'
+  webSearchPerformed: boolean
+  userFeedbackRequest: string | null
+  debug?: any
+}

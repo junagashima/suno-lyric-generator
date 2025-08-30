@@ -21,6 +21,12 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [content, setContent] = useState('')
   const [songLength, setSongLength] = useState('3-4分')
   
+  // 🌟 新機能：分析信頼度の状態管理
+  const [analysisConfidence, setAnalysisConfidence] = useState<'high' | 'medium' | 'low' | null>(null)
+  const [analysisConfidenceReason, setAnalysisConfidenceReason] = useState<string>('')
+  const [analysisType, setAnalysisType] = useState<string>('')
+  const [userFeedbackRequest, setUserFeedbackRequest] = useState<string | null>(null)
+  
   // Step B: 内容反映度の状態管理
   const [contentReflection, setContentReflection] = useState('literal')
   
@@ -101,6 +107,13 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       const data = await response.json()
       setMood(data.mood || '')
       setMusicStyle(data.style || '')
+      
+      // 🌟 新機能：分析信頼度情報の保存
+      setAnalysisConfidence(data.confidence || null)
+      setAnalysisConfidenceReason(data.confidenceReason || '')
+      setAnalysisType(data.analysisType || '')
+      setUserFeedbackRequest(data.userFeedbackRequest || null)
+      
       // Step H: 楽曲構造情報を保存
       setAnalyzedStructure(data.structure || null)
       
@@ -392,6 +405,40 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           <p className="text-xs text-blue-600 mt-2">
             💡 この詳細情報はSuno AIでより正確な楽曲生成に活用されます
           </p>
+        </div>
+      )}
+
+      {/* 🌟 新機能：分析信頼度表示 */}
+      {mode === 'simple' && analysisConfidence && (
+        <div className={`p-3 rounded-lg border ${
+          analysisConfidence === 'high' ? 'bg-green-50 border-green-200' : 
+          analysisConfidence === 'medium' ? 'bg-yellow-50 border-yellow-200' : 
+          'bg-red-50 border-red-200'
+        }`}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-semibold">
+              {analysisConfidence === 'high' ? '✅ 高精度分析' : 
+               analysisConfidence === 'medium' ? '⚠️ 中程度精度' : 
+               '❌ 推測分析'}
+            </span>
+            <span className={`px-2 py-1 rounded text-xs ${
+              analysisConfidence === 'high' ? 'bg-green-100 text-green-800' : 
+              analysisConfidence === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+              'bg-red-100 text-red-800'
+            }`}>
+              {analysisType === 'database' ? 'データベース' : 
+               analysisType === 'web_enhanced' ? 'ウェブ検索強化' : 
+               '一般的推測'}
+            </span>
+          </div>
+          <p className="text-sm text-gray-700 mb-2">{analysisConfidenceReason}</p>
+          {userFeedbackRequest && (
+            <div className="bg-white p-2 rounded border border-orange-200">
+              <p className="text-xs text-orange-700">
+                <strong>📝 フィードバック募集:</strong> {userFeedbackRequest}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

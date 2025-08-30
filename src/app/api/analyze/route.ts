@@ -190,6 +190,50 @@ export async function POST(request: NextRequest) {
     
     console.log(`🔍 AIによる分析を実行: ${song} - ${artist}`)
 
+    // 🌐 ウェブ検索による楽曲情報収集
+    let webSearchResults = ''
+    let hasWebSearchInfo = false
+    try {
+      console.log(`🔍 ウェブ検索開始: ${song} by ${artist}`)
+      
+      // 楽曲の詳細情報を検索
+      const songInfoQuery = `"${song}" "${artist}" BPM テンポ キー 楽器構成 ジャンル 音楽分析`
+      const songInfoResults = await fetch('/api/web-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: songInfoQuery })
+      })
+      
+      if (songInfoResults.ok) {
+        const songData = await songInfoResults.json()
+        if (songData.foundRelevantInfo) {
+          webSearchResults += `楽曲詳細情報:\n${songData.results?.slice(0, 3).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n\n`
+          hasWebSearchInfo = true
+        }
+      }
+      
+      // アーティストのスタイル情報も検索
+      const artistStyleQuery = `"${artist}" 音楽スタイル ジャンル 特徴 楽器`
+      const artistResults = await fetch('/api/web-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: artistStyleQuery })
+      })
+      
+      if (artistResults.ok) {
+        const artistData = await artistResults.json()
+        if (artistData.foundRelevantInfo) {
+          webSearchResults += `アーティスト情報:\n${artistData.results?.slice(0, 2).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n`
+          hasWebSearchInfo = true
+        }
+      }
+      
+      console.log('🔍 ウェブ検索完了:', hasWebSearchInfo ? '有用な情報取得' : '詳細情報なし')
+    } catch (error) {
+      console.error('🚨 ウェブ検索エラー:', error)
+      webSearchResults = '検索情報取得に失敗'
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",  // 精度向上のためgpt-4oに変更
       messages: [
@@ -291,6 +335,14 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
 - styleフィールド：ジャンル名とプロダクション手法のみの簡潔な記述
 - 楽器情報は全てinstrumentsフィールドに記述する
 - 構造化された長文形式は禁止
+
+## 🌐 ウェブ検索による追加情報
+${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませんでした。アーティストの一般的特徴から分析を行います。'}
+
+🔍【分析精度向上指示】
+- 上記のウェブ検索情報がある場合は、それを参考にして具体的なSUNO指示を生成
+- 検索情報がない場合は、アーティストの一般的特徴からの推測であることを認識
+- **重要**: tempo, rhythm, instruments, mood, forbidden, styleの全要素を必ず出力
 
 楽曲「${song}」by ${artist} を、**Suno AI用スタイル指示作成**の観点で分析してください。
 
@@ -661,6 +713,23 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
         forbidden
       }, 'male'); // デフォルトで男性、フロントエンドで性別に応じて再分析
 
+      // 🎯 分析信頼度の判定
+      const isKnownSong = knownSong !== undefined
+      
+      let confidence = 'low'
+      let confidenceReason = 'AIによる推測分析（楽曲固有情報なし）'
+      let analysisType = 'ai_estimation'
+      
+      if (isKnownSong) {
+        confidence = 'high'
+        confidenceReason = '検証済み楽曲による正確な分析'
+        analysisType = 'database'
+      } else if (hasWebSearchInfo) {
+        confidence = 'medium'
+        confidenceReason = 'ウェブ検索情報に基づく分析'
+        analysisType = 'web_enhanced'
+      }
+
       return NextResponse.json({
         // 既存フィールド（後方互換性）
         mood,
@@ -672,12 +741,22 @@ styleフィールドでは「Purpose:」「Instruments:」等の形式を絶対�
         forbidden,
         // 新しいボーカル要素分析結果
         vocalAnalysis: vocalAnalysisResult,
+        // 🌟 新機能：分析信頼度情報
+        confidence,
+        confidenceReason,
+        analysisType,
+        webSearchPerformed: webSearchResults ? true : false,
+        userFeedbackRequest: confidence === 'low' ? 'この分析が不正確な場合、正しい楽曲情報をお聞かせください' : null,
         debug: {
           originalMood: parsedResponse.mood,
           originalStyle: parsedResponse.style,
           newFields: { tempo, rhythm, instruments, forbidden },
           moodLength: mood.length,
           styleLength: style.length,
+          webSearchResultsLength: webSearchResults?.length || 0,
+          hasWebSearchInfo,
+          confidence,
+          confidenceReason,
           processed: true
         }
       })
