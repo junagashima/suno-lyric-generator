@@ -381,22 +381,20 @@ export function generateOptimizedSunoText(
   vocalistAge: VocalistAge | null,
   songLength: string
 ): string {
-  // 基本要素（最大3つ）
-  const baseKeywords = elements.slice(0, 3).map(el => el.sunoKeyword).join(', ')
+  // 選択された基本要素のキーワードを取得
+  const selectedKeywords = elements.map(el => el.sunoKeyword)
   
-  // ボーカリスト年齢による最適化（1-2キーワード追加）
+  // ボーカリスト年齢による最適化キーワードを取得
   let ageKeywords: string[] = []
   if (vocalistAge) {
-    // 年齢キーワードは最大2つまで
     ageKeywords = vocalistAge.sunoKeywords.slice(0, 2)
   }
   
-  // 全体で最大3つの形容詞に制限（SUNO推奨）
-  const allKeywords = []
-  if (baseKeywords) allKeywords.push(baseKeywords)
-  if (ageKeywords.length > 0) allKeywords.push(ageKeywords.join(', '))
+  // 全てのキーワードを結合して、厳密に3つまでに制限（SUNO推奨）
+  const allKeywords = [...selectedKeywords, ...ageKeywords]
+  const limitedKeywords = allKeywords.slice(0, 3)
   
-  const finalText = `${gender} voice, ${allKeywords.join(', ')}`
+  const finalText = `${gender} voice, ${limitedKeywords.join(', ')}`
   
   // 楽曲長最適化は英語スタイル指示で別途処理（ボーカルテキストには含めない）
   return finalText
