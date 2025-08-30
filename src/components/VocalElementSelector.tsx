@@ -51,14 +51,23 @@ export default function VocalElementSelector({
 
   // 選択変更時にコールバック実行（編集モード時は保留）
   useEffect(() => {
+    console.log('🔍 DEBUG useEffect実行:', {
+      isEditingRecommended,
+      prevEditingMode: prevEditingModeRef.current,
+      selectedElementsLength: selectedElements.length,
+      trigger: 'useEffect executed'
+    })
+    
     // 編集モード中は親コンポーネントに反映しない
     if (isEditingRecommended) {
+      console.log('🚫 編集モード中のためonSelectionChangeをスキップ')
       prevEditingModeRef.current = isEditingRecommended
       return
     }
     
     // 編集モードから抜けた直後の場合もスキップ
     if (prevEditingModeRef.current === true && isEditingRecommended === false) {
+      console.log('🚫 編集モード終了直後のためonSelectionChangeをスキップ')
       prevEditingModeRef.current = isEditingRecommended
       return
     }
@@ -66,7 +75,7 @@ export default function VocalElementSelector({
     prevEditingModeRef.current = isEditingRecommended
     
     const generatedText = generateSunoVocalText(selectedElements, gender)
-    console.log('🎤 VocalElementSelector更新:', { selectedElements, generatedText })
+    console.log('✅ onSelectionChange実行:', { selectedElements, generatedText })
     onSelectionChange({
       selectedElements,
       generatedText
@@ -87,6 +96,14 @@ export default function VocalElementSelector({
 
   // 個別要素選択ハンドラー（編集保留対応版）
   const handleElementToggle = (element: VocalElement) => {
+    console.log('🔍 DEBUG handleElementToggle実行:', {
+      elementId: element.id,
+      elementLabel: element.label,
+      isEditingRecommended,
+      currentSelectedLength: selectedElements.length,
+      currentTempLength: tempEditingElements.length
+    })
+    
     setSelectedPreset('') // プリセット選択を解除
 
     // 🔑 KEY FIX: 編集モード中は一時状態を操作、通常時は直接操作
