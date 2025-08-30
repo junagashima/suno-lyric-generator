@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { VocalConfiguration, VocalElement } from '../../../types/vocal'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -82,11 +83,17 @@ interface VocalSettings {
   techniques: string[]
 }
 
-// SUNO 4要素システム用インターフェース
-interface VocalConfiguration {
+// SUNO 4要素システム用インターフェース（修正版）
+interface ApiVocalConfiguration {
+  // 基本のVocalConfiguration
+  selectedElements?: VocalElement[] // 選択された要素オブジェクト
+  generatedText: string // 生成されたSUNOテキスト
+  optimizationSettings?: any // SUNO最適化設定
+  
+  // API固有の追加プロパティ
   useNewSystem: boolean // SUNO最適化システムを使用するかどうか
-  selectedElements?: string[] // 選択された要素（例: ["Raw / Rough（生々しい・荒い）", "Shouting（叫び気味）", "Energetic（エネルギッシュ）"]）
-  sunoText?: string // 生成されたSUNOテキスト（例: "male voice, raw, rough, shouting, energetic"）
+  selectedElementLabels?: string[] // 選択された要素のラベル（互換性用）
+  sunoText?: string // 生成されたSUNOテキスト（別名）
   mode?: 'simple' | 'custom' // 簡単モード（自動選択）またはカスタムモード（手動選択）
   presetId?: string // 使用されたプリセットID（プリセット使用時）
 }
@@ -106,7 +113,7 @@ interface GenerateRequest {
   songLength: string
   vocal: VocalSettings
   // SUNO最適化ボーカル設定（新機能）
-  vocalConfiguration?: VocalConfiguration
+  vocalConfiguration?: ApiVocalConfiguration
   // 混合言語設定（新機能）
   languageSettings?: LanguageSettings
   // ラップモード選択（拡張版）
@@ -222,7 +229,9 @@ export async function POST(request: NextRequest) {
         return {
           vocalDescription: vocalConfiguration.sunoText,
           isNewSystem: true,
-          selectedElements: vocalConfiguration.selectedElements || []
+          selectedElements: (vocalConfiguration.selectedElements || []).map(el => 
+            typeof el === 'string' ? el : el.label
+          )
         } as const
       } else {
         // 従来システム使用時
@@ -734,20 +743,20 @@ ${finalRapMode === 'full' ? `
 ### 3.1. ボーカル表現技法（${vocalSettings.isNewSystem ? 'SUNO最適化' : '従来システム'}）
 ${vocalSettings.isNewSystem ? `
 **🎤 SUNO最適化ボーカル指示の英語変換:**
-${(vocalSettings.selectedElements || []).map(element => {
-  if (element.includes('Raw') || element.includes('Rough')) return '- **Raw/Rough**: raw vocals, rough texture, unpolished edge, gritty delivery'
-  if (element.includes('Shouting')) return '- **Shouting**: shouting style, powerful projection, intense vocal delivery'
-  if (element.includes('Energetic')) return '- **Energetic**: energetic performance, dynamic vocals, high-energy delivery'
-  if (element.includes('Smooth')) return '- **Smooth**: smooth vocals, flowing delivery, polished technique'
-  if (element.includes('Whispered')) return '- **Whispered**: whispered vocals, intimate delivery, soft approach'
-  if (element.includes('Emotional')) return '- **Emotional**: deeply emotional, heartfelt delivery, expressive range'
-  if (element.includes('Confident')) return '- **Confident**: confident vocals, assertive delivery, strong presence'
-  if (element.includes('Melancholic')) return '- **Melancholic**: melancholic tone, wistful delivery, bittersweet emotion'
-  if (element.includes('Aggressive')) return '- **Aggressive**: aggressive vocals, fierce delivery, intense energy'
-  if (element.includes('Clear')) return '- **Clear**: clear pronunciation, crisp articulation, precise delivery'
-  if (element.includes('Slurred')) return '- **Slurred**: slightly slurred, relaxed articulation, casual delivery'
-  if (element.includes('Breathy')) return '- **Breathy**: breathy vocals, airy delivery, intimate texture'
-  return `- **${element}**: vocal characteristic to be applied`
+${(vocalSettings.selectedElements || []).map(elementLabel => {
+  if (elementLabel.includes('Raw') || elementLabel.includes('Rough')) return '- **Raw/Rough**: raw vocals, rough texture, unpolished edge, gritty delivery'
+  if (elementLabel.includes('Shouting')) return '- **Shouting**: shouting style, powerful projection, intense vocal delivery'
+  if (elementLabel.includes('Energetic')) return '- **Energetic**: energetic performance, dynamic vocals, high-energy delivery'
+  if (elementLabel.includes('Smooth')) return '- **Smooth**: smooth vocals, flowing delivery, polished technique'
+  if (elementLabel.includes('Whispered')) return '- **Whispered**: whispered vocals, intimate delivery, soft approach'
+  if (elementLabel.includes('Emotional')) return '- **Emotional**: deeply emotional, heartfelt delivery, expressive range'
+  if (elementLabel.includes('Confident')) return '- **Confident**: confident vocals, assertive delivery, strong presence'
+  if (elementLabel.includes('Melancholic')) return '- **Melancholic**: melancholic tone, wistful delivery, bittersweet emotion'
+  if (elementLabel.includes('Aggressive')) return '- **Aggressive**: aggressive vocals, fierce delivery, intense energy'
+  if (elementLabel.includes('Clear')) return '- **Clear**: clear pronunciation, crisp articulation, precise delivery'
+  if (elementLabel.includes('Slurred')) return '- **Slurred**: slightly slurred, relaxed articulation, casual delivery'
+  if (elementLabel.includes('Breathy')) return '- **Breathy**: breathy vocals, airy delivery, intimate texture'
+  return `- **${elementLabel}**: vocal characteristic to be applied`
 }).join('\\n')}
 
 **重要**: 上記の具体的な特徴を "Vocals" セクションで使用し、一般的な "expressive, emotional delivery" は避ける。` : `

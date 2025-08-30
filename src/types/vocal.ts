@@ -12,6 +12,8 @@ export interface VocalElement {
 export interface VocalConfiguration {
   selectedElements: VocalElement[]
   generatedText: string
+  // 段階3: SUNO最適化設定の統合
+  optimizationSettings?: SunoOptimizationSettings
 }
 
 export interface AnalyzedVocalResult {
