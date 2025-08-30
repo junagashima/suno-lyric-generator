@@ -186,6 +186,14 @@ export default function VocalElementSelector({
     })
   }
 
+  // 段階2: 編集キャンセルハンドラー
+  const handleCancelEditing = () => {
+    setIsEditingRecommended(false)
+    // 元の状態に戻す（変更を破棄）
+    setTempEditingElements([])
+    setHasUnsavedChanges(false)
+  }
+
   // 段階2: 元の推奨設定に戻すハンドラー
   const handleResetToOriginal = () => {
     if (originalRecommended) {
@@ -216,10 +224,6 @@ export default function VocalElementSelector({
                 📊 楽曲分析に基づく推奨設定
               </p>
               <div className="flex gap-2 items-center">
-                {/* デバッグ表示 */}
-                <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
-                  編集:{isEditingRecommended ? 'ON' : 'OFF'}
-                </span>
                 
                 {!isEditingRecommended ? (
                   <button
@@ -235,16 +239,27 @@ export default function VocalElementSelector({
                     <button
                       type="button"
                       onClick={handleResetToOriginal}
-                      className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 border border-gray-600 font-semibold"
+                      className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                     >
                       ↻ 元に戻す
                     </button>
                     <button
                       type="button"
-                      onClick={handleFinishEditing}
-                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 border border-green-700 font-semibold"
+                      onClick={handleCancelEditing}
+                      className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
                     >
-                      ✓ 完了
+                      ✕ 取消
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFinishEditing}
+                      className={`px-3 py-1 text-xs rounded font-semibold ${
+                        hasUnsavedChanges 
+                          ? 'bg-green-600 text-white hover:bg-green-700 border border-green-700' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-700'
+                      }`}
+                    >
+                      ✓ {hasUnsavedChanges ? '保存' : '完了'}
                     </button>
                   </>
                 )}
@@ -252,24 +267,32 @@ export default function VocalElementSelector({
             </div>
             
             <div className="flex flex-wrap gap-2 mb-3">
-              {selectedElements.map(element => (
+              {(isEditingRecommended ? tempEditingElements : selectedElements).map(element => (
                 <span 
                   key={element.id}
                   className={`px-3 py-1 rounded-full text-sm ${
                     isEditingRecommended 
-                      ? 'bg-green-100 text-green-800' 
+                      ? hasUnsavedChanges
+                        ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                        : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
                       : 'bg-blue-100 text-blue-800'
                   }`}
                 >
                   {element.label}
+                  {isEditingRecommended && hasUnsavedChanges && <span className="ml-1">*</span>}
                 </span>
               ))}
             </div>
             
             <div className="bg-white p-3 rounded border">
               <p className="text-sm font-mono text-gray-700">
-                {generateSunoVocalText(selectedElements, gender)}
+                {generateSunoVocalText(isEditingRecommended ? tempEditingElements : selectedElements, gender)}
               </p>
+              {isEditingRecommended && hasUnsavedChanges && (
+                <p className="text-xs text-orange-600 mt-1">
+                  ⚠️ 未保存の変更があります
+                </p>
+              )}
             </div>
             
             {!isEditingRecommended && (
