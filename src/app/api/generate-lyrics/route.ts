@@ -238,6 +238,15 @@ export async function POST(request: NextRequest) {
     const vocalSettings = determineVocalSettings()
     console.log('🎤 ボーカル設定:', vocalSettings)
     console.log('📨 受信したvocalConfiguration:', JSON.stringify(vocalConfiguration, null, 2))
+    
+    // 段階3: SUNO最適化設定のデバッグ情報
+    if (vocalConfiguration?.optimizationSettings) {
+      console.log('🚀 SUNO最適化設定受信:', {
+        vocalistAge: vocalConfiguration.optimizationSettings.vocalistAge?.label,
+        songLength: vocalConfiguration.optimizationSettings.songLength,
+        finalSunoText: vocalConfiguration.sunoText
+      })
+    }
 
     // 混合言語制御ロジック（新機能）
     const determineLanguageSettings = () => {
