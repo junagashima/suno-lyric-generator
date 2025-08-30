@@ -105,6 +105,15 @@ export default function VocalElementSelector({
 
   // シンプルモードの表示
   if (mode === 'simple') {
+    // デバッグログ追加
+    console.log('🔍 Debug - Simple Mode State:', {
+      mode,
+      hasAnalyzedResult: !!analyzedResult,
+      isEditingRecommended,
+      selectedElementsLength: selectedElements.length,
+      analyzedResultElements: analyzedResult?.recommendedElements?.length
+    })
+    
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-medium">🎵 ボーカルスタイル</h3>
@@ -115,11 +124,17 @@ export default function VocalElementSelector({
               <p className="text-sm text-gray-600">
                 📊 楽曲分析に基づく推奨設定
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                {/* デバッグ表示 */}
+                <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                  編集:{isEditingRecommended ? 'ON' : 'OFF'}
+                </span>
+                
                 {!isEditingRecommended ? (
                   <button
                     onClick={handleStartEditing}
-                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-700 font-semibold shadow-sm"
+                    style={{ minWidth: '80px' }}
                   >
                     ⚙️ 編集する
                   </button>
@@ -127,13 +142,13 @@ export default function VocalElementSelector({
                   <>
                     <button
                       onClick={handleResetToOriginal}
-                      className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+                      className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 border border-gray-600 font-semibold"
                     >
                       ↻ 元に戻す
                     </button>
                     <button
                       onClick={handleFinishEditing}
-                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 border border-green-700 font-semibold"
                     >
                       ✓ 完了
                     </button>
@@ -180,6 +195,17 @@ export default function VocalElementSelector({
             <p className="text-sm text-gray-600">
               楽曲分析を実行すると、最適なボーカルスタイルが自動選択されます
             </p>
+            
+            {/* 緊急テスト：分析結果なしでも編集ボタンを表示 */}
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-xs text-yellow-700 mb-2">🧪 テスト版: 編集機能確認</p>
+              <button
+                onClick={handleStartEditing}
+                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-700"
+              >
+                ⚙️ テスト編集
+              </button>
+            </div>
           </div>
         )}
         
