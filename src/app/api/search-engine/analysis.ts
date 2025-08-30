@@ -77,7 +77,17 @@ export async function performAdvancedSongAnalysis(query: string, type: string) {
   };
 }
 
-function getArtistDatabase() {
+interface ArtistInfo {
+  genre: string;
+  tempo: string;
+  instruments: string;
+  vocal_style: string;
+  mood_tendencies: string[];
+  description: string;
+  confidence: number;
+}
+
+function getArtistDatabase(): Record<string, ArtistInfo> {
   return {
     // J-POP メジャーアーティスト
     'あいみょん': {
@@ -146,7 +156,7 @@ function getArtistDatabase() {
   };
 }
 
-function findArtistInfo(artist: string, database: any) {
+function findArtistInfo(artist: string, database: Record<string, ArtistInfo>): ArtistInfo | null {
   if (!artist || artist.trim() === '') return null;
   
   const artistLower = artist.toLowerCase().trim();
@@ -161,10 +171,10 @@ function findArtistInfo(artist: string, database: any) {
   // 部分マッチング（より厳密に）
   for (const [key, value] of Object.entries(database)) {
     if (artistLower.includes(key.toLowerCase()) && key.length > 2) {
-      return { ...value, confidence: (value as any).confidence * 0.8 };
+      return { ...value, confidence: value.confidence * 0.8 };
     }
     if (key.toLowerCase().includes(artistLower) && artistLower.length > 2) {
-      return { ...value, confidence: (value as any).confidence * 0.7 };
+      return { ...value, confidence: value.confidence * 0.7 };
     }
   }
   

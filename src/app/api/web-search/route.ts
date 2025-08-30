@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     
     console.log('🔍 実際のウェブ検索実行:', query)
     
-    let searchResults = []
+    let searchResults: any[] = []
     let foundRelevantInfo = false
     
     try {
