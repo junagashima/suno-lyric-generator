@@ -91,7 +91,7 @@ export const deliveryOptions: VocalElement[] = [
     label: 'Falsetto（裏声多用）',
     description: '裏声・ミックス多用',
     examples: ['髭男 藤原聡の高音域'],
-    sunoKeyword: 'falsetto, mixed voice'
+    sunoKeyword: 'falsetto'
   },
   {
     id: 'conversational',
@@ -99,7 +99,7 @@ export const deliveryOptions: VocalElement[] = [
     label: 'Conversational（語りかけ）',
     description: '語りかけるように',
     examples: ['藤井風', 'ラップ風のトークボイス'],
-    sunoKeyword: 'conversational, spoken'
+    sunoKeyword: 'conversational'
   }
 ]
 
@@ -111,7 +111,7 @@ export const emotionOptions: VocalElement[] = [
     label: 'Emotional（感情的）',
     description: '心情を込める',
     examples: ['バラード系楽曲'],
-    sunoKeyword: 'emotional, heartfelt'
+    sunoKeyword: 'emotional'
   },
   {
     id: 'energetic',
@@ -171,7 +171,7 @@ export const pronunciationOptions: VocalElement[] = [
     label: 'Robotic（機械的）',
     description: '機械的（ボカロ風、K-POPエフェクト寄り）',
     examples: ['ボカロ楽曲', 'K-POP'],
-    sunoKeyword: 'robotic, processed'
+    sunoKeyword: 'robotic'
   },
   {
     id: 'bilingual',
@@ -179,7 +179,7 @@ export const pronunciationOptions: VocalElement[] = [
     label: 'Bilingual（バイリンガル）',
     description: '日本語＋英語ミックス',
     examples: ['現代J-POP'],
-    sunoKeyword: 'bilingual, code-switching'
+    sunoKeyword: 'bilingual'
   }
 ]
 
