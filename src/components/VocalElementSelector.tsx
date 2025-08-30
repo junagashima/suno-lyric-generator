@@ -78,7 +78,7 @@ export default function VocalElementSelector({
       selectedElements,
       generatedText
     })
-  }, [selectedElements, gender, onSelectionChange])  // isEditingRecommendedを依存関係から完全削除
+  }, [selectedElements, gender])  // onSelectionChangeを削除して無限ループを防止
   
   // 編集モード管理用の別useEffect
   useEffect(() => {
