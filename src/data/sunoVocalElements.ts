@@ -83,7 +83,7 @@ export const deliveryOptions: VocalElement[] = [
     label: 'Shouting（叫び気味）',
     description: 'ロックやエモで使う叫び気味',
     examples: ['ELLEGARDEN', 'ONE OK ROCK'],
-    sunoKeyword: 'shouting, slightly shouting'
+    sunoKeyword: 'shouting'
   },
   {
     id: 'falsetto',
