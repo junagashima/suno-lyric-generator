@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { 
   VocalElement, 
   VocalConfiguration,
@@ -34,6 +34,9 @@ export default function VocalElementSelector({
   // 段階2改良: 編集中の一時状態管理（確定まで親に反映しない）
   const [tempEditingElements, setTempEditingElements] = useState<VocalElement[]>([])
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
+  // 編集モード状態の前回値を記憶
+  const prevEditingModeRef = useRef(isEditingRecommended)
 
   // 楽曲分析結果が更新されたら自動選択
   useEffect(() => {
@@ -50,8 +53,17 @@ export default function VocalElementSelector({
   useEffect(() => {
     // 編集モード中は親コンポーネントに反映しない
     if (isEditingRecommended) {
+      prevEditingModeRef.current = isEditingRecommended
       return
     }
+    
+    // 編集モードから抜けた直後の場合もスキップ
+    if (prevEditingModeRef.current === true && isEditingRecommended === false) {
+      prevEditingModeRef.current = isEditingRecommended
+      return
+    }
+    
+    prevEditingModeRef.current = isEditingRecommended
     
     const generatedText = generateSunoVocalText(selectedElements, gender)
     console.log('🎤 VocalElementSelector更新:', { selectedElements, generatedText })
