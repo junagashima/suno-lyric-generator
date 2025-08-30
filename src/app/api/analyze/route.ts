@@ -193,42 +193,49 @@ export async function POST(request: NextRequest) {
     // 🌐 ウェブ検索による楽曲情報収集
     let webSearchResults = ''
     let hasWebSearchInfo = false
+    let analysisConfidence = 'low'
+    
     try {
       console.log(`🔍 ウェブ検索開始: ${song} by ${artist}`)
       
+      // 共有ウェブ検索サービスを使用
+      const { performWebSearchAnalysis } = await import('../../../utils/webSearchService')
+      
       // 楽曲の詳細情報を検索
       const songInfoQuery = `"${song}" "${artist}" BPM テンポ キー 楽器構成 ジャンル 音楽分析`
-      const songInfoResults = await fetch('/api/web-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: songInfoQuery })
-      })
+      const songData = await performWebSearchAnalysis(songInfoQuery)
       
-      if (songInfoResults.ok) {
-        const songData = await songInfoResults.json()
-        if (songData.foundRelevantInfo) {
-          webSearchResults += `楽曲詳細情報:\n${songData.results?.slice(0, 3).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n\n`
-          hasWebSearchInfo = true
+      if (songData.foundRelevantInfo) {
+        webSearchResults += `楽曲詳細情報:\n${songData.results?.slice(0, 3).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n\n`
+        hasWebSearchInfo = true
+        
+        // 信頼度を設定
+        const maxConfidence = Math.max(...(songData.results?.map((r: any) => r.confidence || 0) || [0]))
+        if (maxConfidence >= 0.7) {
+          analysisConfidence = 'high'
+        } else if (maxConfidence >= 0.5) {
+          analysisConfidence = 'medium'
         }
       }
       
       // アーティストのスタイル情報も検索
       const artistStyleQuery = `"${artist}" 音楽スタイル ジャンル 特徴 楽器`
-      const artistResults = await fetch('/api/web-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: artistStyleQuery })
-      })
+      const artistData = await performWebSearchAnalysis(artistStyleQuery)
       
-      if (artistResults.ok) {
-        const artistData = await artistResults.json()
-        if (artistData.foundRelevantInfo) {
-          webSearchResults += `アーティスト情報:\n${artistData.results?.slice(0, 2).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n`
-          hasWebSearchInfo = true
+      if (artistData.foundRelevantInfo) {
+        webSearchResults += `アーティスト情報:\n${artistData.results?.slice(0, 2).map((r: any) => `- ${r.title}: ${r.snippet}`).join('\n') || '情報なし'}\n`
+        hasWebSearchInfo = true
+        
+        // 信頼度を更新
+        const maxArtistConfidence = Math.max(...(artistData.results?.map((r: any) => r.confidence || 0) || [0]))
+        if (maxArtistConfidence >= 0.7 && analysisConfidence !== 'high') {
+          analysisConfidence = analysisConfidence === 'medium' ? 'high' : 'medium'
+        } else if (maxArtistConfidence >= 0.5 && analysisConfidence === 'low') {
+          analysisConfidence = 'medium'
         }
       }
       
-      console.log('🔍 ウェブ検索完了:', hasWebSearchInfo ? '有用な情報取得' : '詳細情報なし')
+      console.log('🔍 ウェブ検索完了:', hasWebSearchInfo ? `有用な情報取得 (信頼度: ${analysisConfidence})` : '詳細情報なし')
     } catch (error) {
       console.error('🚨 ウェブ検索エラー:', error)
       webSearchResults = '検索情報取得に失敗'
@@ -725,8 +732,12 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
         confidenceReason = `データベース登録楽曲による正確な分析（${song} - ${artist}）`
         analysisType = 'database'
       } else if (hasWebSearchInfo) {
-        confidence = 'medium'
-        confidenceReason = `アーティスト特徴データベースに基づく分析（${artist}の楽曲特徴を適用）`
+        confidence = analysisConfidence // ウェブ検索から得られた信頼度を使用
+        confidenceReason = analysisConfidence === 'high' ? 
+          `ウェブ検索により詳細なアーティスト情報を取得（${artist}の楽曲特徴に基づく高精度分析）` :
+          analysisConfidence === 'medium' ?
+          `ウェブ検索により基本的なアーティスト情報を取得（${artist}の一般的特徴に基づく分析）` :
+          `ウェブ検索を実行したが詳細情報は限定的（${artist}の推定特徴に基づく分析）`
         analysisType = 'web_enhanced'
       } else {
         confidenceReason = `楽曲・アーティスト情報が不足のため一般的推測分析（${song || '楽曲不明'} - ${artist || 'アーティスト不明'}）`
