@@ -9,7 +9,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { artist, song } = await request.json()
+    const { artist, song, rapMode = 'none' } = await request.json()
 
     if (!artist || !song) {
       return NextResponse.json(
@@ -131,9 +131,11 @@ export async function POST(request: NextRequest) {
       let style = `Purpose: ${purpose}, ${length}, ${language}. Mood: ${moodWords}. Tempo: ${tempoDesc}, ${knownMusicData.tempo}. Vocals: ${vocalDescription}. Forbidden: ${forbiddenElements}.`
       
       // Step G: 歌詞構成用の構造情報を追加
-      const hasRapElements = knownMusicData.genre.includes('ヒップホップ') || 
-                           knownMusicData.artist.includes('Dragon Ash') ||
-                           knownMusicData.artist.includes('RIP SLYME')
+      // rapMode設定を優先し、楽曲データベースの情報も考慮
+      const hasRapFromDatabase = knownMusicData.genre.includes('ヒップホップ') || 
+                                knownMusicData.artist.includes('Dragon Ash') ||
+                                knownMusicData.artist.includes('RIP SLYME')
+      const hasRapElements = rapMode !== 'none' ? true : hasRapFromDatabase
       
       // 🔍 データベース処理でのsynth pad検査
       console.log('=== データベース処理 Synth Pad検査 ===');
@@ -754,6 +756,14 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
         forbidden,
         // 新しいボーカル要素分析結果
         vocalAnalysis: vocalAnalysisResult,
+        // Step G: 楽曲構造情報を追加（rapMode反映）
+        structure: {
+          hasRap: rapMode !== 'none', // rapMode設定を優先
+          vocalStyle: vocalAnalysisResult?.sunoText || 'standard vocals',
+          genre: rapMode === 'full' ? 'Hip-Hop/Rap' : 
+                 rapMode === 'partial' ? 'Pop with Rap elements' : 
+                 'Contemporary Pop'
+        },
         // 🌟 新機能：分析信頼度情報
         confidence,
         confidenceReason,

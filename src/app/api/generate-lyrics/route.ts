@@ -700,6 +700,11 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
     // 🎯 英語スタイル指示生成プロンプト（Phase 2: 段階的改善中）
     // Step 1完了: 翻訳関数をファイル上部に移動済み
     
+    // 英語変数の準備（SUNO指示用）
+    const englishTheme = translateToEnglish(theme)
+    const englishMood = translateToEnglish(mood)
+    const englishLength = translateToEnglish(songLength)
+    
     // 巨大プロンプト復旧：重要な連携システムを保持
     const stylePrompt = `Create a concise Suno AI style instruction using this exact format:
 

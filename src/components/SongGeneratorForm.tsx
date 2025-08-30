@@ -97,6 +97,7 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
         body: JSON.stringify({
           artist: referenceArtist,
           song: referenceSong,
+          rapMode, // ラップモード設定を楽曲分析に渡す
         }),
       })
 
