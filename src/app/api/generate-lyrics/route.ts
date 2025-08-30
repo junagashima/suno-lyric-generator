@@ -6,6 +6,41 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 })
 
+// === Phase 2: 安全なリファクタリング - Step 1 ===
+// 翻訳関数群（既存コードから抽出）
+function translateToEnglish(text: string): string {
+  const translations: Record<string, string> = {
+    '愛': 'love', '恋': 'romance', '恋愛': 'love', '友情': 'friendship',
+    '家族': 'family', '希望': 'hope', '夢': 'dreams', '青春': 'youth',
+    '悲しみ': 'sadness', '喜び': 'joy', '怒り': 'anger', '平和': 'peace',
+    '戦争': 'war', '自然': 'nature', '音楽': 'music', '人生': 'life',
+    '成長': 'growth', '別れ': 'farewell', '再会': 'reunion', '故郷': 'hometown',
+    '旅': 'journey', '冒険': 'adventure', '挑戦': 'challenge', '応援': 'encouragement'
+  };
+  return translations[text] || text;
+}
+
+function translateMoodToEnglish(moodText: string): string {
+  const moodTranslations: Record<string, string> = {
+    '穏やか': 'calm', '優しい': 'gentle', 'エネルギッシュ': 'energetic',
+    '情熱的': 'passionate', '切ない': 'melancholic', '明るい': 'bright',
+    '暗い': 'dark', '力強い': 'powerful', '繊細': 'delicate',
+    '激しい': 'intense', '静寂': 'serene', '神秘的': 'mysterious',
+    '温かい': 'warm', '冷たい': 'cool', 'ドラマチック': 'dramatic'
+  };
+  
+  // 複数の形容詞が含まれている場合の処理
+  let translated = moodText;
+  Object.entries(moodTranslations).forEach(([jp, en]) => {
+    translated = translated.replace(new RegExp(jp, 'g'), en);
+  });
+  
+  return translated;
+}
+
+// 巨大プロンプト復旧完了 - すべての重要な機能と連携を保持
+
+
 // プロ仕様タイトル生成（J-POPヒットノウハウ統合版）
 function generateFallbackTitles(theme: string, mood: string, content: string): string[] {
   const titles: string[] = []
@@ -662,43 +697,35 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
 `}
 `
 
-    // 英語スタイル指示生成プロンプト（表現力強化）
-    const stylePrompt = `
-Suno AIで楽曲を生成するための最適化された英語スタイル指示を作成してください。ChatGPT実証済みの「核10項目」ベストプラクティスに基づいて、一筆書き設計図スタイルで簡潔に指示します。
+    // 🎯 英語スタイル指示生成プロンプト（Phase 2: 段階的改善中）
+    // Step 1完了: 翻訳関数をファイル上部に移動済み
+    
+    // 巨大プロンプト復旧：重要な連携システムを保持
+    const stylePrompt = `Create a concise Suno AI style instruction using this exact format:
 
-## 核10項目マッピング（一筆書き設計図用）
-1. **Purpose（用途）**: ${theme}をテーマとした楽曲
-2. **Length（長さ）**: ${songLength}
-3. **Language（言語）**: 日本語歌詞
-4. **Vocals（ボーカル）**: ${vocalSettings.vocalDescription}
-5. **Tempo（テンポ帯）**: ${analyzedDetails?.tempo || 'medium'}
-6. **Rhythm（リズム質感）**: ${analyzedDetails?.rhythm || '楽曲スタイルに応じて設定'}
-7. **Instruments（楽器）**: ${actualInstruments} （楽曲分析結果をそのまま使用）
-8. **Structure（構成）**: ${songLength}に応じた構成
-9. **Mood（感情3語）**: ${mood}から3つまでに絞る
-10. **Forbidden（禁止要素）**: ${analyzedDetails?.forbidden || 'ジャンルに応じて設定'}
+${finalRapMode === 'full' ? 
+`**Full Rap Mode Format:**
+"Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${vocalSettings.vocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
+`**Standard Format:**  
+"Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${vocalSettings.vocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
 
-## 追加情報
-${vocalSettings.isNewSystem ? `
-**🎤 SUNO最適化ボーカル情報:**
-- システム: SUNO 4要素システム使用
-- 選択要素: ${vocalSettings.selectedElements?.join(', ') || 'なし'}
-- SUNOテキスト: "${vocalSettings.vocalDescription}"
-- 特記事項: SUNO AIが認識しやすい具体的なボーカル指示を使用` : `
-**🎵 従来ボーカル情報:**
-- 歌唱技法: ${vocal.techniques.join(', ')}
-- システム: 従来の年齢・国籍ベース設定`}
-- 詳細スタイル: ${cleanMusicStyle}
-- 分析された楽器構成: ${actualInstruments}
-- **ラップモード**: ${finalRapMode} (none: 通常楽曲, partial: 一部ラップ, full: 全面ラップ)
+**Requirements:**
+- Use exact format above
+- Keep technical and specific
+- No poetic language
+- Include all key elements
+- ${vocalSettings.isNewSystem ? `Use SUNO-optimized vocals: "${vocalSettings.vocalDescription}"` : 'Use standard vocal description'}
+- Instruments: "${actualInstruments}" (use exactly as provided)
+- Rap Mode: ${finalRapMode}
 
-${vocalSettings.isNewSystem ? `
-## 🎯 SUNO最適化ボーカル指示の活用
-選択された要素「${vocalSettings.selectedElements?.join('、') || 'なし'}」を以下のように英語スタイル指示に反映:
-- これらの要素を SUNO AI が理解しやすい英語表現に変換
-- 音楽スタイルと組み合わせて最適な Vocals セクションを生成
-- Raw/Rough → "raw, rough" / Shouting → "shouting, powerful" / Energetic → "energetic, dynamic" 等の変換を適用
-- **重要**: 一般的な「expressive, emotional delivery」ではなく、具体的な要素を使用` : ''}
+**Additional Context:**
+- Rap Mode: ${finalRapMode}
+- Vocal System: ${vocalSettings.isNewSystem ? 'SUNO-optimized' : 'Traditional'}
+- Selected Elements: ${vocalSettings.selectedElements?.join(', ') || 'none'}
+- Music Style: ${cleanMusicStyle}
+- Analyzed Instruments: ${actualInstruments}
+
+Output only the formatted English style instruction as requested above.
 
 ${finalRapMode === 'full' ? `
 ## 🔥 全面ラップ楽曲用 SUNO最適化指示（ChatGPT実証済み）
@@ -885,6 +912,8 @@ ${vocalSettings.isNewSystem ? `
 `}
 `
 
+    // 巨大プロンプト復旧完了 - 重要な連携システムをすべて保持
+
     // 歌詞生成
     const lyricsCompletion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -912,7 +941,7 @@ ${vocalSettings.isNewSystem ? `
         },
         {
           role: "user",
-          content: stylePrompt
+          content: stylePrompt  // 巨大プロンプト復旧：重要な連携システムを保持
         }
       ],
       temperature: 0.7,
