@@ -305,12 +305,12 @@ export default function VocalElementSelector({
         )}
         
         {/* 段階2: 編集モード時の個別選択 UI */}
-        {isEditingRecommended && (
+        {isEditingRecommended && analyzedResult && (
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <h4 className="text-md font-medium mb-3">
               🎵 個別選択編集 
               <span className="text-sm font-normal text-gray-600">
-                （{tempEditingElements.length}/3）
+                （{selectedElements.length}/3）
               </span>
             </h4>
             
@@ -324,11 +324,9 @@ export default function VocalElementSelector({
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {elements.map(element => {
-                    // 編集モード中は tempEditingElements を参照
-                    const currentElements = isEditingRecommended ? tempEditingElements : selectedElements
-                    const isSelected = currentElements.some(el => el.id === element.id)
-                    const canSelect = currentElements.length < 3 || isSelected
-                    const categorySelected = currentElements.some(el => el.category === category)
+                    const isSelected = selectedElements.some(el => el.id === element.id)
+                    const canSelect = selectedElements.length < 3 || isSelected
+                    const categorySelected = selectedElements.some(el => el.category === category)
                     
                     return (
                       <button
