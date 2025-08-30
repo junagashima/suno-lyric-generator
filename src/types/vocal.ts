@@ -30,3 +30,31 @@ export interface ExtendedVocalSettings {
   // 従来の歌唱技法（後方互換性用）
   techniques?: string[]
 }
+
+// 段階3: 年齢・楽曲長設定のSUNO最適化モード
+export interface AgeRange {
+  id: string
+  label: string
+  description: string
+  sunoKeywords: string[]
+  vocalAdjustments: {
+    tone: string[]
+    delivery: string[]
+    energy: string
+  }
+}
+
+export interface SongLength {
+  id: string
+  label: string
+  duration: string
+  description: string
+  sunoStructure: string
+  vocalOptimizations: string[]
+}
+
+export interface SunoOptimizationSettings {
+  ageRange: AgeRange | null
+  songLength: SongLength | null
+  vocalElements: VocalElement[]
+}

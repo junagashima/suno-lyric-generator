@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import VocalElementSelector from './VocalElementSelector'
-import { VocalConfiguration, AnalyzedVocalResult } from '../types/vocal'
+import { VocalConfiguration, AnalyzedVocalResult, SunoOptimizationSettings } from '../types/vocal'
 
 interface Props {
   onGenerate: (data: any) => void
@@ -47,6 +47,9 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [useNewVocalSystem, setUseNewVocalSystem] = useState(false)
   const [vocalConfiguration, setVocalConfiguration] = useState<any>(null)
   const [analyzedVocalResult, setAnalyzedVocalResult] = useState<any>(null)
+  
+  // 段階3: SUNO最適化設定
+  const [sunoOptimizationSettings, setSunoOptimizationSettings] = useState<SunoOptimizationSettings | null>(null)
   
   // 混合言語設定（新機能）
   const [englishMixLevel, setEnglishMixLevel] = useState('none')
@@ -504,6 +507,8 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               mode={mode}
               analyzedResult={analyzedVocalResult}
               onSelectionChange={(config: VocalConfiguration) => setVocalConfiguration(config)}
+              enableSunoOptimization={true}
+              onOptimizationChange={(settings: SunoOptimizationSettings) => setSunoOptimizationSettings(settings)}
             />
           </div>
         )}

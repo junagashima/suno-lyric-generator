@@ -2,13 +2,20 @@ import React, { useState, useEffect, useRef } from 'react'
 import { 
   VocalElement, 
   VocalConfiguration,
-  AnalyzedVocalResult
+  AnalyzedVocalResult,
+  AgeRange,
+  SongLength,
+  SunoOptimizationSettings
 } from '../types/vocal'
 import { 
   vocalElementsByCategory, 
   vocalPresets,
   generateSunoVocalText,
-  allVocalElements
+  allVocalElements,
+  ageRanges,
+  songLengths,
+  getRecommendedElementsForAge,
+  generateOptimizedSunoText
 } from '../data/sunoVocalElements'
 
 interface VocalElementSelectorProps {
@@ -16,13 +23,19 @@ interface VocalElementSelectorProps {
   mode: 'simple' | 'custom'
   analyzedResult?: AnalyzedVocalResult | null
   onSelectionChange: (configuration: VocalConfiguration) => void
+  // 段階3: SUNO最適化モード対応
+  enableSunoOptimization?: boolean
+  onOptimizationChange?: (settings: SunoOptimizationSettings) => void
 }
 
 export default function VocalElementSelector({ 
   gender, 
   mode, 
   analyzedResult,
-  onSelectionChange 
+  onSelectionChange,
+  // 段階3: SUNO最適化モード対応
+  enableSunoOptimization = false,
+  onOptimizationChange
 }: VocalElementSelectorProps) {
   const [selectedElements, setSelectedElements] = useState<VocalElement[]>([])
   const [selectedPreset, setSelectedPreset] = useState<string>('')
@@ -34,6 +47,10 @@ export default function VocalElementSelector({
   // 段階2改良: 編集中の一時状態管理（確定まで親に反映しない）
   const [tempEditingElements, setTempEditingElements] = useState<VocalElement[]>([])
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
+  // 段階3: SUNO最適化モード設定
+  const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange | null>(null)
+  const [selectedSongLength, setSelectedSongLength] = useState<SongLength | null>(null)
   
   // 編集モード状態の前回値を記憶
   const prevEditingModeRef = useRef(isEditingRecommended)
@@ -202,6 +219,40 @@ export default function VocalElementSelector({
     }
   }
 
+  // 段階3: 年齢層選択ハンドラー
+  const handleAgeRangeChange = (ageRange: AgeRange) => {
+    setSelectedAgeRange(ageRange)
+    
+    // 年齢層に基づく推奨要素の自動適用
+    const recommendedElements = getRecommendedElementsForAge(ageRange)
+    if (mode === 'simple' && !isEditingRecommended) {
+      setSelectedElements(recommendedElements)
+    }
+    
+    // 親コンポーネントに通知
+    if (onOptimizationChange) {
+      onOptimizationChange({
+        ageRange,
+        songLength: selectedSongLength,
+        vocalElements: isEditingRecommended ? tempEditingElements : selectedElements
+      })
+    }
+  }
+
+  // 段階3: 楽曲長選択ハンドラー  
+  const handleSongLengthChange = (songLength: SongLength) => {
+    setSelectedSongLength(songLength)
+    
+    // 親コンポーネントに通知
+    if (onOptimizationChange) {
+      onOptimizationChange({
+        ageRange: selectedAgeRange,
+        songLength,
+        vocalElements: isEditingRecommended ? tempEditingElements : selectedElements
+      })
+    }
+  }
+
   // シンプルモードの表示
   if (mode === 'simple') {
     // デバッグログ追加
@@ -323,6 +374,94 @@ export default function VocalElementSelector({
               >
                 ⚙️ テスト編集
               </button>
+            </div>
+          </div>
+        )}
+        
+        {/* 段階3: SUNO最適化モード設定 */}
+        {enableSunoOptimization && (
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <h4 className="text-md font-semibold mb-3 flex items-center">
+              🚀 SUNO最適化設定 
+              <span className="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Stage 3</span>
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 年齢層選択 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ターゲット年齢層
+                </label>
+                <div className="space-y-2">
+                  {ageRanges.map(ageRange => (
+                    <label key={ageRange.id} className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        name="ageRange"
+                        value={ageRange.id}
+                        checked={selectedAgeRange?.id === ageRange.id}
+                        onChange={() => handleAgeRangeChange(ageRange)}
+                        className="mt-1 w-4 h-4 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{ageRange.label}</div>
+                        <div className="text-xs text-gray-600">{ageRange.description}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 楽曲長選択 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  楽曲長設定
+                </label>
+                <div className="space-y-2">
+                  {songLengths.map(songLength => (
+                    <label key={songLength.id} className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        name="songLength"
+                        value={songLength.id}
+                        checked={selectedSongLength?.id === songLength.id}
+                        onChange={() => handleSongLengthChange(songLength)}
+                        className="mt-1 w-4 h-4 text-purple-600 border-2 border-gray-300 focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{songLength.label}</div>
+                        <div className="text-xs text-gray-600">{songLength.description}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* 最適化プレビュー */}
+            {selectedAgeRange && selectedSongLength && (
+              <div className="mt-4 bg-white p-3 rounded border border-purple-200">
+                <h5 className="text-sm font-medium text-purple-800 mb-2">🎯 最適化プレビュー</h5>
+                <div className="text-xs space-y-1">
+                  <div><strong>年齢層キーワード:</strong> {selectedAgeRange.sunoKeywords.join(', ')}</div>
+                  <div><strong>楽曲長最適化:</strong> {selectedSongLength.vocalOptimizations.join(', ')}</div>
+                  <div className="mt-2 p-2 bg-gray-50 rounded">
+                    <strong>SUNO最適化テキスト:</strong>
+                    <div className="font-mono text-gray-700 mt-1">
+                      {generateOptimizedSunoText(
+                        isEditingRecommended ? tempEditingElements : selectedElements,
+                        gender,
+                        selectedAgeRange,
+                        selectedSongLength
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-3 text-xs text-gray-600">
+              💡 年齢層と楽曲長を選択すると、SUNO AIでより最適化された楽曲が生成されます
             </div>
           </div>
         )}

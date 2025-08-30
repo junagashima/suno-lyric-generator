@@ -253,3 +253,159 @@ export function generateSunoVocalText(elements: VocalElement[], gender: string =
   const keywords = elements.map(el => el.sunoKeyword).join(', ')
   return `${gender} voice, ${keywords}`
 }
+
+// ========================================
+// 段階3: 年齢・楽曲長設定のSUNO最適化モード
+// ========================================
+
+// 年齢層設定
+export interface AgeRange {
+  id: string
+  label: string
+  description: string
+  sunoKeywords: string[]
+  vocalAdjustments: {
+    tone: string[]
+    delivery: string[]
+    energy: string
+  }
+}
+
+export const ageRanges: AgeRange[] = [
+  {
+    id: 'teen',
+    label: '10代 (Teen)',
+    description: 'エネルギッシュで若々しい、高音域重視',
+    sunoKeywords: ['youthful', 'energetic', 'high-pitched'],
+    vocalAdjustments: {
+      tone: ['bright', 'clear'],
+      delivery: ['energetic', 'shouting'],
+      energy: 'high'
+    }
+  },
+  {
+    id: 'young_adult',
+    label: '20代 (Young Adult)',
+    description: 'バランス型、現代的で洗練された',
+    sunoKeywords: ['modern', 'balanced', 'expressive'],
+    vocalAdjustments: {
+      tone: ['clear', 'warm_soft'],
+      delivery: ['expressive', 'conversational'],
+      energy: 'medium-high'
+    }
+  },
+  {
+    id: 'adult',
+    label: '30代 (Adult)',
+    description: '落ち着きがあり、深みのある表現',
+    sunoKeywords: ['mature', 'rich', 'controlled'],
+    vocalAdjustments: {
+      tone: ['warm_soft', 'dark_husky'],
+      delivery: ['conversational', 'expressive'],
+      energy: 'medium'
+    }
+  },
+  {
+    id: 'mature',
+    label: '40代+ (Mature)',
+    description: '渋みと豊かな表現力、深い感情',
+    sunoKeywords: ['deep', 'resonant', 'experienced'],
+    vocalAdjustments: {
+      tone: ['dark_husky', 'raw_rough'],
+      delivery: ['expressive', 'powerful'],
+      energy: 'medium-low'
+    }
+  }
+]
+
+// 楽曲長設定
+export interface SongLength {
+  id: string
+  label: string
+  duration: string
+  description: string
+  sunoStructure: string
+  vocalOptimizations: string[]
+}
+
+export const songLengths: SongLength[] = [
+  {
+    id: 'short',
+    label: 'Short (30秒-1分)',
+    duration: '30-60秒',
+    description: 'キャッチーでインパクト重視、SNS向け',
+    sunoStructure: 'intro, verse, chorus',
+    vocalOptimizations: [
+      'catchy hooks',
+      'immediate impact', 
+      'memorable phrasing',
+      'high energy throughout'
+    ]
+  },
+  {
+    id: 'medium',
+    label: 'Medium (2-3分)',
+    duration: '2-3分',
+    description: 'バランス型、標準的な楽曲構成',
+    sunoStructure: 'intro, verse, chorus, verse, chorus, bridge, chorus, outro',
+    vocalOptimizations: [
+      'dynamic range',
+      'verse-chorus contrast',
+      'bridge variation',
+      'build-up tension'
+    ]
+  },
+  {
+    id: 'long',
+    label: 'Long (4分+)',
+    duration: '4分以上',
+    description: '複雑な構成、豊かな展開とストーリー性',
+    sunoStructure: 'extended intro, multiple verses, varied choruses, instrumental breaks, extended outro',
+    vocalOptimizations: [
+      'storytelling progression',
+      'vocal evolution throughout',
+      'multiple emotional peaks',
+      'sophisticated phrasing'
+    ]
+  }
+]
+
+// SUNO最適化設定
+export interface SunoOptimizationSettings {
+  ageRange: AgeRange
+  songLength: SongLength
+  vocalElements: VocalElement[]
+}
+
+// 年齢・楽曲長に基づく推奨ボーカル要素の取得
+export function getRecommendedElementsForAge(ageRange: AgeRange): VocalElement[] {
+  const recommended: VocalElement[] = []
+  
+  // 年齢に応じたtone要素
+  ageRange.vocalAdjustments.tone.forEach(toneId => {
+    const element = allVocalElements.find(el => el.id === toneId)
+    if (element) recommended.push(element)
+  })
+  
+  // 年齢に応じたdelivery要素
+  ageRange.vocalAdjustments.delivery.forEach(deliveryId => {
+    const element = allVocalElements.find(el => el.id === deliveryId)
+    if (element) recommended.push(element)
+  })
+  
+  return recommended
+}
+
+// 楽曲長に基づくボーカル最適化テキスト生成
+export function generateOptimizedSunoText(
+  elements: VocalElement[], 
+  gender: string,
+  ageRange: AgeRange,
+  songLength: SongLength
+): string {
+  const baseText = generateSunoVocalText(elements, gender)
+  const ageKeywords = ageRange.sunoKeywords.join(', ')
+  const optimizations = songLength.vocalOptimizations.join(', ')
+  
+  return `${baseText}, ${ageKeywords}, ${optimizations}`
+}
