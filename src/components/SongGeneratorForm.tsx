@@ -432,11 +432,34 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
             </span>
           </div>
           <p className="text-sm text-gray-700 mb-2">{analysisConfidenceReason}</p>
-          {userFeedbackRequest && (
-            <div className="bg-white p-2 rounded border border-orange-200">
-              <p className="text-xs text-orange-700">
+          
+          {/* 信頼度別の追加情報 */}
+          {analysisConfidence === 'high' && (
+            <div className="bg-green-100 p-2 rounded border border-green-300 mt-2">
+              <p className="text-xs text-green-800">
+                <strong>✅ 高精度分析:</strong> この楽曲は事前にデータベース登録されており、正確な分析結果を提供しています。
+              </p>
+            </div>
+          )}
+          
+          {analysisConfidence === 'medium' && (
+            <div className="bg-yellow-100 p-2 rounded border border-yellow-300 mt-2">
+              <p className="text-xs text-yellow-800">
+                <strong>⚠️ 中程度精度:</strong> アーティストの一般的な特徴に基づいた分析です。楽曲固有の特徴は反映されていない可能性があります。
+              </p>
+            </div>
+          )}
+          
+          {analysisConfidence === 'low' && userFeedbackRequest && (
+            <div className="bg-orange-100 p-2 rounded border border-orange-300 mt-2">
+              <p className="text-xs text-orange-800">
                 <strong>📝 フィードバック募集:</strong> {userFeedbackRequest}
               </p>
+              <div className="mt-2">
+                <p className="text-xs text-gray-600">
+                  💡 <strong>改善提案:</strong> より正確な分析のため、楽曲の詳細情報（BPM、キー、ジャンル等）をお聞かせいただけると、今後の分析精度向上に役立ちます。
+                </p>
+              </div>
             </div>
           )}
         </div>

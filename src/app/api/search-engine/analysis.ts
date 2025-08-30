@@ -152,6 +152,42 @@ function getArtistDatabase(): Record<string, ArtistInfo> {
       mood_tendencies: ['melancholic', 'alternative', 'emotional'],
       description: 'オルタナティブロックバンド、女性ボーカルの感情的な表現',
       confidence: 0.7
+    },
+    'RADWIMPS': {
+      genre: 'Alternative Rock/Pop',
+      tempo: 'medium-fast (100-130 BPM)',
+      instruments: 'guitar, piano, strings, drums, orchestral elements',
+      vocal_style: 'expressive male vocals, emotional range',
+      mood_tendencies: ['cinematic', 'emotional', 'uplifting', 'dramatic'],
+      description: 'シネマティックなロックバンド、映画音楽的な壮大なサウンド',
+      confidence: 0.9
+    },
+    'ONE OK ROCK': {
+      genre: 'Rock/Alternative Rock',
+      tempo: 'fast (120-150 BPM)',
+      instruments: 'electric guitar, bass, drums, powerful vocals',
+      vocal_style: 'powerful male vocals, rock energy',
+      mood_tendencies: ['energetic', 'powerful', 'anthemic', 'driving'],
+      description: '国際的ロックバンド、エネルギッシュで力強いロックサウンド',
+      confidence: 0.9
+    },
+    'BUMP OF CHICKEN': {
+      genre: 'Alternative Rock/Pop Rock',
+      tempo: 'medium (90-120 BPM)',
+      instruments: 'guitar, bass, drums, melodic arrangements',
+      vocal_style: 'gentle male vocals, melodic delivery',
+      mood_tendencies: ['nostalgic', 'warm', 'hopeful', 'gentle'],
+      description: 'メロディックロックバンド、温かみのある優しいロックサウンド',
+      confidence: 0.8
+    },
+    'Aimer': {
+      genre: 'Pop/Alternative Pop',
+      tempo: 'medium (80-110 BPM)',
+      instruments: 'piano, strings, guitar, orchestral elements',
+      vocal_style: 'husky female vocals, emotional expression',
+      mood_tendencies: ['melancholic', 'atmospheric', 'cinematic', 'emotional'],
+      description: 'アニメソング界の歌姫、ハスキーで感情豊かなボーカル',
+      confidence: 0.8
     }
   };
 }

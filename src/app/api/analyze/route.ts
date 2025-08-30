@@ -722,12 +722,14 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
       
       if (isKnownSong) {
         confidence = 'high'
-        confidenceReason = '検証済み楽曲による正確な分析'
+        confidenceReason = `データベース登録楽曲による正確な分析（${song} - ${artist}）`
         analysisType = 'database'
       } else if (hasWebSearchInfo) {
         confidence = 'medium'
-        confidenceReason = 'ウェブ検索情報に基づく分析'
+        confidenceReason = `アーティスト特徴データベースに基づく分析（${artist}の楽曲特徴を適用）`
         analysisType = 'web_enhanced'
+      } else {
+        confidenceReason = `楽曲・アーティスト情報が不足のため一般的推測分析（${song || '楽曲不明'} - ${artist || 'アーティスト不明'}）`
       }
 
       return NextResponse.json({
