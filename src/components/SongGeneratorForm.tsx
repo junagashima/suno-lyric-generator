@@ -113,6 +113,7 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
       setAnalysisConfidenceReason(data.confidenceReason || '')
       setAnalysisType(data.analysisType || '')
       setUserFeedbackRequest(data.userFeedbackRequest || null)
+      
       // Step H: 楽曲構造情報を保存
       setAnalyzedStructure(data.structure || null)
       
