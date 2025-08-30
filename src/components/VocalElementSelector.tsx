@@ -223,6 +223,7 @@ export default function VocalElementSelector({
                 
                 {!isEditingRecommended ? (
                   <button
+                    type="button"
                     onClick={handleStartEditing}
                     className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-700 font-semibold shadow-sm"
                     style={{ minWidth: '80px' }}
@@ -232,12 +233,14 @@ export default function VocalElementSelector({
                 ) : (
                   <>
                     <button
+                      type="button"
                       onClick={handleResetToOriginal}
                       className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 border border-gray-600 font-semibold"
                     >
                       ↻ 元に戻す
                     </button>
                     <button
+                      type="button"
                       onClick={handleFinishEditing}
                       className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 border border-green-700 font-semibold"
                     >
@@ -291,6 +294,7 @@ export default function VocalElementSelector({
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
               <p className="text-xs text-yellow-700 mb-2">🧪 テスト版: 編集機能確認</p>
               <button
+                type="button"
                 onClick={handleStartEditing}
                 className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-700"
               >
@@ -326,6 +330,7 @@ export default function VocalElementSelector({
                     
                     return (
                       <button
+                        type="button"
                         key={element.id}
                         onClick={() => handleElementToggle(element)}
                         disabled={!canSelect && !categorySelected}
@@ -367,6 +372,7 @@ export default function VocalElementSelector({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {vocalPresets.map(preset => (
             <button
+              type="button"
               key={preset.id}
               onClick={() => handlePresetSelect(preset.id)}
               className={`p-3 border rounded-lg text-left transition-colors ${
@@ -407,6 +413,7 @@ export default function VocalElementSelector({
                 
                 return (
                   <button
+                    type="button"
                     key={element.id}
                     onClick={() => handleElementToggle(element)}
                     disabled={!canSelect && !categorySelected}
