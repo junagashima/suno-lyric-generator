@@ -10,13 +10,37 @@ const openai = new OpenAI({
 // 翻訳関数群（既存コードから抽出）
 function translateToEnglish(text: string): string {
   const translations: Record<string, string> = {
+    // 既存の翻訳
     '愛': 'love', '恋': 'romance', '恋愛': 'love', '友情': 'friendship',
     '家族': 'family', '希望': 'hope', '夢': 'dreams', '青春': 'youth',
     '悲しみ': 'sadness', '喜び': 'joy', '怒り': 'anger', '平和': 'peace',
     '戦争': 'war', '自然': 'nature', '音楽': 'music', '人生': 'life',
     '成長': 'growth', '別れ': 'farewell', '再会': 'reunion', '故郷': 'hometown',
-    '旅': 'journey', '冒険': 'adventure', '挑戦': 'challenge', '応援': 'encouragement'
+    '旅': 'journey', '冒険': 'adventure', '挑戦': 'challenge', '応援': 'encouragement',
+    
+    // 楽曲長の翻訳
+    '2-3分': '2-3 minutes', '3-4分': '3-4 minutes', '4-5分': '4-5 minutes', 
+    '5分以上': 'over 5 minutes', '1分程度': 'about 1 minute', '短い': 'short',
+    '長い': 'long', '標準': 'standard length',
+    
+    // 感情・ムードの翻訳
+    'エネルギッシュ': 'energetic', 'メランコリック': 'melancholic', 'ノスタルジック': 'nostalgic',
+    'アップビート': 'upbeat', 'ダウンテンポ': 'downtempo', 'チル': 'chill',
+    'ドラマティック': 'dramatic', 'ロマンチック': 'romantic', 'パワフル': 'powerful',
+    'やさしい': 'gentle', '激しい': 'intense', 'ポジティブ': 'positive',
+    'ネガティブ': 'negative', 'クール': 'cool', 'ホット': 'hot',
+    
+    // テンポ・リズム関連
+    'スロー': 'slow', 'ミディアム': 'medium', 'ファスト': 'fast',
+    'ミディアムテンポ': 'medium tempo', 'グルーヴ重視': 'groove-focused',
+    'ビート重視': 'beat-focused', 'リズミカル': 'rhythmic',
+    
+    // ボーカル関連
+    '男性ボーカル': 'male vocals', '女性ボーカル': 'female vocals',
+    '男女混合': 'mixed male and female', '男女混合グループ': 'mixed gender group',
+    'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony'
   };
+  
   return translations[text] || text;
 }
 
@@ -705,14 +729,54 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
     const englishMood = translateToEnglish(mood)
     const englishLength = translateToEnglish(songLength)
     
+    // ボーカル指示の高度な英語化処理
+    function advancedTranslateToEnglish(text: string): string {
+      if (!text) return 'expressive vocals'
+      
+      // 段階的翻訳処理
+      let result = text
+      
+      // 1. 複合語パターンの翻訳
+      const complexPatterns: Record<string, string> = {
+        '男女混合グループ voice': 'mixed gender group vocals',
+        '男女混合グループ': 'mixed gender group',
+        '男女混合 voice': 'mixed male female vocals',
+        'グループ voice': 'group vocals',
+        'デュエット voice': 'duet vocals'
+      }
+      
+      // 2. 複合語パターンマッチング
+      for (const [pattern, translation] of Object.entries(complexPatterns)) {
+        if (result.includes(pattern)) {
+          result = result.replace(pattern, translation)
+        }
+      }
+      
+      // 3. 残りの日本語を個別翻訳
+      result = translateToEnglish(result)
+      
+      // 4. 最終的な英語検証と調整
+      if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(result)) {
+        // まだ日本語が残っている場合の緊急対応
+        result = result
+          .replace(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+/g, 'vocals')
+          .replace(/\s+/g, ' ')
+          .trim()
+      }
+      
+      return result || 'expressive vocals'
+    }
+    
+    const englishVocalDescription = advancedTranslateToEnglish(vocalSettings.vocalDescription)
+    
     // 巨大プロンプト復旧：重要な連携システムを保持
     const stylePrompt = `Create a concise Suno AI style instruction using this exact format:
 
 ${finalRapMode === 'full' ? 
 `**Full Rap Mode Format:**
-"Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${vocalSettings.vocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
+"Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${englishVocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
 `**Standard Format:**  
-"Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${vocalSettings.vocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
+"Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
 
 **Requirements:**
 - Use exact format above
