@@ -187,7 +187,7 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           theme,
           content,
           contentReflection, // Step C: 安全に追加
-          songLength,
+          songLength: useNewVocalSystem && sunoOptimizationSettings?.songLength ? sunoOptimizationSettings.songLength : songLength,
           vocal: {
             gender: vocalGender,
             age: vocalAge,
