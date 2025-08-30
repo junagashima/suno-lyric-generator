@@ -31,30 +31,21 @@ export interface ExtendedVocalSettings {
   techniques?: string[]
 }
 
-// 段階3: 年齢・楽曲長設定のSUNO最適化モード
-export interface AgeRange {
+// 段階3: ボーカリスト年齢・楽曲長設定のSUNO最適化モード（修正版）
+export interface VocalistAge {
   id: string
   label: string
   description: string
   sunoKeywords: string[]
-  vocalAdjustments: {
+  vocalCharacteristics: {
     tone: string[]
     delivery: string[]
-    energy: string
+    voiceQuality: string
   }
 }
 
-export interface SongLength {
-  id: string
-  label: string
-  duration: string
-  description: string
-  sunoStructure: string
-  vocalOptimizations: string[]
-}
-
 export interface SunoOptimizationSettings {
-  ageRange: AgeRange | null
-  songLength: SongLength | null
+  vocalistAge: VocalistAge | null
+  songLength: string // 既存のsongLength値を使用（'2-3分', '3-4分', '4-5分', '5分以上'）
   vocalElements: VocalElement[]
 }

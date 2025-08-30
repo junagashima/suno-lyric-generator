@@ -369,6 +369,7 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">設定方法:</span>
             <button
+              type="button"
               onClick={() => setUseNewVocalSystem(false)}
               className={`px-3 py-1 text-sm rounded ${
                 !useNewVocalSystem 
@@ -379,6 +380,7 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               従来方式
             </button>
             <button
+              type="button"
               onClick={() => setUseNewVocalSystem(true)}
               className={`px-3 py-1 text-sm rounded ${
                 useNewVocalSystem 
