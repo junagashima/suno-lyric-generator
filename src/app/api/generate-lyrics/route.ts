@@ -443,22 +443,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 楽曲長の統合処理（SUNO最適化設定を優先）
+    const determineFinalSongLength = () => {
+      // SUNO最適化設定のsongLengthを優先
+      if (vocalConfiguration?.optimizationSettings?.songLength) {
+        console.log('🎵 SUNO最適化設定のsongLengthを使用:', vocalConfiguration.optimizationSettings.songLength)
+        return vocalConfiguration.optimizationSettings.songLength
+      }
+      // フォールバック：基本のsongLength
+      console.log('🎵 基本のsongLengthを使用:', songLength)
+      return songLength
+    }
+    
+    const finalSongLength = determineFinalSongLength()
+
     // 歌詞生成プロンプト
     const lyricsPrompt = `
 あなたは日本のヒット曲を数多く手がけたプロの作詞家です。Suno AIで使用するための歌詞とタイトルを作成してください。
 
 ## 楽曲設定
 - モード: ${mode === 'simple' ? '簡単モード（参考楽曲ベース）' : 'こだわりモード（完全オリジナル）'}
-- 楽曲の長さ: ${songLength}
+- 楽曲の長さ: ${finalSongLength} ${vocalConfiguration?.optimizationSettings?.songLength ? '（SUNO最適化設定より）' : '（基本設定より）'}
 
 ## 楽曲の長さに応じた歌詞量調整（重要）
-${songLength === '2-3分' ? 
+${finalSongLength === '2-3分' ? 
   '**短い楽曲**：各セクションは短く簡潔に。Verse（4-6行）、Chorus（4-8行）、全体で30-40行程度。' :
-  songLength === '3-4分' ? 
+  finalSongLength === '3-4分' ? 
   '**標準的な楽曲**：標準的な歌詞量。Verse（6-8行）、Chorus（6-10行）、全体で50-70行程度。' :
-  songLength === '4-5分' ? 
+  finalSongLength === '4-5分' ? 
   '**長い楽曲**：充実した歌詞内容。Verse（8-12行）、Chorus（8-12行）、Bridge/Cメロを含め全体で70-90行程度。' :
-  '**非常に長い楽曲**：多層的な歌詞構成。複数のストーリー展開、繰り返しセクション、全体で90行以上。'}
+  finalSongLength === '5分以上' ?
+  '**非常に長い楽曲**：多層的な歌詞構成。複数のストーリー展開、繰り返しセクション、全体で90行以上。' :
+  '**カスタム長さ楽曲**：指定された長さに合わせた適切な歌詞量で構成。'}
 
 ## 雰囲気・感情を歌詞に反映（必須）
 ※ 以下の雰囲気・感情を歌詞の表現スタイル、語彙選択、リズム感に必ず反映させてください：
@@ -491,7 +507,17 @@ ${vocalSettings.isNewSystem ? `
 
 ## SUNO最適化ボーカルの特徴
 ※ この設定では、SUNO AIが認識しやすい具体的なボーカル指示が含まれています。歌詞はこれらの特徴を活かした表現を心がけてください。
-※ 特に以下の要素が重要です: ${vocalSettings.selectedElements?.join('、') || 'なし'}` : `
+※ 特に以下の要素が重要です: ${vocalSettings.selectedElements?.join('、') || 'なし'}
+
+${vocalConfiguration?.optimizationSettings ? `
+## 🚀 SUNO最適化設定（高度設定）
+**ユーザーが指定したSUNO最適化パラメータ:**
+- **楽曲長**: ${vocalConfiguration.optimizationSettings.songLength || finalSongLength}（最優先で適用）
+- **ボーカリスト年齢**: ${vocalConfiguration.optimizationSettings.vocalistAge?.label || '未指定'}
+- **最適化要素**: ${vocalConfiguration.optimizationSettings.vocalElements?.map((el: any) => el.label).join('、') || 'なし'}
+
+**⚠️ 重要**: この楽曲はSUNO最適化設定に基づいて作成されています。指定された楽曲長「${vocalConfiguration.optimizationSettings.songLength || finalSongLength}」に厳密に合わせて歌詞量を調整してください。
+` : ''}` : `
 **🎵 従来システム使用**
 - 構成: ${vocal.gender}
 - 年齢: ${vocal.age}
@@ -614,7 +640,7 @@ ${finalRapMode === 'full' ? `
    **モーダル構成**: Intro → Verse → Chorus → Interlude → Verse → Bridge → Chorus → Outro
    **アーティスティック構成**: Intro → Verse → Verse → Chorus → Verse → Bridge → Outro
    
-   楽曲の長さ：${songLength}
+   楽曲の長さ：${finalSongLength}
 `}
 
 ${finalRapMode === 'full' ? `
@@ -727,7 +753,7 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
     // 英語変数の準備（SUNO指示用）
     const englishTheme = translateToEnglish(theme)
     const englishMood = translateToEnglish(mood)
-    const englishLength = translateToEnglish(songLength)
+    const englishLength = translateToEnglish(finalSongLength)
     
     // ボーカル指示の高度な英語化処理
     function advancedTranslateToEnglish(text: string): string {
@@ -785,6 +811,7 @@ ${finalRapMode === 'full' ?
 - Include all key elements
 - ${vocalSettings.isNewSystem ? `Use SUNO-optimized vocals: "${vocalSettings.vocalDescription}"` : 'Use standard vocal description'}
 - Instruments: "${actualInstruments}" (use exactly as provided)
+- Song Length: "${englishLength}" ${vocalConfiguration?.optimizationSettings?.songLength ? '(SUNO optimized)' : '(standard)'}
 - Rap Mode: ${finalRapMode}
 
 **Additional Context:**
