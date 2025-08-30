@@ -26,19 +26,12 @@ export default function VocalElementSelector({
 }: VocalElementSelectorProps) {
   const [selectedElements, setSelectedElements] = useState<VocalElement[]>([])
   const [selectedPreset, setSelectedPreset] = useState<string>('')
-  
-  // 段階2: 簡単モードでの推奨設定編集機能
-  const [isEditingRecommended, setIsEditingRecommended] = useState(false)
-  const [originalRecommended, setOriginalRecommended] = useState<VocalElement[] | null>(null)
 
   // 楽曲分析結果が更新されたら自動選択
   useEffect(() => {
     if (mode === 'simple' && analyzedResult) {
       setSelectedElements(analyzedResult.recommendedElements)
       setSelectedPreset('')
-      // 段階2: 編集モード用に元の推奨設定を保存
-      setOriginalRecommended(analyzedResult.recommendedElements)
-      setIsEditingRecommended(false) // 新しい分析結果では編集モードをリセット
     }
   }, [mode, analyzedResult])
 
@@ -82,24 +75,6 @@ export default function VocalElementSelector({
     // 最大3要素まで
     if (newElements.length <= 3) {
       setSelectedElements(newElements)
-    }
-  }
-
-  // 段階2: 編集モード開始ハンドラー
-  const handleStartEditing = () => {
-    setIsEditingRecommended(true)
-  }
-
-  // 段階2: 編集完了ハンドラー
-  const handleFinishEditing = () => {
-    setIsEditingRecommended(false)
-  }
-
-  // 段階2: 元の推奨設定に戻すハンドラー
-  const handleResetToOriginal = () => {
-    if (originalRecommended) {
-      setSelectedElements(originalRecommended)
-      setSelectedPreset('')
     }
   }
 
