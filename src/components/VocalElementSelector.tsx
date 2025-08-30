@@ -77,7 +77,7 @@ export default function VocalElementSelector({
   const handleElementToggle = (element: VocalElement) => {
     setSelectedPreset('') // プリセット選択を解除
 
-    // 編集モード中は一時状態を操作、通常時は直接操作
+    // 🔑 KEY FIX: 編集モード中は一時状態を操作、通常時は直接操作
     const currentElements = isEditingRecommended ? tempEditingElements : selectedElements
     const setCurrentElements = isEditingRecommended ? setTempEditingElements : setSelectedElements
 
@@ -98,7 +98,7 @@ export default function VocalElementSelector({
     // 新要素を追加
     newElements.push(element)
 
-    // 3要素を超える場合は最古の要素を削除（FIFO方式）
+    // 3要素を超える場合は最古の要素を削除
     if (newElements.length > 3) {
       const oldestElement = currentElements.find(el => 
         el.category !== element.category && 
@@ -109,7 +109,7 @@ export default function VocalElementSelector({
       }
     }
 
-    const finalElements = newElements.slice(0, 3) // 安全のため3要素に制限
+    const finalElements = newElements.slice(0, 3)
     setCurrentElements(finalElements)
     if (isEditingRecommended) setHasUnsavedChanges(true)
   }
@@ -141,39 +141,21 @@ export default function VocalElementSelector({
   // 段階2: 元の推奨設定に戻すハンドラー
   const handleResetToOriginal = () => {
     if (originalRecommended) {
-      if (isEditingRecommended) {
-        // 編集中は一時状態をリセット
-        setTempEditingElements([...originalRecommended])
-        setHasUnsavedChanges(true)
-      } else {
-        // 編集モード外では直接確定
-        setSelectedElements(originalRecommended)
-        setSelectedPreset('')
-      }
-    }
-  }
-  
-  // 段階2: 編集キャンセルハンドラー
-  const handleCancelEditing = () => {
-    setIsEditingRecommended(false)
-    // 元の状態に戻す（変更を破棄）
-    setTempEditingElements([])
-    setHasUnsavedChanges(false)
-  }
-  
-  // 編集モード中の一時全クリア
-  const handleTempClearAll = () => {
-    if (isEditingRecommended) {
-      setTempEditingElements([])
-      setHasUnsavedChanges(true)
-    } else {
-      setSelectedElements([])
+      setSelectedElements(originalRecommended)
+      setSelectedPreset('')
     }
   }
 
   // シンプルモードの表示
   if (mode === 'simple') {
-
+    // デバッグログ追加
+    console.log('🔍 Debug - Simple Mode State:', {
+      mode,
+      hasAnalyzedResult: !!analyzedResult,
+      isEditingRecommended,
+      selectedElementsLength: selectedElements.length,
+      analyzedResultElements: analyzedResult?.recommendedElements?.length
+    })
     
     return (
       <div className="space-y-4">
@@ -203,25 +185,15 @@ export default function VocalElementSelector({
                   <>
                     <button
                       onClick={handleResetToOriginal}
-                      className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+                      className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 border border-gray-600 font-semibold"
                     >
                       ↻ 元に戻す
                     </button>
                     <button
-                      onClick={handleCancelEditing}
-                      className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      ✕ 取消
-                    </button>
-                    <button
                       onClick={handleFinishEditing}
-                      className={`px-3 py-1 text-xs rounded font-semibold ${
-                        hasUnsavedChanges 
-                          ? 'bg-green-600 text-white hover:bg-green-700' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 border border-green-700 font-semibold"
                     >
-                      ✓ {hasUnsavedChanges ? '保存' : '完了'}
+                      ✓ 完了
                     </button>
                   </>
                 )}
@@ -229,32 +201,24 @@ export default function VocalElementSelector({
             </div>
             
             <div className="flex flex-wrap gap-2 mb-3">
-              {(isEditingRecommended ? tempEditingElements : selectedElements).map(element => (
+              {selectedElements.map(element => (
                 <span 
                   key={element.id}
                   className={`px-3 py-1 rounded-full text-sm ${
                     isEditingRecommended 
-                      ? hasUnsavedChanges
-                        ? 'bg-orange-100 text-orange-800 border border-orange-300'
-                        : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                      ? 'bg-green-100 text-green-800' 
                       : 'bg-blue-100 text-blue-800'
                   }`}
                 >
                   {element.label}
-                  {isEditingRecommended && hasUnsavedChanges && <span className="ml-1">*</span>}
                 </span>
               ))}
             </div>
             
             <div className="bg-white p-3 rounded border">
               <p className="text-sm font-mono text-gray-700">
-                {generateSunoVocalText(isEditingRecommended ? tempEditingElements : selectedElements, gender)}
+                {generateSunoVocalText(selectedElements, gender)}
               </p>
-              {isEditingRecommended && hasUnsavedChanges && (
-                <p className="text-xs text-orange-600 mt-1">
-                  ⚠️ 未保存の変更があります
-                </p>
-              )}
             </div>
             
             {!isEditingRecommended && (
@@ -265,7 +229,7 @@ export default function VocalElementSelector({
             
             {isEditingRecommended && (
               <p className="text-xs text-green-600 mt-2">
-                ✏️ 編集モード: 「保存」ボタンを押すまで変更は適用されません
+                ✏️ 編集モード: 下記の個別選択で推奨設定をカスタマイズできます
               </p>
             )}
           </div>
@@ -274,63 +238,29 @@ export default function VocalElementSelector({
             <p className="text-sm text-gray-600">
               楽曲分析を実行すると、最適なボーカルスタイルが自動選択されます
             </p>
-
+            
+            {/* 緊急テスト：分析結果なしでも編集ボタンを表示 */}
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-xs text-yellow-700 mb-2">🧪 テスト版: 編集機能確認</p>
+              <button
+                onClick={handleStartEditing}
+                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 border border-blue-700"
+              >
+                ⚙️ テスト編集
+              </button>
+            </div>
           </div>
         )}
         
         {/* 段階2: 編集モード時の個別選択 UI */}
         {isEditingRecommended && analyzedResult && (
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="text-md font-medium">
-                🎵 個別選択編集 
-                <span className="text-sm font-normal text-gray-600">
-                  （{tempEditingElements.length}/3）
-                </span>
-              </h4>
-              
-              {/* 全クリアボタン */}
-              {tempEditingElements.length > 0 && (
-                <button
-                  onClick={handleTempClearAll}
-                  className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  🗑️ 全クリア
-                </button>
-              )}
-            </div>
-            
-            {/* 現在の編集状況を上部に表示 */}
-            {tempEditingElements.length > 0 && (
-              <div className="mb-4 p-3 bg-white rounded border">
-                <div className="flex justify-between items-start mb-2">
-                  <p className="text-xs text-gray-600">編集中の選択:</p>
-                  {hasUnsavedChanges && (
-                    <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                      未保存 *
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {tempEditingElements.map(element => (
-                    <button
-                      key={element.id}
-                      onClick={() => handleElementToggle(element)}
-                      className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm hover:bg-red-100 hover:text-red-800 transition-colors border border-orange-200"
-                      title="クリックして選択解除"
-                    >
-                      {element.label} ❌
-                    </button>
-                  ))}
-                </div>
-                <div className="text-xs font-mono text-gray-700 bg-gray-50 p-2 rounded">
-                  {generateSunoVocalText(tempEditingElements, gender)}
-                </div>
-                <p className="text-xs text-blue-600 mt-1">
-                  💡 「保存」ボタンを押すまで変更は適用されません
-                </p>
-              </div>
-            )}
+            <h4 className="text-md font-medium mb-3">
+              🎵 個別選択編集 
+              <span className="text-sm font-normal text-gray-600">
+                （{selectedElements.length}/3）
+              </span>
+            </h4>
             
             {Object.entries(vocalElementsByCategory).map(([category, elements]) => (
               <div key={category} className="mb-4">
@@ -342,32 +272,24 @@ export default function VocalElementSelector({
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {elements.map(element => {
-                    const currentElements = isEditingRecommended ? tempEditingElements : selectedElements
-                    const isSelected = currentElements.some(el => el.id === element.id)
-                    const categorySelected = currentElements.some(el => el.category === category)
+                    const isSelected = selectedElements.some(el => el.id === element.id)
+                    const canSelect = selectedElements.length < 3 || isSelected
+                    const categorySelected = selectedElements.some(el => el.category === category)
                     
                     return (
                       <button
                         key={element.id}
                         onClick={() => handleElementToggle(element)}
+                        disabled={!canSelect && !categorySelected}
                         className={`p-2 border rounded text-left text-sm transition-colors ${
                           isSelected 
-                            ? 'border-green-500 bg-green-50 text-green-800 hover:border-red-500 hover:bg-red-50 hover:text-red-800' 
-                            : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                            ? 'border-green-500 bg-green-50 text-green-800' 
+                            : canSelect || categorySelected
+                            ? 'border-gray-300 hover:border-green-300'
+                            : 'border-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
-                        title={isSelected ? 'クリックして選択解除' : 'クリックして選択（3要素まで）'}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="font-medium">
-                            {element.label}
-                            {isSelected && <span className="ml-1 text-green-600">✓</span>}
-                          </div>
-                          {currentElements.length >= 3 && !isSelected && (
-                            <span className="text-xs text-orange-600 bg-orange-100 px-1 rounded">
-                              入替
-                            </span>
-                          )}
-                        </div>
+                        <div className="font-medium">{element.label}</div>
                         <div className="text-xs text-gray-600">{element.description}</div>
                       </button>
                     )
