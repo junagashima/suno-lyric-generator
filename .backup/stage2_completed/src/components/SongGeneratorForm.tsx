@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import VocalElementSelector from './VocalElementSelector'
-import { VocalConfiguration, AnalyzedVocalResult, SunoOptimizationSettings } from '../types/vocal'
-import { generateOptimizedSunoText } from '../data/sunoVocalElements'
+import { VocalConfiguration, AnalyzedVocalResult } from '../types/vocal'
 
 interface Props {
   onGenerate: (data: any) => void
@@ -48,9 +47,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [useNewVocalSystem, setUseNewVocalSystem] = useState(false)
   const [vocalConfiguration, setVocalConfiguration] = useState<any>(null)
   const [analyzedVocalResult, setAnalyzedVocalResult] = useState<any>(null)
-  
-  // 段階3: SUNO最適化設定
-  const [sunoOptimizationSettings, setSunoOptimizationSettings] = useState<SunoOptimizationSettings | null>(null)
   
   // 混合言語設定（新機能）
   const [englishMixLevel, setEnglishMixLevel] = useState('none')
@@ -145,36 +141,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
 
     setIsLoading(true)
     try {
-      // SUNO最適化テキストを生成（段階3修正）
-      const generateFinalSunoText = () => {
-        if (useNewVocalSystem && vocalConfiguration) {
-          // SUNO最適化が有効で、年齢・楽曲長設定がある場合
-          if (sunoOptimizationSettings?.vocalistAge || sunoOptimizationSettings?.songLength) {
-            return generateOptimizedSunoText(
-              vocalConfiguration.selectedElements || [],
-              vocalGender,
-              sunoOptimizationSettings.vocalistAge,
-              sunoOptimizationSettings.songLength
-            )
-          }
-          // SUNO最適化有効だが、年齢・楽曲長設定がない場合は通常のテキスト
-          return vocalConfiguration.generatedText || ''
-        }
-        return ''
-      }
-
-      const finalSunoText = generateFinalSunoText()
-      console.log('🎯 最終SUNOテキスト:', finalSunoText)
-      console.log('🔧 SUNO最適化設定:', sunoOptimizationSettings)
-      
-      // Step 1: 詳細デバッグ情報（安全な追加）
-      console.log('📊 詳細デバッグ情報:')
-      console.log('  - useNewVocalSystem:', useNewVocalSystem)
-      console.log('  - vocalConfiguration:', vocalConfiguration)
-      console.log('  - sunoOptimizationSettings詳細:', {
-        vocalistAge: sunoOptimizationSettings?.vocalistAge?.label || 'なし',
-        songLength: sunoOptimizationSettings?.songLength || 'なし'
-      })
       const response = await fetch('/api/generate-lyrics', {
         method: 'POST',
         headers: {
@@ -194,15 +160,13 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
             nationality: vocalNationality,
             techniques: vocalTechniques
           },
-          // SUNO最適化ボーカル設定（新機能・段階3修正版）
+          // SUNO最適化ボーカル設定（新機能）
           vocalConfiguration: useNewVocalSystem ? {
             useNewSystem: true,
             selectedElements: vocalConfiguration?.selectedElements?.map((el: any) => el.label) || [],
-            sunoText: finalSunoText, // 最適化されたテキストを使用
+            sunoText: vocalConfiguration?.generatedText || '',
             mode: mode,
-            presetId: vocalConfiguration?.presetId || null,
-            // SUNO最適化設定を追加
-            optimizationSettings: sunoOptimizationSettings
+            presetId: vocalConfiguration?.presetId || null
           } : null,
           // 混合言語設定（新機能）
           languageSettings: {
@@ -402,7 +366,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">設定方法:</span>
             <button
-              type="button"
               onClick={() => setUseNewVocalSystem(false)}
               className={`px-3 py-1 text-sm rounded ${
                 !useNewVocalSystem 
@@ -413,7 +376,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               従来方式
             </button>
             <button
-              type="button"
               onClick={() => setUseNewVocalSystem(true)}
               className={`px-3 py-1 text-sm rounded ${
                 useNewVocalSystem 
@@ -542,8 +504,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               mode={mode}
               analyzedResult={analyzedVocalResult}
               onSelectionChange={(config: VocalConfiguration) => setVocalConfiguration(config)}
-              enableSunoOptimization={true}
-              onOptimizationChange={(settings: SunoOptimizationSettings) => setSunoOptimizationSettings(settings)}
             />
           </div>
         )}

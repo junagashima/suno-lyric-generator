@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import VocalElementSelector from './VocalElementSelector'
-import { VocalConfiguration, AnalyzedVocalResult, SunoOptimizationSettings } from '../types/vocal'
-import { generateOptimizedSunoText } from '../data/sunoVocalElements'
+import { VocalConfiguration, AnalyzedVocalResult } from '../types/vocal'
 
 interface Props {
   onGenerate: (data: any) => void
@@ -48,9 +47,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
   const [useNewVocalSystem, setUseNewVocalSystem] = useState(false)
   const [vocalConfiguration, setVocalConfiguration] = useState<any>(null)
   const [analyzedVocalResult, setAnalyzedVocalResult] = useState<any>(null)
-  
-  // 段階3: SUNO最適化設定
-  const [sunoOptimizationSettings, setSunoOptimizationSettings] = useState<SunoOptimizationSettings | null>(null)
   
   // 混合言語設定（新機能）
   const [englishMixLevel, setEnglishMixLevel] = useState('none')
@@ -145,36 +141,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
 
     setIsLoading(true)
     try {
-      // SUNO最適化テキストを生成（段階3修正）
-      const generateFinalSunoText = () => {
-        if (useNewVocalSystem && vocalConfiguration) {
-          // SUNO最適化が有効で、年齢・楽曲長設定がある場合
-          if (sunoOptimizationSettings?.vocalistAge || sunoOptimizationSettings?.songLength) {
-            return generateOptimizedSunoText(
-              vocalConfiguration.selectedElements || [],
-              vocalGender,
-              sunoOptimizationSettings.vocalistAge,
-              sunoOptimizationSettings.songLength
-            )
-          }
-          // SUNO最適化有効だが、年齢・楽曲長設定がない場合は通常のテキスト
-          return vocalConfiguration.generatedText || ''
-        }
-        return ''
-      }
-
-      const finalSunoText = generateFinalSunoText()
-      console.log('🎯 最終SUNOテキスト:', finalSunoText)
-      console.log('🔧 SUNO最適化設定:', sunoOptimizationSettings)
-      
-      // Step 1: 詳細デバッグ情報（安全な追加）
-      console.log('📊 詳細デバッグ情報:')
-      console.log('  - useNewVocalSystem:', useNewVocalSystem)
-      console.log('  - vocalConfiguration:', vocalConfiguration)
-      console.log('  - sunoOptimizationSettings詳細:', {
-        vocalistAge: sunoOptimizationSettings?.vocalistAge?.label || 'なし',
-        songLength: sunoOptimizationSettings?.songLength || 'なし'
-      })
       const response = await fetch('/api/generate-lyrics', {
         method: 'POST',
         headers: {
@@ -188,22 +154,21 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           content,
           contentReflection, // Step C: 安全に追加
           songLength,
-          vocal: {
+          vocal: useNewVocalSystem ? {
             gender: vocalGender,
             age: vocalAge,
             nationality: vocalNationality,
-            techniques: vocalTechniques
-          },
-          // SUNO最適化ボーカル設定（新機能・段階3修正版）
-          vocalConfiguration: useNewVocalSystem ? {
+            techniques: vocalTechniques,
+            // 新SUNO 4要素システム
             useNewSystem: true,
-            selectedElements: vocalConfiguration?.selectedElements?.map((el: any) => el.label) || [],
-            sunoText: finalSunoText, // 最適化されたテキストを使用
-            mode: mode,
-            presetId: vocalConfiguration?.presetId || null,
-            // SUNO最適化設定を追加
-            optimizationSettings: sunoOptimizationSettings
-          } : null,
+            vocalConfiguration: vocalConfiguration
+          } : {
+            gender: vocalGender,
+            age: vocalAge,
+            nationality: vocalNationality,
+            techniques: vocalTechniques,
+            useNewSystem: false
+          },
           // 混合言語設定（新機能）
           languageSettings: {
             englishMixLevel,
@@ -401,8 +366,111 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           <h3 className="text-lg font-semibold text-gray-800">🎤 ボーカル設定</h3>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">設定方法:</span>
-            <button
-              type="button"
+            <div className="flex bg-white rounded-lg p-1">
+              <button
+                onClick={() => setUseNewVocalSystem(false)}
+                className={`px-3 py-1 text-sm rounded ${
+                  !useNewVocalSystem 
+                    ? 'bg-green-500 text-white' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                従来方式
+              </button>
+              <button
+                onClick={() => setUseNewVocalSystem(true)}
+                className={`px-3 py-1 text-sm rounded ${
+                  useNewVocalSystem 
+                    ? 'bg-blue-500 text-white' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                SUNO 4要素
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* 共通基本設定 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ボーカル構成</label>
+            <select
+              value={vocalGender}
+              onChange={(e) => setVocalGender(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="女性">女性（ソロ）</option>
+              <option value="男性">男性（ソロ）</option>
+              <option value="女性デュエット">女性デュエット（2人）</option>
+              <option value="男性デュエット">男性デュエット（2人）</option>
+              <option value="男女デュエット">男女デュエット（2人）</option>
+              <option value="女性グループ">女性グループ（3人以上）</option>
+              <option value="男性グループ">男性グループ（3人以上）</option>
+              <option value="男女混合グループ">男女混合グループ</option>
+              <option value="コーラス重視">コーラス重視（複数ボーカル）</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">年齢</label>
+            <select
+              value={vocalAge}
+              onChange={(e) => setVocalAge(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="10代">10代</option>
+              <option value="20代">20代</option>
+              <option value="30代">30代</option>
+              <option value="40代">40代</option>
+              <option value="50代以上">50代以上</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">国籍</label>
+            <select
+              value={vocalNationality}
+              onChange={(e) => setVocalNationality(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="日本">日本</option>
+              <option value="アメリカ">アメリカ</option>
+              <option value="イギリス">イギリス</option>
+              <option value="韓国">韓国</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">楽曲の長さ</label>
+            <select
+              value={songLength}
+              onChange={(e) => setSongLength(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="2-3分">2-3分</option>
+              <option value="3-4分">3-4分</option>
+              <option value="4-5分">4-5分</option>
+              <option value="5分以上">5分以上</option>
+            </select>
+          </div>
+        </div>
+        
+        {/* ボーカルスタイル設定 */}
+        {useNewVocalSystem ? (
+          <VocalElementSelector
+            gender={vocalGender === '女性' ? 'female' : 'male'}
+            mode={mode}
+            analyzedResult={analyzedVocalResult}
+            onSelectionChange={(config: VocalConfiguration) => {
+              setVocalConfiguration(config)
+            }}
+          />
+        ) : (
+          <div>
+            <div className="mb-3">
+              <span className="text-sm text-gray-600 bg-yellow-100 px-2 py-1 rounded">
+                📌 従来方式: 歌唱技法から選択
+              </span>
+            </div>
               onClick={() => setUseNewVocalSystem(false)}
               className={`px-3 py-1 text-sm rounded ${
                 !useNewVocalSystem 
@@ -413,7 +481,6 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               従来方式
             </button>
             <button
-              type="button"
               onClick={() => setUseNewVocalSystem(true)}
               className={`px-3 py-1 text-sm rounded ${
                 useNewVocalSystem 
@@ -492,6 +559,64 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
           </div>
         </div>
 
+        {/* 混合言語設定（新機能） */}
+        <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
+            🌐 言語・多言語設定 <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">NEW</span>
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">基本言語設定</label>
+              <select
+                value={languagePreference}
+                onChange={(e) => setLanguagePreference(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="auto">国籍に基づく自動選択</option>
+                <option value="japanese">日本語メイン</option>
+                <option value="english">英語メイン</option>
+                <option value="mixed">多言語混合</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">英語混在レベル</label>
+              <select
+                value={englishMixLevel}
+                onChange={(e) => setEnglishMixLevel(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={languagePreference === 'english'}
+              >
+                <option value="none">英語なし（純日本語）</option>
+                <option value="light">少し混在（10-20%程度）</option>
+                <option value="moderate">中程度混在（30-50%程度）</option>
+                <option value="heavy">多く混在（50-70%程度）</option>
+              </select>
+            </div>
+          </div>
+
+          {/* 説明テキスト */}
+          <div className="mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
+            <div className="space-y-1">
+              <div><strong>国籍設定連動:</strong> 
+                {vocalNationality === 'アメリカ' || vocalNationality === 'イギリス' ? 
+                  '英語圏の国籍のため、英語歌詞の生成が優先されます' :
+                  vocalNationality === '韓国' ? 
+                  '韓国の国籍のため、韓国語要素が含まれる場合があります' :
+                  '日本の国籍のため、日本語歌詞が基本となります'
+                }
+              </div>
+              <div><strong>英語混在レベル:</strong> 
+                {englishMixLevel === 'none' ? '完全に日本語のみで作詞します' :
+                 englishMixLevel === 'light' ? 'サビや決めフレーズで部分的に英語を使用' :
+                 englishMixLevel === 'moderate' ? 'コーラス部分や重要セクションで英語を積極使用' :
+                 'バイリンガル楽曲として日英を自然にミックス'}
+              </div>
+            </div>
+          </div>
+        </div>
+
             {/* 歌唱技法（複数選択） */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -542,69 +667,9 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
               mode={mode}
               analyzedResult={analyzedVocalResult}
               onSelectionChange={(config: VocalConfiguration) => setVocalConfiguration(config)}
-              enableSunoOptimization={true}
-              onOptimizationChange={(settings: SunoOptimizationSettings) => setSunoOptimizationSettings(settings)}
             />
           </div>
         )}
-      </div>
-
-      {/* 言語・多言語設定（共通設定） */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h4 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
-          🌐 言語・多言語設定 <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">NEW</span>
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">基本言語設定</label>
-            <select
-              value={languagePreference}
-              onChange={(e) => setLanguagePreference(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="auto">国籍に基づく自動選択</option>
-              <option value="japanese">日本語メイン</option>
-              <option value="english">英語メイン</option>
-              <option value="mixed">多言語混合</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">英語混在レベル</label>
-            <select
-              value={englishMixLevel}
-              onChange={(e) => setEnglishMixLevel(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={languagePreference === 'english'}
-            >
-              <option value="none">英語なし（純日本語）</option>
-              <option value="light">少し混在（10-20%程度）</option>
-              <option value="moderate">中程度混在（30-50%程度）</option>
-              <option value="heavy">多く混在（50-70%程度）</option>
-            </select>
-          </div>
-        </div>
-
-        {/* 説明テキスト */}
-        <div className="mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-          <div className="space-y-1">
-            <div><strong>国籍設定連動:</strong> 
-              {vocalNationality === 'アメリカ' || vocalNationality === 'イギリス' ? 
-                '英語圏の国籍のため、英語歌詞の生成が優先されます' :
-                vocalNationality === '韓国' ? 
-                '韓国の国籍のため、韓国語要素が含まれる場合があります' :
-                '日本の国籍のため、日本語歌詞が基本となります'
-              }
-            </div>
-            <div><strong>英語混在レベル:</strong> 
-              {englishMixLevel === 'none' ? '完全に日本語のみで作詞します' :
-               englishMixLevel === 'light' ? 'サビや決めフレーズで部分的に英語を使用' :
-               englishMixLevel === 'moderate' ? 'コーラス部分や重要セクションで英語を積極使用' :
-               'バイリンガル楽曲として日英を自然にミックス'}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ラップ調選択（安全追加） */}
