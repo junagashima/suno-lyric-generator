@@ -22,6 +22,9 @@ export function FinalOutputDisplay({
   const [isEditingStyle, setIsEditingStyle] = useState(false)
   const [editedStyle, setEditedStyle] = useState(output.styleInstruction)
   const [showCustomizationGuide, setShowCustomizationGuide] = useState(false)
+  // 🎯 Phase 2: 歌詞編集機能追加
+  const [isEditingLyrics, setIsEditingLyrics] = useState(false)
+  const [editedLyrics, setEditedLyrics] = useState(output.lyrics)
 
   // スタイル指示の品質チェック結果を表示
   const getQualityBadge = () => {
@@ -79,6 +82,14 @@ export function FinalOutputDisplay({
     console.log('スタイル更新:', editedStyle)
     setIsEditingStyle(false)
     // TODO: 編集されたスタイルでの再生成処理
+  }
+
+  // 🎯 Phase 2: 歌詞編集保存処理
+  const handleSaveLyricsEdit = () => {
+    // 編集された歌詞を保存（即座に反映）
+    console.log('歌詞更新:', editedLyrics)
+    setIsEditingLyrics(false)
+    // 編集内容は状態に保存され、コピー機能で使用される
   }
 
   // スタイル再生成処理
@@ -167,21 +178,81 @@ export function FinalOutputDisplay({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">🎵 生成された歌詞</h3>
-            <button
-              onClick={() => copyToClipboard(output.lyrics, '歌詞')}
-              className="text-sm text-blue-600 hover:text-blue-800 border border-blue-300 px-3 py-1 rounded"
-            >
-              📋 全体コピー
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsEditingLyrics(!isEditingLyrics)}
+                className="text-sm text-green-600 hover:text-green-800 border border-green-300 px-3 py-1 rounded"
+                disabled={isLoading}
+              >
+                ✏️ 編集
+              </button>
+              <button
+                onClick={() => copyToClipboard(isEditingLyrics ? editedLyrics : output.lyrics, '歌詞')}
+                className="text-sm text-blue-600 hover:text-blue-800 border border-blue-300 px-3 py-1 rounded"
+              >
+                📋 全体コピー
+              </button>
+            </div>
           </div>
+
+          {/* 歌詞の表示・編集 */}
           <div className="bg-gray-50 rounded-md p-4">
-            <pre className="whitespace-pre-wrap text-sm text-gray-900 font-mono leading-relaxed">
-              {output.lyrics}
-            </pre>
+            {isEditingLyrics ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    歌詞を編集
+                  </label>
+                  <textarea
+                    value={editedLyrics}
+                    onChange={(e) => setEditedLyrics(e.target.value)}
+                    className="w-full h-64 p-3 border border-gray-300 rounded-md text-sm font-mono"
+                    placeholder="[Intro]&#10;歌詞内容...&#10;&#10;[Verse]&#10;歌詞内容...&#10;&#10;[Chorus]&#10;歌詞内容..."
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleSaveLyricsEdit}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700"
+                  >
+                    ✅ 保存
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingLyrics(false)
+                      setEditedLyrics(output.lyrics)
+                    }}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400"
+                  >
+                    ❌ キャンセル
+                  </button>
+                </div>
+                
+                {/* 編集時の注意事項 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <div className="text-sm text-blue-800">
+                    <strong>⚠️ 歌詞編集時の注意:</strong>
+                    <ul className="mt-1 ml-4 list-disc space-y-1">
+                      <li>SUNOタグ（[Intro], [Verse], [Chorus]等）は英語で保持してください</li>
+                      <li>歌詞本文は日本語で記述し、タグとの混在に注意してください</li>
+                      <li>楽曲構造を大幅に変更すると生成された音楽と合わない可能性があります</li>
+                      <li>改行とタグの配置に注意して、SUNOが正しく認識できる形式を保ってください</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <pre className="whitespace-pre-wrap text-sm text-gray-900 font-mono leading-relaxed">
+                {editedLyrics}
+              </pre>
+            )}
           </div>
-          <div className="text-xs text-gray-500">
-            ※ Sunoタグ（[Intro], [Verse], [Chorus]等）が含まれています
-          </div>
+          
+          {!isEditingLyrics && (
+            <div className="text-xs text-gray-500">
+              ※ Sunoタグ（[Intro], [Verse], [Chorus]等）が含まれています
+            </div>
+          )}
         </div>
       )}
 
