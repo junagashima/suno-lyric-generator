@@ -1,0 +1,5 @@
+58865ca hotfix: 英語スタイル指示の日本語混合問題を緊急修正
+0429039 trigger: force production deployment after rap mode fixes
+611ffa1 fix: rap mode設定の楽曲分析反映と英語スタイル指示安定化
+653ef9b feat(lyrics): Phase 3 - Dragon Ash風partial rap mode完全実装
+e06340c chore: add vercel dependency for production deployment

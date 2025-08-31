@@ -10,37 +10,13 @@ const openai = new OpenAI({
 // 翻訳関数群（既存コードから抽出）
 function translateToEnglish(text: string): string {
   const translations: Record<string, string> = {
-    // 既存の翻訳
     '愛': 'love', '恋': 'romance', '恋愛': 'love', '友情': 'friendship',
     '家族': 'family', '希望': 'hope', '夢': 'dreams', '青春': 'youth',
     '悲しみ': 'sadness', '喜び': 'joy', '怒り': 'anger', '平和': 'peace',
     '戦争': 'war', '自然': 'nature', '音楽': 'music', '人生': 'life',
     '成長': 'growth', '別れ': 'farewell', '再会': 'reunion', '故郷': 'hometown',
-    '旅': 'journey', '冒険': 'adventure', '挑戦': 'challenge', '応援': 'encouragement',
-    
-    // 楽曲長の翻訳
-    '2-3分': '2-3 minutes', '3-4分': '3-4 minutes', '4-5分': '4-5 minutes', 
-    '5分以上': 'over 5 minutes', '1分程度': 'about 1 minute', '短い': 'short',
-    '長い': 'long', '標準': 'standard length',
-    
-    // 感情・ムードの翻訳
-    'エネルギッシュ': 'energetic', 'メランコリック': 'melancholic', 'ノスタルジック': 'nostalgic',
-    'アップビート': 'upbeat', 'ダウンテンポ': 'downtempo', 'チル': 'chill',
-    'ドラマティック': 'dramatic', 'ロマンチック': 'romantic', 'パワフル': 'powerful',
-    'やさしい': 'gentle', '激しい': 'intense', 'ポジティブ': 'positive',
-    'ネガティブ': 'negative', 'クール': 'cool', 'ホット': 'hot',
-    
-    // テンポ・リズム関連
-    'スロー': 'slow', 'ミディアム': 'medium', 'ファスト': 'fast',
-    'ミディアムテンポ': 'medium tempo', 'グルーヴ重視': 'groove-focused',
-    'ビート重視': 'beat-focused', 'リズミカル': 'rhythmic',
-    
-    // ボーカル関連
-    '男性ボーカル': 'male vocals', '女性ボーカル': 'female vocals',
-    '男女混合': 'mixed male and female', '男女混合グループ': 'mixed gender group',
-    'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony'
+    '旅': 'journey', '冒険': 'adventure', '挑戦': 'challenge', '応援': 'encouragement'
   };
-  
   return translations[text] || text;
 }
 
@@ -443,38 +419,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 楽曲長の統合処理（SUNO最適化設定を優先）
-    const determineFinalSongLength = () => {
-      // SUNO最適化設定のsongLengthを優先
-      if (vocalConfiguration?.optimizationSettings?.songLength) {
-        console.log('🎵 SUNO最適化設定のsongLengthを使用:', vocalConfiguration.optimizationSettings.songLength)
-        return vocalConfiguration.optimizationSettings.songLength
-      }
-      // フォールバック：基本のsongLength
-      console.log('🎵 基本のsongLengthを使用:', songLength)
-      return songLength
-    }
-    
-    const finalSongLength = determineFinalSongLength()
-
     // 歌詞生成プロンプト
     const lyricsPrompt = `
 あなたは日本のヒット曲を数多く手がけたプロの作詞家です。Suno AIで使用するための歌詞とタイトルを作成してください。
 
 ## 楽曲設定
 - モード: ${mode === 'simple' ? '簡単モード（参考楽曲ベース）' : 'こだわりモード（完全オリジナル）'}
-- 楽曲の長さ: ${finalSongLength} ${vocalConfiguration?.optimizationSettings?.songLength ? '（SUNO最適化設定より）' : '（基本設定より）'}
+- 楽曲の長さ: ${songLength}
 
 ## 楽曲の長さに応じた歌詞量調整（重要）
-${finalSongLength === '2-3分' ? 
+${songLength === '2-3分' ? 
   '**短い楽曲**：各セクションは短く簡潔に。Verse（4-6行）、Chorus（4-8行）、全体で30-40行程度。' :
-  finalSongLength === '3-4分' ? 
+  songLength === '3-4分' ? 
   '**標準的な楽曲**：標準的な歌詞量。Verse（6-8行）、Chorus（6-10行）、全体で50-70行程度。' :
-  finalSongLength === '4-5分' ? 
+  songLength === '4-5分' ? 
   '**長い楽曲**：充実した歌詞内容。Verse（8-12行）、Chorus（8-12行）、Bridge/Cメロを含め全体で70-90行程度。' :
-  finalSongLength === '5分以上' ?
-  '**非常に長い楽曲**：多層的な歌詞構成。複数のストーリー展開、繰り返しセクション、全体で90行以上。' :
-  '**カスタム長さ楽曲**：指定された長さに合わせた適切な歌詞量で構成。'}
+  '**非常に長い楽曲**：多層的な歌詞構成。複数のストーリー展開、繰り返しセクション、全体で90行以上。'}
 
 ## 雰囲気・感情を歌詞に反映（必須）
 ※ 以下の雰囲気・感情を歌詞の表現スタイル、語彙選択、リズム感に必ず反映させてください：
@@ -507,17 +467,7 @@ ${vocalSettings.isNewSystem ? `
 
 ## SUNO最適化ボーカルの特徴
 ※ この設定では、SUNO AIが認識しやすい具体的なボーカル指示が含まれています。歌詞はこれらの特徴を活かした表現を心がけてください。
-※ 特に以下の要素が重要です: ${vocalSettings.selectedElements?.join('、') || 'なし'}
-
-${vocalConfiguration?.optimizationSettings ? `
-## 🚀 SUNO最適化設定（高度設定）
-**ユーザーが指定したSUNO最適化パラメータ:**
-- **楽曲長**: ${vocalConfiguration.optimizationSettings.songLength || finalSongLength}（最優先で適用）
-- **ボーカリスト年齢**: ${vocalConfiguration.optimizationSettings.vocalistAge?.label || '未指定'}
-- **最適化要素**: ${vocalConfiguration.optimizationSettings.vocalElements?.map((el: any) => el.label).join('、') || 'なし'}
-
-**⚠️ 重要**: この楽曲はSUNO最適化設定に基づいて作成されています。指定された楽曲長「${vocalConfiguration.optimizationSettings.songLength || finalSongLength}」に厳密に合わせて歌詞量を調整してください。
-` : ''}` : `
+※ 特に以下の要素が重要です: ${vocalSettings.selectedElements?.join('、') || 'なし'}` : `
 **🎵 従来システム使用**
 - 構成: ${vocal.gender}
 - 年齢: ${vocal.age}
@@ -640,7 +590,7 @@ ${finalRapMode === 'full' ? `
    **モーダル構成**: Intro → Verse → Chorus → Interlude → Verse → Bridge → Chorus → Outro
    **アーティスティック構成**: Intro → Verse → Verse → Chorus → Verse → Bridge → Outro
    
-   楽曲の長さ：${finalSongLength}
+   楽曲の長さ：${songLength}
 `}
 
 ${finalRapMode === 'full' ? `
@@ -747,72 +697,17 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
 `}
 `
 
-    // 🎯 Phase 0: A/Bテスト機能実装
-    // 安全な改善のためのフラグ制御システム
-    const ENABLE_IMPROVED_TRANSLATION = process.env.ENABLE_IMPROVED_TRANSLATION === 'true' || false
-    const ENABLE_DYNAMIC_STRUCTURE = process.env.ENABLE_DYNAMIC_STRUCTURE === 'true' || false
-    
-    console.log('🔧 A/Bテストフラグ状態:', {
-      improvedTranslation: ENABLE_IMPROVED_TRANSLATION,
-      dynamicStructure: ENABLE_DYNAMIC_STRUCTURE
-    })
-
     // 🎯 英語スタイル指示生成プロンプト（Phase 2: 段階的改善中）
     // Step 1完了: 翻訳関数をファイル上部に移動済み
-    
-    // 英語変数の準備（SUNO指示用）
-    const englishTheme = translateToEnglish(theme)
-    const englishMood = translateToEnglish(mood)
-    const englishLength = translateToEnglish(finalSongLength)
-    
-    // ボーカル指示の高度な英語化処理
-    function advancedTranslateToEnglish(text: string): string {
-      if (!text) return 'expressive vocals'
-      
-      // 段階的翻訳処理
-      let result = text
-      
-      // 1. 複合語パターンの翻訳
-      const complexPatterns: Record<string, string> = {
-        '男女混合グループ voice': 'mixed gender group vocals',
-        '男女混合グループ': 'mixed gender group',
-        '男女混合 voice': 'mixed male female vocals',
-        'グループ voice': 'group vocals',
-        'デュエット voice': 'duet vocals'
-      }
-      
-      // 2. 複合語パターンマッチング
-      for (const [pattern, translation] of Object.entries(complexPatterns)) {
-        if (result.includes(pattern)) {
-          result = result.replace(pattern, translation)
-        }
-      }
-      
-      // 3. 残りの日本語を個別翻訳
-      result = translateToEnglish(result)
-      
-      // 4. 最終的な英語検証と調整
-      if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(result)) {
-        // まだ日本語が残っている場合の緊急対応
-        result = result
-          .replace(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+/g, 'vocals')
-          .replace(/\s+/g, ' ')
-          .trim()
-      }
-      
-      return result || 'expressive vocals'
-    }
-    
-    const englishVocalDescription = advancedTranslateToEnglish(vocalSettings.vocalDescription)
     
     // 巨大プロンプト復旧：重要な連携システムを保持
     const stylePrompt = `Create a concise Suno AI style instruction using this exact format:
 
 ${finalRapMode === 'full' ? 
 `**Full Rap Mode Format:**
-"Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${englishVocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
+"Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${vocalSettings.vocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
 `**Standard Format:**  
-"Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
+"Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${vocalSettings.vocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
 
 **Requirements:**
 - Use exact format above
@@ -821,7 +716,6 @@ ${finalRapMode === 'full' ?
 - Include all key elements
 - ${vocalSettings.isNewSystem ? `Use SUNO-optimized vocals: "${vocalSettings.vocalDescription}"` : 'Use standard vocal description'}
 - Instruments: "${actualInstruments}" (use exactly as provided)
-- Song Length: "${englishLength}" ${vocalConfiguration?.optimizationSettings?.songLength ? '(SUNO optimized)' : '(standard)'}
 - Rap Mode: ${finalRapMode}
 
 **Additional Context:**
@@ -1057,51 +951,6 @@ ${vocalSettings.isNewSystem ? `
     const lyricsResponse = lyricsCompletion.choices[0]?.message?.content || ''
     const styleResponse = styleCompletion.choices[0]?.message?.content || ''
 
-    // 🎯 Phase 0-3: 英語スタイル指示の品質チェック機能
-    function checkEnglishStyleQuality(styleText: string) {
-      const issues = []
-      
-      // 日本語文字検出
-      const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/
-      const hasJapanese = japaneseRegex.test(styleText)
-      
-      if (hasJapanese) {
-        const japaneseMatches = styleText.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+/g)
-        issues.push(`日本語検出: ${japaneseMatches?.join(', ')}`)
-      }
-      
-      // 基本必須要素チェック
-      const requiredElements = ['Purpose', 'Mood', 'Tempo', 'Instruments', 'Vocals']
-      const missingElements = requiredElements.filter(element => 
-        !styleText.toLowerCase().includes(element.toLowerCase())
-      )
-      
-      if (missingElements.length > 0) {
-        issues.push(`必須要素不足: ${missingElements.join(', ')}`)
-      }
-      
-      return {
-        isValid: issues.length === 0,
-        issues,
-        hasJapanese,
-        confidence: issues.length === 0 ? 'high' : issues.length <= 2 ? 'medium' : 'low'
-      }
-    }
-
-    const styleQuality = checkEnglishStyleQuality(styleResponse)
-    
-    console.log('🎯 英語スタイル指示品質チェック結果:', {
-      isValid: styleQuality.isValid,
-      confidence: styleQuality.confidence,
-      issues: styleQuality.issues,
-      hasJapanese: styleQuality.hasJapanese
-    })
-    
-    // エラー検出時のログ
-    if (!styleQuality.isValid) {
-      console.error('⚠️ 英語スタイル指示に問題を検出:', styleQuality.issues)
-    }
-
     // タイトル候補を確実に生成するためのフォールバック処理
     let titles: string[] = []
     
@@ -1198,14 +1047,6 @@ ${vocalSettings.isNewSystem ? `
         theme,
         vocal,
         vocalConfiguration: vocalSettings.isNewSystem ? vocalConfiguration : null
-      },
-      // 🎯 Phase 0-3: 品質チェック結果を追加
-      qualityCheck: {
-        styleQuality: styleQuality,
-        abTestFlags: {
-          improvedTranslation: ENABLE_IMPROVED_TRANSLATION,
-          dynamicStructure: ENABLE_DYNAMIC_STRUCTURE
-        }
       }
     })
 
