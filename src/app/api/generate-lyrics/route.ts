@@ -175,6 +175,64 @@ interface VocalSettings {
   techniques: string[]
 }
 
+// 🎯 Phase 2A: SUNO構造タグ修正関数
+// ユーザーのラップ設定に応じて正しい構造を生成
+function generateCorrectStructure(elements: DecomposedElements, settings: UserSettings): string {
+  const baseStructure = elements.structure
+  
+  // ラップモードに応じた構造修正
+  if (settings.rapMode === 'full') {
+    // 全面ラップ: 標準構造を完全にラップ構造に変換
+    return baseStructure
+      .replace(/verse/gi, 'rap verse')
+      .replace(/chorus/gi, 'rap hook')
+      .replace(/pre-chorus/gi, 'rap bridge')
+  } else if (settings.rapMode === 'partial') {
+    // 一部ラップ: 一部のverseをrap verseに変換
+    return baseStructure
+      .replace(/→ verse → chorus/, '→ verse → chorus → rap verse → chorus')
+      .replace(/verse → chorus → verse/, 'verse → chorus → rap verse')
+  }
+  
+  // ラップなし: 元の構造をそのまま使用
+  return baseStructure
+}
+
+// 🎯 Phase 2A: SUNOジャンルタグ生成関数
+// SUNOルールに完全準拠したジャンルタグを生成
+function generateGenreTags(elements: DecomposedElements, settings: UserSettings): string {
+  const tags: string[] = []
+  
+  // ラップモード対応
+  if (settings.rapMode === 'full') {
+    tags.push('hiphop', 'rap', 'japanese rap')
+  } else if (settings.rapMode === 'partial') {
+    tags.push('jpop', 'rap elements', 'hip hop fusion')
+  } else {
+    // ジャンルベースのタグ生成
+    const genre = elements.genre.toLowerCase()
+    if (genre.includes('pop')) {
+      tags.push('jpop', 'japanese pop')
+    } else if (genre.includes('rock')) {
+      tags.push('jrock', 'japanese rock')  
+    } else if (genre.includes('ballad')) {
+      tags.push('jpop', 'ballad', 'emotional')
+    } else {
+      tags.push('jpop') // デフォルト
+    }
+  }
+  
+  // ムードタグ追加
+  const mood = elements.mood.toLowerCase()
+  if (mood.includes('energetic')) tags.push('energetic')
+  if (mood.includes('gentle')) tags.push('gentle')
+  if (mood.includes('nostalgic')) tags.push('nostalgic')
+  
+  // タグを[]形式で結合
+  const tagString = tags.map(tag => `[${tag}]`).join('')
+  return `${tagString}\n\n`
+}
+
 // SUNO 4要素システム用インターフェース（修正版）
 interface ApiVocalConfiguration {
   // 基本のVocalConfiguration
@@ -1472,10 +1530,13 @@ ${userSettings.songLength === '2-3分' ?
 - 楽器指示は英語のみ使用: [Acoustic guitar intro], [Piano melody], [Drums and bass]
 - 歌詞本文は日本語で、タグのみ英語厳守
 
+${generateGenreTags(decomposedElements, userSettings)}
+
+
 [Intro]
 （楽器演奏部分がある場合は英語タグのみ使用）
 
-${decomposedElements.structure}に基づいた楽曲構成で、各セクション間の楽器演奏は英語タグで指示
+${generateCorrectStructure(decomposedElements, userSettings)}に基づいた楽曲構成で、各セクション間の楽器演奏は英語タグで指示
 ...
 
 [Outro]
