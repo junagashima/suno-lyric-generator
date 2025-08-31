@@ -11,7 +11,7 @@ import { NewArchitectureMain } from '@/components/new-architecture/NewArchitectu
 export default function Home() {
   const [generatedData, setGeneratedData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [useNewArchitecture, setUseNewArchitecture] = useState(false)
+  const [useNewArchitecture, setUseNewArchitecture] = useState(true)
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-6xl">
@@ -22,17 +22,23 @@ export default function Home() {
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
           AIを活用してSuno AIで使用する歌詞とスタイル指示を生成します。<br/>
-          {useNewArchitecture ? (
-            <>新アーキテクチャによる段階的・高品質な楽曲生成システムです。</>
-          ) : (
-            <>簡単モードと、こだわりモードの2つの方法で楽曲制作をサポートします。</>
-          )}
+          <>新アーキテクチャによる段階的・高品質な楽曲生成システムです。従来システムも切り替え可能です。</>
         </p>
         
         {/* アーキテクチャ切り替えボタン */}
         <div className="mt-6 flex justify-center">
           <div className="bg-white rounded-lg shadow-md p-4 flex items-center space-x-4">
             <span className="text-sm font-medium text-gray-700">システム選択:</span>
+            <button
+              onClick={() => setUseNewArchitecture(true)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                useNewArchitecture 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              🚀 新アーキテクチャ（推奨）
+            </button>
             <button
               onClick={() => setUseNewArchitecture(false)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -43,26 +49,18 @@ export default function Home() {
             >
               📝 従来システム
             </button>
-            <button
-              onClick={() => setUseNewArchitecture(true)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                useNewArchitecture 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              🚀 新アーキテクチャ
-            </button>
           </div>
         </div>
         
-        {useNewArchitecture && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg max-w-2xl mx-auto">
-            <p className="text-sm text-green-800">
-              ✨ <strong>新アーキテクチャの特徴:</strong> 日本語混入問題の根本解決、段階的品質向上、SUNO最適化
-            </p>
-          </div>
-        )}
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg max-w-2xl mx-auto">
+          <p className="text-sm text-green-800">
+            {useNewArchitecture ? (
+              <>✨ <strong>新アーキテクチャ（デフォルト）:</strong> 完全5ステップフロー・ダミーデータ問題解決・19ジャンル分類・SUNO最適化</>
+            ) : (
+              <>📝 <strong>従来システム:</strong> シンプルな一発生成モード</>
+            )}
+          </p>
+        </div>
       </header>
 
       {/* メインコンテンツ */}
