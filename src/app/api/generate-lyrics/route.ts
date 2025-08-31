@@ -1300,7 +1300,7 @@ ${vocalSettings.isNewSystem ? `
   }
 }
 
-// 🎯 Phase 1-3: 新アーキテクチャ専用処理関数
+// 🎯 Phase 1-3: 新アーキテクチャ専用処理関数（ダミー実装を実際の生成に置き換え）
 async function handleNewArchitectureGeneration(
   decomposedElements: DecomposedElements,
   userSettings: UserSettings,
@@ -1308,51 +1308,296 @@ async function handleNewArchitectureGeneration(
 ): Promise<NextResponse> {
   try {
     console.log('🚀 新アーキテクチャ処理開始')
+    console.log('- 分解要素:', decomposedElements)
+    console.log('- ユーザー設定:', userSettings)
     
-    // Phase 1-3A: DecomposedElements → FinalOutput変換処理
-    const finalOutput: FinalOutput = {
-      titles: ['新システムタイトル1', '新システムタイトル2', '新システムタイトル3'],
-      lyrics: `[Intro]
-新アーキテクチャテスト歌詞
+    // 🔄 既存の強力な生成システムを新アーキテクチャで活用
+    // ステップ1: DecomposedElementsとUserSettingsを既存システム形式に変換
+    
+    const legacyRequestData = {
+      // 新アーキテクチャフラグ
+      useNewArchitecture: true,
+      decomposedElements,
+      userSettings,
+      
+      // 既存システム互換パラメータに変換
+      mode: 'custom',
+      theme: userSettings.theme,
+      content: userSettings.lyricsContent,
+      songLength: userSettings.songLength,
+      
+      // 音楽スタイル: 分解された要素から構築
+      musicStyle: `${decomposedElements.genre}, ${decomposedElements.instruments}, ${decomposedElements.mood}`,
+      mood: decomposedElements.mood,
+      
+      // ボーカル設定: 新アーキテクチャのボーカル属性を変換
+      vocal: {
+        gender: decomposedElements.vocal.attribute || '女性（ソロ）',
+        age: '20代',
+        nationality: '日本',
+        techniques: decomposedElements.vocal.sunoElements || []
+      },
+      
+      // SUNO最適化設定: 新アーキテクチャの要素を活用
+      vocalConfiguration: {
+        useNewSystem: true,
+        generatedText: `${decomposedElements.vocal.attribute}, ${decomposedElements.vocal.sunoElements?.join(', ') || ''}`,
+        selectedElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || [],
+        optimizationSettings: {
+          songLength: userSettings.songLength,
+          vocalElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || []
+        }
+      },
+      
+      // 言語設定
+      languageSettings: {
+        englishMixLevel: userSettings.language.englishMixLevel || 'none',
+        languagePreference: userSettings.language.primary || 'japanese'
+      },
+      
+      // ラップモード
+      rapMode: userSettings.rapMode || 'none',
+      
+      // 楽曲分析詳細: 分解要素から構築
+      analyzedDetails: {
+        tempo: decomposedElements.tempo,
+        rhythm: decomposedElements.rhythm,
+        instruments: decomposedElements.instruments,
+        forbidden: decomposedElements.forbidden
+      },
+      
+      // 楽曲構造情報
+      analyzedStructure: {
+        hasRap: userSettings.rapMode !== 'none',
+        vocalStyle: decomposedElements.vocal.attribute || 'solo',
+        genre: decomposedElements.genre,
+        isDragonAshStyle: false
+      }
+    }
 
-[Verse]
-${decomposedElements.mood}な雰囲気で
-${userSettings.lyricsContent}を歌にする
+    console.log('🔄 既存生成システムに変換されたリクエスト:', {
+      theme: legacyRequestData.theme,
+      musicStyle: legacyRequestData.musicStyle,
+      songLength: legacyRequestData.songLength,
+      vocalAttribute: decomposedElements.vocal.attribute
+    })
 
-[Chorus]  
-新しいシステムで生まれた
-この歌に想いを込めて
+    // ステップ2: 既存の強力な歌詞生成プロンプトを使用
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || '',
+    })
+
+    // 既存システムの歌詞生成ロジックを再利用（上記のlyricsPrompt構築と同じ）
+    const lyricsPrompt = `
+あなたは日本のヒット曲を数多く手がけたプロの作詞家です。Suno AIで使用するための歌詞とタイトルを作成してください。
+
+## 新アーキテクチャ楽曲設定（19ジャンル分類・SUNO最適化対応）
+- ジャンル: ${decomposedElements.genre}
+- 楽器構成: ${decomposedElements.instruments}
+- 楽曲構造: ${decomposedElements.structure}
+- リズム: ${decomposedElements.rhythm}
+- テンポ: ${decomposedElements.tempo}
+- ムード: ${decomposedElements.mood}
+- 楽曲の長さ: ${userSettings.songLength}
+
+## ボーカル設定（新アーキテクチャ）
+- ボーカル属性: ${decomposedElements.vocal.attribute}
+- SUNO最適化要素: ${decomposedElements.vocal.sunoElements?.join('、') || 'なし'}
+
+## 言語設定
+- 基本言語: ${userSettings.language.primary}
+- 英語混在レベル: ${userSettings.language.englishMixLevel || 'なし'}
+
+## ラップ設定
+- ラップモード: ${userSettings.rapMode}
+
+## 歌詞に必ず盛り込む具体的な内容
+${userSettings.lyricsContent}
+
+## 楽曲テーマ
+${userSettings.theme}
+
+## 禁止要素
+${decomposedElements.forbidden}
+
+## 作詞要件
+以下の要素を考慮してJ-POPヒット曲として成功する歌詞を作成してください：
+
+1. **新アーキテクチャ対応作詞戦略**
+   - 19ジャンル分類システムに基づく適切な表現選択
+   - 分析された楽器構成・リズム・テンポに完全同調した歌詞
+   - SUNO最適化要素を活かした表現技法
+   - 指定された楽曲構造に準拠した構成
+
+2. **楽曲長さに応じた歌詞量調整（重要）**
+${userSettings.songLength === '2-3分' ? 
+  '**短い楽曲**：各セクションは短く簡潔に。Verse（4-6行）、Chorus（4-8行）、全体で30-40行程度。' :
+  userSettings.songLength === '3-4分' ? 
+  '**標準的な楽曲**：標準的な歌詞量。Verse（6-8行）、Chorus（6-10行）、全体で50-70行程度。' :
+  userSettings.songLength === '4-5分' ? 
+  '**長い楽曲**：充実した歌詞内容。Verse（8-12行）、Chorus（8-12行）、Bridge/Cメロを含め全体で70-90行程度。' :
+  '**非常に長い楽曲**：多層的な歌詞構成。複数のストーリー展開、繰り返しセクション、全体で90行以上。'}
+
+## 出力形式
+必ず以下の形式で回答してください：
+
+**タイトル候補:**
+1. タイトル1
+2. タイトル2  
+3. タイトル3
+
+**歌詞（Sunoタグ付き）:**
+[Intro]
+[楽器演奏部分の指示がある場合]
+
+${decomposedElements.structure}に基づいた楽曲構成
+...
 
 [Outro]
-[Fade out]`,
-      styleInstruction: `Purpose: New architecture test track, about ${userSettings.songLength}, ${userSettings.language.primary} lyrics. Mood: ${decomposedElements.mood}. Tempo: ${decomposedElements.tempo}. Rhythm: ${decomposedElements.rhythm}. Instruments: ${decomposedElements.instruments}. Vocals: ${decomposedElements.vocal.attribute}. Structure: ${decomposedElements.structure}. Genre: ${decomposedElements.genre}. Forbidden: ${decomposedElements.forbidden}.`,
+[Fade out]
+`
+
+    // ステップ3: 歌詞生成実行
+    const lyricsCompletion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system", 
+          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。新アーキテクチャの19ジャンル分類システムとSUNO最適化技術を完全に理解し、分析された楽曲要素（ジャンル、楽器、構造、リズム、テンポ、ムード）を歌詞に深く反映させることができます。ボーカル属性とSUNO要素を活用した最高品質の歌詞を作成してください。"
+        },
+        {
+          role: "user",
+          content: lyricsPrompt
+        }
+      ],
+      temperature: 0.9,
+      max_tokens: 2000
+    })
+
+    // ステップ4: 英語スタイル指示生成（既存システムのstylePrompt活用）
+    const stylePrompt = `Create a Suno AI style instruction for this new architecture song:
+
+**New Architecture Analysis Results:**
+- Genre: ${decomposedElements.genre}
+- Instruments: ${decomposedElements.instruments}  
+- Structure: ${decomposedElements.structure}
+- Rhythm: ${decomposedElements.rhythm}
+- Tempo: ${decomposedElements.tempo}
+- Mood: ${decomposedElements.mood}
+- Vocal Attribute: ${decomposedElements.vocal.attribute}
+- SUNO Elements: ${decomposedElements.vocal.sunoElements?.join(', ') || 'none'}
+- Song Length: ${userSettings.songLength}
+- Language: ${userSettings.language.primary}
+- Rap Mode: ${userSettings.rapMode}
+- Forbidden: ${decomposedElements.forbidden}
+
+**Format Requirements:**
+Use exact format: "Purpose: [theme] track, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm]. Instruments: [instruments]. Vocals: [vocal attribute]. Structure: [structure]. Genre: [genre]. Forbidden: [forbidden]."
+
+Output only the formatted English style instruction.`
+
+    const styleCompletion = await openai.chat.completions.create({
+      model: "gpt-4o", 
+      messages: [
+        {
+          role: "system",
+          content: "You are a Suno AI optimization specialist who creates precise style instructions from new architecture analysis results. Use the 19-genre classification system and SUNO optimization elements to create technical, structured instructions."
+        },
+        {
+          role: "user", 
+          content: stylePrompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    })
+
+    // ステップ5: 応答処理と品質チェック
+    const lyricsResponse = lyricsCompletion.choices[0]?.message?.content || ''
+    const styleResponse = styleCompletion.choices[0]?.message?.content || ''
+
+    // タイトル抽出（既存システムと同じロジック）
+    let titles: string[] = []
+    const allLines = lyricsResponse.split('\n')
+    let inTitleSection = false
+    
+    for (const line of allLines) {
+      if (line.includes('タイトル')) {
+        inTitleSection = true
+        continue
+      }
+      if (inTitleSection) {
+        const titleMatch = line.match(/^\d+\.\s*(.+)/) || line.match(/^・\s*(.+)/) || line.match(/^-\s*(.+)/)
+        if (titleMatch) {
+          let title = titleMatch[1].trim()
+          title = title.replace(/^\[(.+?)\]$/, '$1').replace(/^「(.+)」$/, '$1')
+          if (title && !title.includes('**') && !title.includes('歌詞')) {
+            titles.push(title)
+          }
+        } else if (line.includes('**') || line.includes('歌詞')) {
+          break
+        }
+      }
+    }
+
+    // タイトル不足時のフォールバック
+    if (titles.length < 3) {
+      const fallbackTitles = generateFallbackTitles(userSettings.theme, decomposedElements.mood, userSettings.lyricsContent)
+      while (titles.length < 3 && fallbackTitles.length > 0) {
+        const fallback = fallbackTitles.shift()
+        if (fallback && !titles.includes(fallback)) {
+          titles.push(fallback)
+        }
+      }
+    }
+
+    // 歌詞抽出
+    let lyrics = lyricsResponse
+    const lyricsMatch = lyricsResponse.match(/\*\*歌詞（Sunoタグ付き）:\*\*\s*\n([\s\S]+)$/s)
+    if (lyricsMatch) {
+      lyrics = lyricsMatch[1].trim()
+    } else {
+      const lines = lyricsResponse.split('\n')
+      const startIndex = lines.findIndex(line => 
+        line.includes('[Intro]') || line.includes('[Verse]') || line.includes('[Pre-Chorus]') || line.includes('[Chorus]')
+      )
+      if (startIndex !== -1) {
+        lyrics = lines.slice(startIndex).join('\n').trim()
+      }
+    }
+
+    // 最終出力構築
+    const finalOutput: FinalOutput = {
+      titles: titles.slice(0, 3),
+      lyrics: lyrics.replace(/^\*\*歌詞（Sunoタグ付き）:\*\*\s*\n?/m, '').trim(),
+      styleInstruction: styleResponse.replace(/^["']|["']$/g, '').trim(),
       editableStyle: true,
       regenerationSupported: true,
       qualityCheck: {
         hasJapanese: userSettings.language.primary === 'japanese',
-        confidence: 'high',
+        confidence: 'high', 
         issues: []
       }
     }
 
-    console.log('✅ 新アーキテクチャ処理完了')
+    console.log('✅ 新アーキテクチャ実生成処理完了')
     console.log('- 生成タイトル数:', finalOutput.titles.length)
+    console.log('- タイトル:', finalOutput.titles)
+    console.log('- 歌詞長:', finalOutput.lyrics.length, '文字')
     console.log('- スタイル指示:', finalOutput.styleInstruction.substring(0, 100) + '...')
 
     return NextResponse.json({
-      // FinalOutput構造で返す
       titles: finalOutput.titles,
       lyrics: finalOutput.lyrics,
       styleInstruction: finalOutput.styleInstruction,
-      // 新アーキテクチャ固有フィールド
       editableStyle: finalOutput.editableStyle,
       regenerationSupported: finalOutput.regenerationSupported,
       qualityCheck: finalOutput.qualityCheck,
-      // デバッグ情報
       debug: {
         architecture: 'new',
         processedElements: decomposedElements,
         processedSettings: userSettings,
+        generationMethod: 'real_ai_generation',
         timestamp: new Date().toISOString()
       }
     })

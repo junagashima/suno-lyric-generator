@@ -2,7 +2,7 @@ import React from 'react'
 import { DecomposedElements } from '@/types/analysis'
 
 // 🎯 Step 2: 改良版要素分解表示コンポーネント
-// 19ジャンル分類システム連携 + 8要素明確表示 + 視覚的改善
+// 19ジャンル分類システム連携 + 視覚的改善
 
 interface DecomposedElementsDisplayProps {
   elements: DecomposedElements
@@ -10,7 +10,12 @@ interface DecomposedElementsDisplayProps {
   isLoading?: boolean
 }
 
-export function DecomposedElementsDisplay({ elements, onProceed, isLoading = false }: DecomposedElementsDisplayProps) {
+export function DecomposedElementsDisplayImproved({ 
+  elements, 
+  onProceed, 
+  isLoading = false 
+}: DecomposedElementsDisplayProps) {
+  
   // 8つのSUNO要素を整理して表示
   const sunoElements = [
     {
