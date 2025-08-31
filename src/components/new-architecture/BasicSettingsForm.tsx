@@ -143,6 +143,61 @@ export function BasicSettingsForm({ settings, onUpdateSettings, isLoading }: Bas
         )}
       </div>
 
+      {/* 内容反映度設定 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          内容反映度設定
+        </label>
+        <div className="space-y-2">
+          <label className="flex items-start">
+            <input
+              type="radio"
+              name="contentReflection"
+              value="literal"
+              checked={settings.contentReflection === 'literal'}
+              onChange={(e) => onUpdateSettings({ contentReflection: e.target.value as 'literal' | 'metaphorical' | 'balanced' })}
+              className="mr-3 mt-1"
+              disabled={isLoading}
+            />
+            <div>
+              <div className="text-sm font-medium">忠実反映</div>
+              <div className="text-xs text-gray-500">専門用語・固有名詞をそのまま歌詞に使用</div>
+            </div>
+          </label>
+          <label className="flex items-start">
+            <input
+              type="radio"
+              name="contentReflection"
+              value="metaphorical"
+              checked={settings.contentReflection === 'metaphorical'}
+              onChange={(e) => onUpdateSettings({ contentReflection: e.target.value as 'literal' | 'metaphorical' | 'balanced' })}
+              className="mr-3 mt-1"
+              disabled={isLoading}
+            />
+            <div>
+              <div className="text-sm font-medium">比喩的表現</div>
+              <div className="text-xs text-gray-500">内容を詩的・象徴的に表現</div>
+            </div>
+          </label>
+          <label className="flex items-start">
+            <input
+              type="radio"
+              name="contentReflection"
+              value="balanced"
+              checked={settings.contentReflection === 'balanced'}
+              onChange={(e) => onUpdateSettings({ contentReflection: e.target.value as 'literal' | 'metaphorical' | 'balanced' })}
+              className="mr-3 mt-1"
+              disabled={isLoading}
+            />
+            <div>
+              <div className="text-sm font-medium">バランス型</div>
+              <div className="text-xs text-gray-500">重要部分は忠実、他は比喩的に</div>
+            </div>
+          </label>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">歌詞内容への反映方法を選択してください</p>
+      </div>
+
       {/* 歌詞テーマ */}
       <div>
         <label htmlFor="theme" className="block text-sm font-medium text-gray-700 mb-2">

@@ -19,7 +19,9 @@ export function useNewArchitectureFlow() {
       vocalAttribute: '女性（ソロ）',
       sunoElements: [],
       lyricsContent: '',
-      theme: ''
+      theme: '',
+      // Phase 2: 内容反映度設定のデフォルト値
+      contentReflection: 'literal'
     },
     finalOutput: null,
     isEditing: false,
@@ -270,7 +272,9 @@ export function useNewArchitectureFlow() {
           englishMixLevel: 'none'
         },
         lyricsContent: '',
-        theme: ''
+        theme: '',
+        // Phase 2: 内容反映度設定のデフォルト値
+        contentReflection: 'literal'
       },
       finalOutput: null,
       isEditing: false,
