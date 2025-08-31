@@ -6,7 +6,6 @@ import { AnalysisResultDisplay } from './AnalysisResultDisplay'
 import { DecomposedElementsDisplay } from './DecomposedElementsDisplay'
 import { UserSettingsStep } from './UserSettingsStep'
 import { FinalOutputDisplay } from './FinalOutputDisplay'
-import { ExampleDisplaySection } from './ExampleDisplaySection'
 
 // 🎯 Phase 2B: 新アーキテクチャメイン統合コンポーネント
 
@@ -26,14 +25,6 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
     isReady,
     canProceed
   } = useNewArchitectureFlow()
-
-  // 🔧 修正: 出力完了時に自動的にonCompleteを呼び出し
-  React.useEffect(() => {
-    if (onComplete && flowState.finalOutput && flowState.currentStep === 'output') {
-      console.log('🎯 新アーキテクチャ完了: onCompleteを呼び出し')
-      onComplete(flowState.finalOutput)
-    }
-  }, [flowState.finalOutput, flowState.currentStep, onComplete])
 
   // 楽曲分析実行
   const handleAnalysis = async (artist: string, song: string) => {
@@ -151,15 +142,8 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
               <div className="text-center">
                 <div className="animate-pulse text-4xl mb-4">🔍</div>
                 <h2 className="text-xl font-bold text-gray-800 mb-2">楽曲分析中...</h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600">
                   AIが楽曲の特徴を分析しています
-                </p>
-                {/* 🎯 Phase C: プログレスバー追加 */}
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                  <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
-                </div>
-                <p className="text-xs text-gray-500">
-                  ジャンル・テンポ・楽器構成・ムードを解析中...
                 </p>
               </div>
             </div>
@@ -218,24 +202,6 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
 
         {/* 右カラム: サイドバー情報 */}
         <div className="space-y-6">
-          {/* 例示表示セクション（入力ステップでのみ表示） */}
-          {flowState.currentStep === 'input' && (
-            <ExampleDisplaySection
-              onSelectExample={handleAnalysis}
-              isLoading={flowState.isLoading}
-            />
-          )}
-          
-          {/* デバッグ情報 - 開発時のみ表示 */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
-              <div><strong>Debug Info:</strong></div>
-              <div>Current Step: {flowState.currentStep}</div>
-              <div>Is Loading: {flowState.isLoading.toString()}</div>
-              <div>Example Display Should Show: {flowState.currentStep === 'input' ? 'YES' : 'NO'}</div>
-            </div>
-          )}
-
           {/* 現在の状態表示 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 進行状況</h3>
@@ -315,7 +281,7 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
             
             <div className="text-sm text-gray-600 space-y-2">
               <div>• <strong>アーキテクチャ:</strong> 新システム v2.0</div>
-              <div>• <strong>API使用:</strong> analyze, decompose, new-architecture (独立), regenerate-style</div>
+              <div>• <strong>API使用:</strong> analyze, decompose, generate-lyrics, regenerate-style</div>
               <div>• <strong>品質保証:</strong> 自動チェック・再生成対応</div>
               <div>• <strong>日本語混入:</strong> 根本的解決済み</div>
             </div>

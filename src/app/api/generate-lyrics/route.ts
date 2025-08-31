@@ -48,8 +48,6 @@ function translateToEnglish(text: string): string {
     '男性ボーカル': 'male vocals', '女性ボーカル': 'female vocals',
     '男女混合': 'mixed male and female', '男女混合グループ': 'mixed gender group',
     'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony',
-    '女性（ソロ）': 'female solo vocals', '男性（ソロ）': 'male solo vocals',
-    '女性ソロ': 'female solo vocals', '男性ソロ': 'male solo vocals',
     
     // 🎯 Phase 1-A: ボーカル関連の頻出パターン追加
     '男性voice': 'male vocals',
@@ -177,64 +175,6 @@ interface VocalSettings {
   techniques: string[]
 }
 
-// 🎯 Phase 2A: SUNO構造タグ修正関数
-// ユーザーのラップ設定に応じて正しい構造を生成
-function generateCorrectStructure(elements: DecomposedElements, settings: UserSettings): string {
-  const baseStructure = elements.structure
-  
-  // ラップモードに応じた構造修正
-  if (settings.rapMode === 'full') {
-    // 全面ラップ: 標準構造を完全にラップ構造に変換
-    return baseStructure
-      .replace(/verse/gi, 'rap verse')
-      .replace(/chorus/gi, 'rap hook')
-      .replace(/pre-chorus/gi, 'rap bridge')
-  } else if (settings.rapMode === 'partial') {
-    // 一部ラップ: 一部のverseをrap verseに変換
-    return baseStructure
-      .replace(/→ verse → chorus/, '→ verse → chorus → rap verse → chorus')
-      .replace(/verse → chorus → verse/, 'verse → chorus → rap verse')
-  }
-  
-  // ラップなし: 元の構造をそのまま使用
-  return baseStructure
-}
-
-// 🎯 Phase 2A: SUNOジャンルタグ生成関数
-// SUNOルールに完全準拠したジャンルタグを生成
-function generateGenreTags(elements: DecomposedElements, settings: UserSettings): string {
-  const tags: string[] = []
-  
-  // ラップモード対応
-  if (settings.rapMode === 'full') {
-    tags.push('hiphop', 'rap', 'japanese rap')
-  } else if (settings.rapMode === 'partial') {
-    tags.push('jpop', 'rap elements', 'hip hop fusion')
-  } else {
-    // ジャンルベースのタグ生成
-    const genre = elements.genre.toLowerCase()
-    if (genre.includes('pop')) {
-      tags.push('jpop', 'japanese pop')
-    } else if (genre.includes('rock')) {
-      tags.push('jrock', 'japanese rock')  
-    } else if (genre.includes('ballad')) {
-      tags.push('jpop', 'ballad', 'emotional')
-    } else {
-      tags.push('jpop') // デフォルト
-    }
-  }
-  
-  // ムードタグ追加
-  const mood = elements.mood.toLowerCase()
-  if (mood.includes('energetic')) tags.push('energetic')
-  if (mood.includes('gentle')) tags.push('gentle')
-  if (mood.includes('nostalgic')) tags.push('nostalgic')
-  
-  // タグを[]形式で結合
-  const tagString = tags.map(tag => `[${tag}]`).join('')
-  return `${tagString}\n\n`
-}
-
 // SUNO 4要素システム用インターフェース（修正版）
 interface ApiVocalConfiguration {
   // 基本のVocalConfiguration
@@ -316,14 +256,7 @@ export async function POST(request: NextRequest) {
     }: GenerateRequest = await request.json()
 
     // 後方互換性: includeRapがtrueの場合はpartialに変換
-    const finalRapMode = ((): 'none' | 'partial' | 'full' => {
-      if (includeRap && rapMode === 'none') {
-        return 'partial'
-      } else if (rapMode) {
-        return rapMode as 'none' | 'partial' | 'full'
-      }
-      return 'none'
-    })()
+    const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
 
     // 🎯 Phase 1-3: 新アーキテクチャ対応 - 早期分岐処理
     if (useNewArchitecture && decomposedElements && userSettings) {
@@ -339,12 +272,7 @@ export async function POST(request: NextRequest) {
     console.log('🔄 従来アーキテクチャモードで処理継続')
 
     // 不要な楽器を除去する関数（改良版）
-    const removeUnwantedInstruments = (styleText: string | undefined): string => {
-      // undefined または null の場合はデフォルト楽器構成を返す
-      if (!styleText) {
-        return 'acoustic guitar, piano'
-      }
-      
+    const removeUnwantedInstruments = (styleText: string): string => {
       const unwantedInstruments = [
         'synth pad', 'synthpad', 'シンセパッド',
         'vocals', 'vocal', 'ボーカル', 'song', 'singing', '歌'
@@ -393,12 +321,9 @@ export async function POST(request: NextRequest) {
       if (analyzedDetails?.instruments) {
         console.log('🎵 楽器構成: 分析結果を使用 -', analyzedDetails.instruments)
         return removeUnwantedInstruments(analyzedDetails.instruments)
-      } else if (musicStyle) {
+      } else {
         console.log('🎵 楽器構成: musicStyleから抽出 -', musicStyle)
         return removeUnwantedInstruments(musicStyle)
-      } else {
-        console.log('🎵 楽器構成: デフォルト楽器を使用')
-        return removeUnwantedInstruments(undefined) // デフォルト値を取得
       }
     }
 
@@ -805,60 +730,6 @@ ${finalRapMode === 'full' ? `
 
 **CRITICAL: [Verse], [Pre-Chorus], [Chorus]タグは絶対に使用禁止**
 ` : `
-## 🚨 CRITICAL: SUNO AI必須タグルール（厳格遵守）
-
-**絶対に使用してはいけないタグ形式:**
-❌ [Verse 1 (Rap)] - 括弧内の説明は使用禁止
-❌ [Chorus (Melody)] - 括弧内の説明は使用禁止
-❌ [ラップバース] - 日本語タグは使用禁止
-❌ [コーラス] - 日本語タグは使用禁止
-
-**SUNO AIが認識する正しいタグ形式のみ使用:**
-✅ [Rap Verse] - ラップセクション
-✅ [Rap Hook] - ラップ用コーラス
-✅ [Chorus] - 通常のコーラス
-✅ [Verse] - 通常のバース
-✅ [Bridge] - ブリッジ
-✅ [Intro] / [Outro] - 導入・終了
-
-${finalRapMode === ('full' as typeof finalRapMode) ? `
-## 🔥 全面ラップ楽曲専用タグ構成（必須遵守）
-**使用可能タグ（ラップ専用）:**
-- [Intro] - 導入部分
-- [Rap Verse] - メインラップセクション（[Verse]は使用禁止）
-- [Rap Hook] - ラップ用コーラス（[Chorus]は使用禁止）
-- [Rap Bridge] - ラップブリッジ（[Pre-Chorus]は使用禁止）
-- [Outro] - 終了部分
-
-**絶対禁止タグ（全面ラップ時）:**
-❌ [Verse] - 歌メロディー用なので使用禁止
-❌ [Chorus] - 歌メロディー用なので使用禁止
-❌ [Pre-Chorus] - 歌メロディー用なので使用禁止
-` : (finalRapMode === 'partial' || analyzedStructure?.hasRap) ? `
-## 🎤 一部ラップ楽曲用タグ構成
-**通常セクション用:**
-- [Intro] - 導入部分
-- [Verse] - 歌メロディーセクション
-- [Pre-Chorus] - プリコーラス（任意）
-- [Chorus] - メインコーラス
-- [Bridge] - ブリッジ（任意）
-- [Outro] - 終了部分
-
-**ラップセクション用（必須1箇所以上）:**
-- [Rap Verse] - ラップセクション
-
-**重要**: [Rap Verse]は[Verse]とは別物です。両方を適切に使い分けてください。
-` : `
-## 🎵 通常楽曲用タグ構成
-**使用可能タグ:**
-- [Intro] - 導入部分
-- [Verse] - バースセクション
-- [Pre-Chorus] - プリコーラス（任意）
-- [Chorus] - メインコーラス
-- [Bridge] - ブリッジ（任意）
-- [Outro] - 終了部分
-`}}
-
 ## 出力形式
 必ず以下の形式で回答してください：
 
@@ -868,37 +739,10 @@ ${finalRapMode === ('full' as typeof finalRapMode) ? `
 3. タイトル3
 
 **歌詞（Sunoタグ付き）:**
-⚠️ **タグ使用時の絶対ルール:**
-- 構造タグ（セクション）は必ず英語のみ
-- 括弧内説明は絶対に使用しない
-- 上記の正しいタグ形式のみ使用
-
 [Intro]
-[楽器演奏部分の指示がある場合は英語で]
+[楽器演奏部分の指示がある場合]
 
-${finalRapMode === ('full' as typeof finalRapMode) ? `[Rap Verse]
-ラップ歌詞内容...
-
-[Rap Hook]
-ラップフック歌詞...
-
-[Rap Verse]
-ラップ歌詞内容...
-
-[Rap Hook]
-ラップフック歌詞...
-` : (finalRapMode === 'partial' || analyzedStructure?.hasRap) ? `[Verse]
-歌詞内容...
-
-[Chorus]
-歌詞内容...
-
-[Rap Verse]
-ラップセクション歌詞（韻踏み必須）...
-
-[Chorus]
-歌詞内容...
-` : `[Verse]
+[Verse]
 歌詞内容...
 
 [Pre-Chorus]
@@ -907,8 +751,11 @@ ${finalRapMode === ('full' as typeof finalRapMode) ? `[Rap Verse]
 [Chorus]
 歌詞内容...
 
-[続きのセクション...]
-`}}
+${finalRapMode === 'partial' || analyzedStructure?.hasRap ? `[Rap Verse]
+歌詞内容（ラップセクション、絵文字や装飾記号なし）...
+
+` : ''}[続きのセクション...]
+
 [Outro]
 [Fade out]
 `}
@@ -1010,16 +857,10 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
       // 1. 複合語パターンの翻訳
       const complexPatterns: Record<string, string> = {
         '男女混合グループ voice': 'mixed gender group vocals',
-        '男女混合グループ': 'mixed gender group vocals',
+        '男女混合グループ': 'mixed gender group',
         '男女混合 voice': 'mixed male female vocals',
-        '男女混合': 'mixed male female vocals',
-        '女性（ソロ）': 'female solo vocals',
-        '男性（ソロ）': 'male solo vocals',
-        '女性ソロ': 'female solo vocals',
-        '男性ソロ': 'male solo vocals',
         'グループ voice': 'group vocals',
-        'デュエット voice': 'duet vocals',
-        'デュエット': 'duet vocals'
+        'デュエット voice': 'duet vocals'
       }
       
       // 2. 複合語パターンマッチング
@@ -1052,9 +893,6 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
 ${finalRapMode === 'full' ? 
 `**Full Rap Mode Format:**
 "Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${englishVocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
-finalRapMode === 'partial' ?
-`**Partial Rap Mode Format:**
-"Purpose: ${englishTheme} track with rap sections, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium-fast'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat with rap sections'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'} with rap verses. Structure: intro → verse → chorus → rap verse → chorus → outro. Rap Style: Japanese rap with rhymes and flow. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."` :
 `**Standard Format:**  
 "Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
 
@@ -1424,10 +1262,6 @@ ${vocalSettings.isNewSystem ? `
       }
     }
     
-    // SUNOタグを抽出（清浄化前に）
-    const sunoTagsMatch = lyrics.match(/^\[[\w\s,]+\][\s\n]*/m)
-    const extractedSunoTags = sunoTagsMatch ? sunoTagsMatch[0].trim() : ''
-    
     // 歌詞内の装飾記号を清浄化
     lyrics = lyrics
       .replace(/🔥\s*\[Rap Verse\]\s*🔥\s*/g, '') // 🔥アイコン行全体を除去
@@ -1439,7 +1273,6 @@ ${vocalSettings.isNewSystem ? `
       titles,
       lyrics,
       styleInstruction: styleResponse.replace(/^["']|["']$/g, '').trim(),
-      sunoTags: extractedSunoTags || 'jpop,japanese pop,gentle', // デフォルトタグを設定
       mode,
       settings: {
         mood,
@@ -1499,53 +1332,22 @@ async function handleNewArchitectureGeneration(
       
       // ボーカル設定: 新アーキテクチャのボーカル属性を変換
       vocal: {
-        gender: (() => {
-          // 安全な性別変換: 英語属性から日本語に変換
-          const attr = decomposedElements.vocal.attribute?.toLowerCase() || ''
-          if (attr.includes('male') && !attr.includes('female')) {
-            return '男性（ソロ）'
-          } else if (attr.includes('female')) {
-            return '女性（ソロ）'
-          } else if (attr.includes('choir') || attr.includes('chorus')) {
-            return 'コーラス'
-          } else {
-            return '女性（ソロ）'  // デフォルト
-          }
-        })(),
+        gender: decomposedElements.vocal.attribute || '女性（ソロ）',
         age: '20代',
         nationality: '日本',
         techniques: decomposedElements.vocal.sunoElements || []
       },
       
       // SUNO最適化設定: 新アーキテクチャの要素を活用
-      vocalConfiguration: (() => {
-        // 安全なテキスト生成: 空要素を避ける
-        const attribute = decomposedElements.vocal.attribute || ''
-        const sunoElements = decomposedElements.vocal.sunoElements || []
-        const sunoElementsText = sunoElements.length > 0 ? sunoElements.join(', ') : ''
-        
-        let finalText = ''
-        if (attribute && sunoElementsText) {
-          finalText = `${attribute}, ${sunoElementsText}`
-        } else if (attribute) {
-          finalText = attribute
-        } else if (sunoElementsText) {
-          finalText = sunoElementsText
-        } else {
-          finalText = 'female vocal, solo'  // デフォルト値
+      vocalConfiguration: {
+        useNewSystem: true,
+        generatedText: `${decomposedElements.vocal.attribute}, ${decomposedElements.vocal.sunoElements?.join(', ') || ''}`,
+        selectedElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || [],
+        optimizationSettings: {
+          songLength: userSettings.songLength,
+          vocalElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || []
         }
-        
-        return {
-          useNewSystem: true,
-          generatedText: finalText,
-          sunoText: finalText,  // 🔧 重要: 既存システムが期待する sunoText フィールド
-          selectedElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || [],
-          optimizationSettings: {
-            songLength: userSettings.songLength,
-            vocalElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || []
-          }
-        }
-      })(),
+      },
       
       // 言語設定
       languageSettings: {
@@ -1555,9 +1357,6 @@ async function handleNewArchitectureGeneration(
       
       // ラップモード
       rapMode: userSettings.rapMode || 'none',
-      
-      // 内容反映度設定
-      contentReflection: userSettings.contentReflection || 'literal',
       
       // 楽曲分析詳細: 分解要素から構築
       analyzedDetails: {
@@ -1609,14 +1408,6 @@ async function handleNewArchitectureGeneration(
 - 基本言語: ${userSettings.language.primary}
 - 英語混在レベル: ${userSettings.language.englishMixLevel || 'なし'}
 
-## 内容反映度設定
-- 反映方法: ${userSettings.contentReflection || 'literal'}
-${userSettings.contentReflection === 'literal' ? 
-  '  → 専門用語・固有名詞をそのまま歌詞に使用' :
-  userSettings.contentReflection === 'metaphorical' ?
-  '  → 内容を詩的・象徴的に表現' :
-  '  → 重要部分は忠実、他は比喩的に'}
-
 ## ラップ設定
 - ラップモード: ${userSettings.rapMode}
 
@@ -1667,28 +1458,10 @@ ${userSettings.songLength === '2-3分' ?
 - 楽器指示は英語のみ使用: [Acoustic guitar intro], [Piano melody], [Drums and bass]
 - 歌詞本文は日本語で、タグのみ英語厳守
 
-## 🚨 この楽曲専用のSUNOタグ構成（生成AI専用指示）
-
-**ジャンルタグ（歌詞冒頭に配置）:**
-${generateGenreTags(decomposedElements, userSettings)}
-
-**楽曲構造（必須遵守）:**
-${generateCorrectStructure(decomposedElements, userSettings)}
-
-**🚨 CRITICAL: SUNOタグ厳格ルール**
-- 括弧内説明は絶対に使用禁止: [Verse 1 (Rap)] ❌
-- 日本語タグは絶対に使用禁止: [ラップバース] ❌  
-- 正しい英語タグのみ使用: [Rap Verse] ✅
-
-**出力時の注意:**
-- 上記のジャンルタグを歌詞の最初に配置
-- 構造指示に従って正確なセクションタグを使用
-- 括弧内説明や日本語タグは絶対に使用しない
-
 [Intro]
 （楽器演奏部分がある場合は英語タグのみ使用）
 
-（上記の楽曲構造に基づいた各セクション）
+${decomposedElements.structure}に基づいた楽曲構成で、各セクション間の楽器演奏は英語タグで指示
 ...
 
 [Outro]
@@ -1769,12 +1542,9 @@ ${generateCorrectStructure(decomposedElements, userSettings)}
 - Forbidden: ${decomposedElements.forbidden}
 
 **Format Requirements:**
-Use exact format based on rap mode:
-- If Rap Mode is "full": "Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about [length], [language] lyrics. Vocals: continuous rap throughout, no melodic singing. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: [mood]. Tempo: [tempo]. Instruments: [instruments]. Forbidden: sung chorus, autotuned melodies, pop-style singing."
-- If Rap Mode is "partial": "Purpose: [theme] track with rap sections, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm] with rap sections. Instruments: [instruments]. Vocals: [vocal attribute] with rap verses. Structure: intro → verse → chorus → rap verse → chorus → outro. Rap Style: Japanese rap with rhymes and flow. Forbidden: [forbidden]."
-- If Rap Mode is "none": "Purpose: [theme] track, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm]. Instruments: [instruments]. Vocals: [vocal attribute]. Structure: [structure]. Genre: [genre]. Forbidden: [forbidden]."
+Use exact format: "Purpose: [theme] track, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm]. Instruments: [instruments]. Vocals: [vocal attribute]. Structure: [structure]. Genre: [genre]. Forbidden: [forbidden]."
 
-Output only the formatted English style instruction for the specified rap mode.`
+Output only the formatted English style instruction.`
 
     const styleCompletion = await openai.chat.completions.create({
       model: "gpt-4o", 

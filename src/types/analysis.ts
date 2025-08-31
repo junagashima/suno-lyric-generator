@@ -82,8 +82,6 @@ export interface UserSettings {
   sunoElements?: string[]                              // SUNO最適化要素（オプショナル - 後方互換性）
   lyricsContent: string           // 歌詞に含めたい内容
   theme: string                   // 歌詞用テーマ（楽曲分析のテーマとは別）
-  // Phase 2: 内容反映度設定を追加
-  contentReflection: 'literal' | 'metaphorical' | 'balanced'  // 内容反映方法
 }
 
 // ===== 最終生成物 =====
