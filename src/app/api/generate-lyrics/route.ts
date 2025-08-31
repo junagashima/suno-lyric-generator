@@ -1499,22 +1499,53 @@ async function handleNewArchitectureGeneration(
       
       // ボーカル設定: 新アーキテクチャのボーカル属性を変換
       vocal: {
-        gender: decomposedElements.vocal.attribute || '女性（ソロ）',
+        gender: (() => {
+          // 安全な性別変換: 英語属性から日本語に変換
+          const attr = decomposedElements.vocal.attribute?.toLowerCase() || ''
+          if (attr.includes('male') && !attr.includes('female')) {
+            return '男性（ソロ）'
+          } else if (attr.includes('female')) {
+            return '女性（ソロ）'
+          } else if (attr.includes('choir') || attr.includes('chorus')) {
+            return 'コーラス'
+          } else {
+            return '女性（ソロ）'  // デフォルト
+          }
+        })(),
         age: '20代',
         nationality: '日本',
         techniques: decomposedElements.vocal.sunoElements || []
       },
       
       // SUNO最適化設定: 新アーキテクチャの要素を活用
-      vocalConfiguration: {
-        useNewSystem: true,
-        generatedText: `${decomposedElements.vocal.attribute}, ${decomposedElements.vocal.sunoElements?.join(', ') || ''}`,
-        selectedElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || [],
-        optimizationSettings: {
-          songLength: userSettings.songLength,
-          vocalElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || []
+      vocalConfiguration: (() => {
+        // 安全なテキスト生成: 空要素を避ける
+        const attribute = decomposedElements.vocal.attribute || ''
+        const sunoElements = decomposedElements.vocal.sunoElements || []
+        const sunoElementsText = sunoElements.length > 0 ? sunoElements.join(', ') : ''
+        
+        let finalText = ''
+        if (attribute && sunoElementsText) {
+          finalText = `${attribute}, ${sunoElementsText}`
+        } else if (attribute) {
+          finalText = attribute
+        } else if (sunoElementsText) {
+          finalText = sunoElementsText
+        } else {
+          finalText = 'female vocal, solo'  // デフォルト値
         }
-      },
+        
+        return {
+          useNewSystem: true,
+          generatedText: finalText,
+          sunoText: finalText,  // 🔧 重要: 既存システムが期待する sunoText フィールド
+          selectedElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || [],
+          optimizationSettings: {
+            songLength: userSettings.songLength,
+            vocalElements: decomposedElements.vocal.sunoElements?.map(id => ({ id, label: id })) || []
+          }
+        }
+      })(),
       
       // 言語設定
       languageSettings: {
