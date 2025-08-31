@@ -85,7 +85,7 @@ export function UserSettingsStep({ settings, onUpdateSettings, onGenerate, isLoa
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                生成中...
+                🎵 高品質楽曲生成中... (独立APIで処理中)
               </>
             ) : (
               <>

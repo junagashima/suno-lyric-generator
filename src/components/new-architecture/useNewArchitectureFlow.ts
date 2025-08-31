@@ -16,7 +16,7 @@ export function useNewArchitectureFlow() {
         englishMixLevel: 'none'
       },
       // Step 3: 新しい設定項目のデフォルト値
-      vocalAttribute: '女性（ソロ）',
+      vocalAttribute: '男女混合グループ',
       sunoElements: [],
       lyricsContent: '',
       theme: '',
@@ -138,32 +138,37 @@ export function useNewArchitectureFlow() {
     setFlowState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      console.log('🚀 新アーキテクチャ: 最終生成開始')
+      console.log('🚀 新アーキテクチャ: 独立API最終生成開始 (レガシー非依存)')
 
-      const response = await fetch('/api/generate-lyrics', {
+      // 🎯 Phase B: 独立APIエンドポイントを使用（レガシー依存を排除）
+      const response = await fetch('/api/new-architecture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          useNewArchitecture: true,
           decomposedElements,
           userSettings,
-          // フォールバック用の基本フィールド（後方互換性）
-          mode: 'simple',
-          mood: decomposedElements.mood,
-          musicStyle: decomposedElements.genre,
-          theme: userSettings.theme,
-          content: userSettings.lyricsContent,
-          songLength: userSettings.songLength
+          requestType: 'generate-lyrics'
         })
       })
 
       if (!response.ok) {
-        throw new Error(`生成APIエラー: ${response.status}`)
+        throw new Error(`独立API生成エラー: ${response.status}`)
       }
 
       const data = await response.json()
       
-      console.log('✅ 最終生成完了:', data)
+      console.log('✅ 独立API生成完了:', {
+        success: data.success,
+        architecture: data.metadata?.architecture,
+        titlesCount: data.titles?.length,
+        hasLyrics: !!data.lyrics,
+        hasStyle: !!data.styleInstruction
+      })
+
+      // 🎯 Phase B: 独立APIレスポンス処理（エラーハンドリング強化）
+      if (!data.success) {
+        throw new Error(data.message || 'API処理エラー')
+      }
 
       const finalOutput: FinalOutput = {
         titles: data.titles || ['生成されたタイトル1', '生成されたタイトル2', '生成されたタイトル3'],
@@ -173,7 +178,7 @@ export function useNewArchitectureFlow() {
         regenerationSupported: data.regenerationSupported !== undefined ? data.regenerationSupported : true,
         qualityCheck: data.qualityCheck || {
           hasJapanese: userSettings.language.primary === 'japanese',
-          confidence: 'medium',
+          confidence: 'medium' as const,
           issues: []
         }
       }
@@ -192,7 +197,7 @@ export function useNewArchitectureFlow() {
       setFlowState(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : '最終生成中にエラーが発生しました'
+        error: error instanceof Error ? error.message : '独立API生成中にエラーが発生しました'
       }))
       throw error
     }
