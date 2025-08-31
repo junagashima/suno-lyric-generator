@@ -35,10 +35,41 @@ function translateToEnglish(text: string): string {
     'ミディアムテンポ': 'medium tempo', 'グルーヴ重視': 'groove-focused',
     'ビート重視': 'beat-focused', 'リズミカル': 'rhythmic',
     
+    // 🎯 Phase 1-A: 高頻出複合句パターンの追加
+    'ミディアムテンポ、グルーヴ重視': 'medium tempo, groove-focused',
+    'スローテンポ、リラックス': 'slow tempo, relaxed',
+    'ファストテンポ、エナジェティック': 'fast tempo, energetic',
+    'アップテンポ、ノリの良い': 'uptempo, groove-driven',
+    'ドライビング、パワフル': 'driving, powerful',
+    
     // ボーカル関連
     '男性ボーカル': 'male vocals', '女性ボーカル': 'female vocals',
     '男女混合': 'mixed male and female', '男女混合グループ': 'mixed gender group',
-    'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony'
+    'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony',
+    
+    // 🎯 Phase 1-A: ボーカル関連の頻出パターン追加
+    '男性voice': 'male vocals',
+    '女性voice': 'female vocals', 
+    '男性': 'male',
+    '女性': 'female',
+    'voice': 'vocals',
+    'ボイス': 'voice',
+    '歌声': 'vocals',
+    
+    // 🎯 Phase 1-A: 楽器・音楽要素の翻訳追加
+    'ギター': 'guitar', 'ベース': 'bass', 'ドラム': 'drums', 'ピアノ': 'piano',
+    'シンセ': 'synthesizer', 'ストリングス': 'strings', 'ブラス': 'brass',
+    'アコースティック': 'acoustic', 'エレクトリック': 'electric',
+    '生楽器': 'live instruments', '電子楽器': 'electronic instruments',
+    
+    // ジャンル・スタイル関連
+    'ポップス': 'pop', 'ロック': 'rock', 'バラード': 'ballad', 'フォーク': 'folk',
+    'ジャズ': 'jazz', 'ブルース': 'blues', 'カントリー': 'country', 'R&B': 'R&B',
+    'ヒップホップ': 'hip-hop', 'ラップ': 'rap', 'エレクトロ': 'electro',
+    
+    // 音質・表現関連  
+    'クリア': 'clear', 'ディストーション': 'distorted', 'リバーブ': 'reverb',
+    'エコー': 'echo', 'フェード': 'fade', 'ビブラート': 'vibrato'
   };
   
   return translations[text] || text;
@@ -760,10 +791,38 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
     // 🎯 英語スタイル指示生成プロンプト（Phase 2: 段階的改善中）
     // Step 1完了: 翻訳関数をファイル上部に移動済み
     
+    // 🎯 Phase 1-A: 改善版翻訳関数
+    function improvedTranslateToEnglish(text: string): string {
+      if (!text) return text
+      
+      // まず複合句の直接翻訳を試行
+      const directTranslation = translateToEnglish(text)
+      if (directTranslation !== text) {
+        return directTranslation
+      }
+      
+      // カンマ区切りの複合句を処理
+      if (text.includes('、') || text.includes(',')) {
+        const parts = text.split(/[、,]/).map(part => part.trim())
+        const translatedParts = parts.map(part => translateToEnglish(part))
+        
+        // 全て翻訳できた場合のみ結合
+        if (translatedParts.every((part, index) => part !== parts[index] || /^[a-zA-Z\s-]+$/.test(part))) {
+          return translatedParts.join(', ')
+        }
+      }
+      
+      // フォールバック: 元のテキストを返す
+      return text
+    }
+
     // 英語変数の準備（SUNO指示用）
-    const englishTheme = translateToEnglish(theme)
-    const englishMood = translateToEnglish(mood)
-    const englishLength = translateToEnglish(finalSongLength)
+    const englishTheme = ENABLE_IMPROVED_TRANSLATION ? 
+      improvedTranslateToEnglish(theme) : translateToEnglish(theme)
+    const englishMood = ENABLE_IMPROVED_TRANSLATION ? 
+      improvedTranslateToEnglish(mood) : translateToEnglish(mood)  
+    const englishLength = ENABLE_IMPROVED_TRANSLATION ? 
+      improvedTranslateToEnglish(finalSongLength) : translateToEnglish(finalSongLength)
     
     // ボーカル指示の高度な英語化処理
     function advancedTranslateToEnglish(text: string): string {
