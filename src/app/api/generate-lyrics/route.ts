@@ -893,6 +893,9 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
 ${finalRapMode === 'full' ? 
 `**Full Rap Mode Format:**
 "Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about ${englishLength}, Japanese lyrics. Vocals: continuous rap throughout, no melodic singing, ${englishVocalDescription || 'rhythmic punchy flow'}. Intro: begin with hype ad-libs "Yo!", "Yeah!", "Let's go!" before first verse. Tempo: medium-fast, head-nod groove. Instruments: ${actualInstruments}. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: ${englishMood}. Forbidden: sung chorus, autotuned melodies, pop-style singing, melodic sections."` :
+finalRapMode === 'partial' ?
+`**Partial Rap Mode Format:**
+"Purpose: ${englishTheme} track with rap sections, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium-fast'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat with rap sections'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'} with rap verses. Structure: intro → verse → chorus → rap verse → chorus → outro. Rap Style: Japanese rap with rhymes and flow. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."` :
 `**Standard Format:**  
 "Purpose: ${englishTheme} themed track, about ${englishLength}, Japanese lyrics. Mood: ${englishMood}. Tempo: ${analyzedDetails?.tempo || 'medium'}. Rhythm: ${analyzedDetails?.rhythm || 'steady beat'}. Instruments: ${actualInstruments}. Vocals: ${englishVocalDescription || 'expressive vocals'}. Forbidden: ${analyzedDetails?.forbidden || 'No EDM drops'}."`}
 
@@ -1358,6 +1361,9 @@ async function handleNewArchitectureGeneration(
       // ラップモード
       rapMode: userSettings.rapMode || 'none',
       
+      // 内容反映度設定
+      contentReflection: userSettings.contentReflection || 'literal',
+      
       // 楽曲分析詳細: 分解要素から構築
       analyzedDetails: {
         tempo: decomposedElements.tempo,
@@ -1407,6 +1413,14 @@ async function handleNewArchitectureGeneration(
 ## 言語設定
 - 基本言語: ${userSettings.language.primary}
 - 英語混在レベル: ${userSettings.language.englishMixLevel || 'なし'}
+
+## 内容反映度設定
+- 反映方法: ${userSettings.contentReflection || 'literal'}
+${userSettings.contentReflection === 'literal' ? 
+  '  → 専門用語・固有名詞をそのまま歌詞に使用' :
+  userSettings.contentReflection === 'metaphorical' ?
+  '  → 内容を詩的・象徴的に表現' :
+  '  → 重要部分は忠実、他は比喩的に'}
 
 ## ラップ設定
 - ラップモード: ${userSettings.rapMode}
@@ -1542,9 +1556,12 @@ ${decomposedElements.structure}に基づいた楽曲構成で、各セクショ�
 - Forbidden: ${decomposedElements.forbidden}
 
 **Format Requirements:**
-Use exact format: "Purpose: [theme] track, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm]. Instruments: [instruments]. Vocals: [vocal attribute]. Structure: [structure]. Genre: [genre]. Forbidden: [forbidden]."
+Use exact format based on rap mode:
+- If Rap Mode is "full": "Style: Hip-hop rap-only track. Purpose: freestyle rap performance, about [length], [language] lyrics. Vocals: continuous rap throughout, no melodic singing. Structure: intro → rap verse → rap hook → rap verse → rap hook → outro. Mood: [mood]. Tempo: [tempo]. Instruments: [instruments]. Forbidden: sung chorus, autotuned melodies, pop-style singing."
+- If Rap Mode is "partial": "Purpose: [theme] track with rap sections, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm] with rap sections. Instruments: [instruments]. Vocals: [vocal attribute] with rap verses. Structure: intro → verse → chorus → rap verse → chorus → outro. Rap Style: Japanese rap with rhymes and flow. Forbidden: [forbidden]."
+- If Rap Mode is "none": "Purpose: [theme] track, about [length], [language] lyrics. Mood: [mood]. Tempo: [tempo]. Rhythm: [rhythm]. Instruments: [instruments]. Vocals: [vocal attribute]. Structure: [structure]. Genre: [genre]. Forbidden: [forbidden]."
 
-Output only the formatted English style instruction.`
+Output only the formatted English style instruction for the specified rap mode.`
 
     const styleCompletion = await openai.chat.completions.create({
       model: "gpt-4o", 
