@@ -314,7 +314,14 @@ export async function POST(request: NextRequest) {
     }: GenerateRequest = await request.json()
 
     // 後方互換性: includeRapがtrueの場合はpartialに変換
-    const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
+    const finalRapMode = ((): 'none' | 'partial' | 'full' => {
+      if (includeRap && rapMode === 'none') {
+        return 'partial'
+      } else if (rapMode) {
+        return rapMode as 'none' | 'partial' | 'full'
+      }
+      return 'none'
+    })()
 
     // 🎯 Phase 1-3: 新アーキテクチャ対応 - 早期分岐処理
     if (useNewArchitecture && decomposedElements && userSettings) {
@@ -804,7 +811,7 @@ ${finalRapMode === 'full' ? `
 ✅ [Bridge] - ブリッジ
 ✅ [Intro] / [Outro] - 導入・終了
 
-${finalRapMode === 'full' ? `
+${finalRapMode === ('full' as typeof finalRapMode) ? `
 ## 🔥 全面ラップ楽曲専用タグ構成（必須遵守）
 **使用可能タグ（ラップ専用）:**
 - [Intro] - 導入部分
@@ -817,7 +824,7 @@ ${finalRapMode === 'full' ? `
 ❌ [Verse] - 歌メロディー用なので使用禁止
 ❌ [Chorus] - 歌メロディー用なので使用禁止
 ❌ [Pre-Chorus] - 歌メロディー用なので使用禁止
-` : finalRapMode === 'partial' || analyzedStructure?.hasRap ? `
+` : (finalRapMode === 'partial' || analyzedStructure?.hasRap) ? `
 ## 🎤 一部ラップ楽曲用タグ構成
 **通常セクション用:**
 - [Intro] - 導入部分
@@ -840,7 +847,7 @@ ${finalRapMode === 'full' ? `
 - [Chorus] - メインコーラス
 - [Bridge] - ブリッジ（任意）
 - [Outro] - 終了部分
-`}
+`}}
 
 ## 出力形式
 必ず以下の形式で回答してください：
@@ -859,7 +866,7 @@ ${finalRapMode === 'full' ? `
 [Intro]
 [楽器演奏部分の指示がある場合は英語で]
 
-${finalRapMode === 'full' ? `[Rap Verse]
+${finalRapMode === ('full' as typeof finalRapMode) ? `[Rap Verse]
 ラップ歌詞内容...
 
 [Rap Hook]
@@ -870,7 +877,7 @@ ${finalRapMode === 'full' ? `[Rap Verse]
 
 [Rap Hook]
 ラップフック歌詞...
-` : finalRapMode === 'partial' || analyzedStructure?.hasRap ? `[Verse]
+` : (finalRapMode === 'partial' || analyzedStructure?.hasRap) ? `[Verse]
 歌詞内容...
 
 [Chorus]
@@ -891,7 +898,7 @@ ${finalRapMode === 'full' ? `[Rap Verse]
 歌詞内容...
 
 [続きのセクション...]
-`}
+`}}
 [Outro]
 [Fade out]
 `}
