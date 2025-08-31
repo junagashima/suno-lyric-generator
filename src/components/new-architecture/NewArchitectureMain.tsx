@@ -2,6 +2,7 @@ import React from 'react'
 import { useNewArchitectureFlow } from './useNewArchitectureFlow'
 import { StepIndicator } from './StepIndicator'
 import { MusicInputStep } from './MusicInputStep'
+import { AnalysisResultDisplay } from './AnalysisResultDisplay'
 import { DecomposedElementsDisplay } from './DecomposedElementsDisplay'
 import { UserSettingsStep } from './UserSettingsStep'
 import { FinalOutputDisplay } from './FinalOutputDisplay'
@@ -28,13 +29,21 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
   // 楽曲分析実行
   const handleAnalysis = async (artist: string, song: string) => {
     try {
-      const analysisResult = await executeAnalysis(artist, song)
-      // 分析完了後、自動で要素分解を実行
-      if (analysisResult) {
-        await executeDecomposition(analysisResult)
-      }
+      await executeAnalysis(artist, song)
+      // 分析完了後は結果表示、要素分解は手動で実行
     } catch (error) {
-      console.error('分析・分解処理エラー:', error)
+      console.error('分析処理エラー:', error)
+    }
+  }
+
+  // 分析結果確認後の要素分解実行
+  const handleProceedToDecomposition = async () => {
+    if (flowState.analysisResult) {
+      try {
+        await executeDecomposition(flowState.analysisResult)
+      } catch (error) {
+        console.error('要素分解エラー:', error)
+      }
     }
   }
 
@@ -118,16 +127,24 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
             />
           )}
 
-          {flowState.currentStep === 'analysis' && (
+          {flowState.currentStep === 'analysis' && !flowState.analysisResult && (
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="text-center">
                 <div className="animate-pulse text-4xl mb-4">🔍</div>
                 <h2 className="text-xl font-bold text-gray-800 mb-2">楽曲分析中...</h2>
                 <p className="text-gray-600">
-                  AIが楽曲を分析し、SUNO要素への分解を実行しています
+                  AIが楽曲の特徴を分析しています
                 </p>
               </div>
             </div>
+          )}
+
+          {flowState.currentStep === 'analysis' && flowState.analysisResult && (
+            <AnalysisResultDisplay
+              analysisResult={flowState.analysisResult}
+              onProceed={handleProceedToDecomposition}
+              isLoading={flowState.isLoading}
+            />
           )}
 
           {flowState.currentStep === 'decompose' && flowState.decomposedElements && (

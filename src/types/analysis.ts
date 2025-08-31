@@ -40,6 +40,35 @@ export type VocalAttribute =
   | '男女混合グループ'
   | 'コーラス重視（複数ボーカル）'
 
+// ===== SUNO最適化要素定義 =====
+export const SUNO_ELEMENTS = [
+  // トーン系
+  { id: 'warm', label: 'Warm（温かい）', category: 'tone', description: '温かみのあるボーカルトーン' },
+  { id: 'cool', label: 'Cool（クール）', category: 'tone', description: 'クールで洗練されたトーン' },
+  { id: 'bright', label: 'Bright（明るい）', category: 'tone', description: '明るく輝きのあるトーン' },
+  { id: 'dark', label: 'Dark（ダーク）', category: 'tone', description: 'ダークで深いトーン' },
+  
+  // デリバリー系  
+  { id: 'smooth', label: 'Smooth（滑らか）', category: 'delivery', description: '滑らかで流れるような歌唱' },
+  { id: 'rough', label: 'Rough（ラフ）', category: 'delivery', description: 'ざらつきのある力強い歌唱' },
+  { id: 'breathy', label: 'Breathy（息遣い）', category: 'delivery', description: '息遣いが感じられる親密な歌唱' },
+  { id: 'clear', label: 'Clear（クリア）', category: 'delivery', description: 'クリアで明瞭な発音' },
+  
+  // エモーション系
+  { id: 'passionate', label: 'Passionate（情熱的）', category: 'emotion', description: '情熱的で力強い感情表現' },
+  { id: 'emotional', label: 'Emotional（感情的）', category: 'emotion', description: '感情豊かな表現力' },
+  { id: 'melancholic', label: 'Melancholic（憂鬱）', category: 'emotion', description: '憂鬱で切ない感情表現' },
+  { id: 'joyful', label: 'Joyful（喜びに満ちた）', category: 'emotion', description: '喜びと明るさに満ちた表現' },
+  
+  // 発音系
+  { id: 'articulated', label: 'Articulated（明瞭）', category: 'pronunciation', description: '明瞭で正確な発音' },
+  { id: 'slurred', label: 'Slurred（流れるような）', category: 'pronunciation', description: 'リラックスした流れるような発音' },
+  { id: 'whispered', label: 'Whispered（ささやき）', category: 'pronunciation', description: 'ささやくような親密な発音' },
+  { id: 'powerful', label: 'Powerful（力強い）', category: 'pronunciation', description: '力強く迫力のある発音' }
+] as const
+
+export type SunoElementId = typeof SUNO_ELEMENTS[number]['id']
+
 // ===== ユーザー設定項目 =====
 export interface UserSettings {
   songLength: '2-3分' | '3-4分' | '4-5分' | '5分以上'  // 楽曲の長さ
@@ -48,6 +77,9 @@ export interface UserSettings {
     primary: 'japanese' | 'english'                   // 基本言語
     englishMixLevel?: 'none' | 'light' | 'moderate' | 'heavy'  // 英語混在レベル
   }
+  // Step 3: 追加された設定項目
+  vocalAttribute?: VocalAttribute                      // ボーカル属性（オプショナル - 後方互換性）
+  sunoElements?: string[]                              // SUNO最適化要素（オプショナル - 後方互換性）
   lyricsContent: string           // 歌詞に含めたい内容
   theme: string                   // 歌詞用テーマ（楽曲分析のテーマとは別）
 }

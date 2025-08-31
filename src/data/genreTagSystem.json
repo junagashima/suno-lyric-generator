@@ -1,0 +1,137 @@
+{
+  "genreTagSystem": {
+    "J-POP バラード系": {
+      "structure": "Aメロ → Bメロ → サビ → Cメロ",
+      "mood": ["ballad", "slow", "romantic"],
+      "theme": ["love", "nostalgia", "farewell"],
+      "emotion": ["melancholic", "hopeful", "sad"],
+      "atmosphere": ["rain", "night", "memory"]
+    },
+    "J-POP ロック寄り": {
+      "structure": "イントロ → Aメロ → Bメロ → サビ",
+      "mood": ["upbeat", "anthem", "energetic"],
+      "theme": ["youth", "freedom", "dream", "struggle"],
+      "emotion": ["passionate", "energetic", "hopeful"],
+      "atmosphere": ["road", "summer", "sky"]
+    },
+    "J-POP アイドル系": {
+      "structure": "Aメロ → Bメロ → サビ → Cメロ",
+      "mood": ["cute", "upbeat", "joyful"],
+      "theme": ["love", "friendship", "youth"],
+      "emotion": ["joyful", "hopeful", "energetic"],
+      "atmosphere": ["school days", "summer", "festival"]
+    },
+    "J-POP シティポップ寄り": {
+      "structure": "リフ → バース → サビ",
+      "mood": ["smooth", "mellow", "melancholic"],
+      "theme": ["romance", "nostalgia", "summer"],
+      "emotion": ["hopeful", "melancholic"],
+      "atmosphere": ["city lights", "urban", "night"]
+    },
+    "J-POP アニソン寄り": {
+      "structure": "Aメロ → Bメロ → サビ → Cメロ",
+      "mood": ["epic", "powerful", "dramatic"],
+      "theme": ["dream", "battle", "hope", "friendship"],
+      "emotion": ["passionate", "energetic"],
+      "atmosphere": ["fantasy", "sky", "adventure"]
+    },
+    "K-POP": {
+      "structure": "バース → プレコーラス → サビ → DB",
+      "mood": ["powerful", "upbeat", "anthem"],
+      "theme": ["youth", "dream", "performance"],
+      "emotion": ["passionate", "energetic"],
+      "atmosphere": ["city lights", "freedom"]
+    },
+    "ロック": {
+      "structure": "イントロ → バース → サビ → ソロ",
+      "mood": ["energetic", "anthem", "ballad"],
+      "theme": ["rebellion", "freedom", "love"],
+      "emotion": ["passionate", "anger", "hopeful"],
+      "atmosphere": ["night", "road", "fire"]
+    },
+    "メタル": {
+      "structure": "リフ → バース → サビ → ソロ",
+      "mood": ["heavy", "fast", "anthem"],
+      "theme": ["rebellion", "struggle", "darkness"],
+      "emotion": ["anger", "energetic", "powerful"],
+      "atmosphere": ["war", "storm", "shadow"]
+    },
+    "メロコア": {
+      "structure": "速いテンポ / サビ繰り返し",
+      "mood": ["upbeat", "energetic", "anthem"],
+      "theme": ["youth", "freedom", "friendship"],
+      "emotion": ["passionate", "hopeful", "energetic"],
+      "atmosphere": ["summer", "street", "ocean"]
+    },
+    "ボカロ": {
+      "structure": "Aメロ → Bメロ → サビ → Dメロ",
+      "mood": ["upbeat", "melancholic", "epic"],
+      "theme": ["youth", "dream", "fantasy"],
+      "emotion": ["nostalgic", "melancholic", "passionate"],
+      "atmosphere": ["digital", "school days", "starlight"]
+    },
+    "アニソン": {
+      "structure": "Aメロ → Bメロ → サビ → Cメロ",
+      "mood": ["epic", "upbeat", "anthem"],
+      "theme": ["dream", "friendship", "battle", "love"],
+      "emotion": ["passionate", "hopeful"],
+      "atmosphere": ["fantasy", "sky", "adventure"]
+    },
+    "アイドル": {
+      "structure": "Aメロ → Bメロ → サビ → Cメロ",
+      "mood": ["cute", "upbeat", "joyful"],
+      "theme": ["love", "friendship", "youth"],
+      "emotion": ["joyful", "hopeful", "energetic"],
+      "atmosphere": ["school days", "summer", "festival"]
+    },
+    "ラップ": {
+      "structure": "バース（16小節）→ フック繰返し",
+      "mood": ["groove", "storytelling", "anthem"],
+      "theme": ["street", "struggle", "freedom"],
+      "emotion": ["passionate", "energetic"],
+      "atmosphere": ["city", "night", "life"]
+    },
+    "ヒップホップ": {
+      "structure": "バース → フック → バース",
+      "mood": ["groove", "smooth", "anthem"],
+      "theme": ["struggle", "dream", "lifestyle"],
+      "emotion": ["energetic", "cool", "powerful"],
+      "atmosphere": ["street", "city lights"]
+    },
+    "フォーク": {
+      "structure": "Aメロ・サビ中心のシンプル構成",
+      "mood": ["ballad", "storytelling"],
+      "theme": ["love", "nostalgia", "everyday life"],
+      "emotion": ["melancholic", "hopeful"],
+      "atmosphere": ["countryside", "memory"]
+    },
+    "シティポップ": {
+      "structure": "リフ → バース → サビ",
+      "mood": ["smooth", "melancholic", "upbeat"],
+      "theme": ["romance", "nostalgia", "summer"],
+      "emotion": ["hopeful", "melancholic"],
+      "atmosphere": ["city lights", "night", "summer night"]
+    },
+    "ジャズ": {
+      "structure": "アドリブ多め / バース → サビ",
+      "mood": ["swing", "smooth", "ballad"],
+      "theme": ["romance", "nostalgia"],
+      "emotion": ["melancholic", "joyful"],
+      "atmosphere": ["bar", "night", "rain"]
+    },
+    "レゲエ": {
+      "structure": "ループリズム / バース → サビ",
+      "mood": ["groove", "island", "upbeat"],
+      "theme": ["freedom", "love", "summer"],
+      "emotion": ["joyful", "relaxed", "hopeful"],
+      "atmosphere": ["beach", "island", "sunshine"]
+    },
+    "ラテン": {
+      "structure": "リズム中心 / 繰返し",
+      "mood": ["upbeat", "dance", "passionate"],
+      "theme": ["love", "party", "freedom"],
+      "emotion": ["joyful", "passionate"],
+      "atmosphere": ["fiesta", "night", "summer"]
+    }
+  }
+}

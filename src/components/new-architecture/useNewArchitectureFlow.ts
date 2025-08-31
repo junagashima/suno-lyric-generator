@@ -15,6 +15,9 @@ export function useNewArchitectureFlow() {
         primary: 'japanese',
         englishMixLevel: 'none'
       },
+      // Step 3: 新しい設定項目のデフォルト値
+      vocalAttribute: '女性（ソロ）',
+      sunoElements: [],
       lyricsContent: '',
       theme: ''
     },
