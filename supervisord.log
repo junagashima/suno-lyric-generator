@@ -1,0 +1,13 @@
+2025-08-31 10:37:39,565 INFO RPC interface 'supervisor' initialized
+2025-08-31 10:37:39,565 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2025-08-31 10:37:39,568 INFO daemonizing the supervisord process
+2025-08-31 10:37:39,568 INFO supervisord started with pid 529378
+2025-08-31 10:37:40,572 INFO spawned: 'nextjs-dev' with pid 529405
+2025-08-31 10:37:41,802 INFO success: nextjs-dev entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-08-31 11:11:31,741 INFO exited: nextjs-dev (exit status 0; expected)
+2025-08-31 11:11:31,785 INFO spawned: 'nextjs-dev' with pid 531689
+2025-08-31 11:11:33,308 INFO success: nextjs-dev entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-08-31 11:14:06,562 INFO waiting for nextjs-dev to stop
+2025-08-31 11:14:06,571 WARN stopped: nextjs-dev (terminated by SIGTERM)
+2025-08-31 11:14:06,588 INFO spawned: 'nextjs-dev' with pid 532570
+2025-08-31 11:14:07,951 INFO success: nextjs-dev entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)

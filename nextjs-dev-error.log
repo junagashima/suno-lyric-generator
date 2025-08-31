@@ -1,0 +1,244 @@
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+新アーキテクチャ処理エラー: Error: 401 Incorrect API key provided: test_key********************ting. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async handleNewArchitectureGeneration (src/app/api/generate-lyrics/route.ts:1647:30)
+    at async POST (src/app/api/generate-lyrics/route.ts:333:14)
+  1645 |
+  1646 |     // ステップ3: 歌詞生成実行
+> 1647 |     const lyricsCompletion = await openai.chat.completions.create({
+       |                              ^
+  1648 |       model: "gpt-4o",
+  1649 |       messages: [
+  1650 |         { {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_fdd577e16d554e318aafc42ec26eae66',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+歌詞生成エラー: Error: 401 Incorrect API key provided: test_key********************ting. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async POST (src/app/api/generate-lyrics/route.ts:1252:30)
+  1250 |
+  1251 |     // 歌詞生成
+> 1252 |     const lyricsCompletion = await openai.chat.completions.create({
+       |                              ^
+  1253 |       model: "gpt-4o",
+  1254 |       messages: [
+  1255 |         { {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_7ec3478d3de34c6db385ad3ee4d0510d',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+ ⚠ Cross origin request detected from 3001-iwtc54r4u03tkl7eyetxg-6532622b.e2b.dev to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+歌詞生成エラー: TypeError: Cannot read properties of undefined (reading 'replace')
+    at eval (src/app/api/generate-lyrics/route.ts:366:41)
+    at Array.forEach (<anonymous>)
+    at eval (src/app/api/generate-lyrics/route.ts:365:18)
+    at Array.forEach (<anonymous>)
+    at removeUnwantedInstruments (src/app/api/generate-lyrics/route.ts:348:27)
+    at getInstrumentsConfiguration (src/app/api/generate-lyrics/route.ts:391:16)
+    at POST (src/app/api/generate-lyrics/route.ts:395:31)
+  364 |         
+  365 |         patterns.forEach(pattern => {
+> 366 |           filteredStyle = filteredStyle.replace(pattern, ' ')
+      |                                         ^
+  367 |         })
+  368 |       })
+  369 |       
+歌詞生成エラー: TypeError: Cannot read properties of undefined (reading 'replace')
+    at eval (src/app/api/generate-lyrics/route.ts:366:41)
+    at Array.forEach (<anonymous>)
+    at eval (src/app/api/generate-lyrics/route.ts:365:18)
+    at Array.forEach (<anonymous>)
+    at removeUnwantedInstruments (src/app/api/generate-lyrics/route.ts:348:27)
+    at getInstrumentsConfiguration (src/app/api/generate-lyrics/route.ts:391:16)
+    at POST (src/app/api/generate-lyrics/route.ts:395:31)
+  364 |         
+  365 |         patterns.forEach(pattern => {
+> 366 |           filteredStyle = filteredStyle.replace(pattern, ' ')
+      |                                         ^
+  367 |         })
+  368 |       })
+  369 |       
+歌詞生成エラー: TypeError: Cannot read properties of undefined (reading 'replace')
+    at eval (src/app/api/generate-lyrics/route.ts:366:41)
+    at Array.forEach (<anonymous>)
+    at eval (src/app/api/generate-lyrics/route.ts:365:18)
+    at Array.forEach (<anonymous>)
+    at removeUnwantedInstruments (src/app/api/generate-lyrics/route.ts:348:27)
+    at getInstrumentsConfiguration (src/app/api/generate-lyrics/route.ts:391:16)
+    at POST (src/app/api/generate-lyrics/route.ts:395:31)
+  364 |         
+  365 |         patterns.forEach(pattern => {
+> 366 |           filteredStyle = filteredStyle.replace(pattern, ' ')
+      |                                         ^
+  367 |         })
+  368 |       })
+  369 |       
+歌詞生成エラー: Error: 401 Incorrect API key provided: test_key********************ting. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async POST (src/app/api/generate-lyrics/route.ts:1252:30)
+  1250 |
+  1251 |     // 歌詞生成
+> 1252 |     const lyricsCompletion = await openai.chat.completions.create({
+       |                              ^
+  1253 |       model: "gpt-4o",
+  1254 |       messages: [
+  1255 |         { {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_0440ecb3afc940bf8510b1e805b9a6ae',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+歌詞生成エラー: Error: 401 Incorrect API key provided: test_key********************ting. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async POST (src/app/api/generate-lyrics/route.ts:1252:30)
+  1250 |
+  1251 |     // 歌詞生成
+> 1252 |     const lyricsCompletion = await openai.chat.completions.create({
+       |                              ^
+  1253 |       model: "gpt-4o",
+  1254 |       messages: [
+  1255 |         { {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_60ed965845854bc0ae50c3c0a47c25f2',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+歌詞生成エラー: Error: 401 Incorrect API key provided: test_key********************ting. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async POST (src/app/api/generate-lyrics/route.ts:1252:30)
+  1250 |
+  1251 |     // 歌詞生成
+> 1252 |     const lyricsCompletion = await openai.chat.completions.create({
+       |                              ^
+  1253 |       model: "gpt-4o",
+  1254 |       messages: [
+  1255 |         { {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_6c063bd554e342799cf1674fcaf9ea36',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+ ⨯ [Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+ ⨯ [Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+ ⨯ [Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: Cannot find module '/home/user/webapp/.next/server/middleware-manifest.json'
+Require stack:
+- /home/user/webapp/node_modules/next/dist/server/next-server.js
+- /home/user/webapp/node_modules/next/dist/server/dev/next-dev-server.js
+- /home/user/webapp/node_modules/next/dist/server/next.js
+- /home/user/webapp/node_modules/next/dist/server/lib/start-server.js] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/home/user/webapp/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/user/webapp/.next/routes-manifest.json'
+}
+ ⚠ Port 3000 is in use by an unknown process, using available port 3002 instead.

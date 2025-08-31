@@ -1,0 +1,180 @@
+
+> suno-lyric-generator@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.0
+   - Local:        http://localhost:3001
+   - Network:      http://169.254.0.21:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3s
+ ○ Compiling /api/generate-lyrics ...
+ ✓ Compiled /api/generate-lyrics in 3.6s (298 modules)
+🚀 新アーキテクチャモードで処理開始
+- decomposedElements: {
+  instruments: 'acoustic guitar, piano, drums',
+  structure: 'intro → verse → chorus → verse → chorus → outro',
+  rhythm: 'gentle 4/4 beat',
+  tempo: 'medium tempo (100-110 BPM)',
+  forbidden: 'No heavy distortion, No EDM drops',
+  mood: 'warm, nostalgic, gentle',
+  genre: 'acoustic pop ballad',
+  vocal: {
+    attribute: '女性（ソロ）',
+    sunoElements: [ 'warm', 'smooth', 'emotional' ]
+  }
+}
+- userSettings: {
+  songLength: '3-4分',
+  rapMode: 'none',
+  language: { primary: 'japanese', englishMixLevel: 'none' },
+  lyricsContent: 'テスト用の歌詞内容です',
+  theme: 'テスト楽曲',
+  contentReflection: 'literal'
+}
+🚀 新アーキテクチャ処理開始
+- 分解要素: {
+  instruments: 'acoustic guitar, piano, drums',
+  structure: 'intro → verse → chorus → verse → chorus → outro',
+  rhythm: 'gentle 4/4 beat',
+  tempo: 'medium tempo (100-110 BPM)',
+  forbidden: 'No heavy distortion, No EDM drops',
+  mood: 'warm, nostalgic, gentle',
+  genre: 'acoustic pop ballad',
+  vocal: {
+    attribute: '女性（ソロ）',
+    sunoElements: [ 'warm', 'smooth', 'emotional' ]
+  }
+}
+- ユーザー設定: {
+  songLength: '3-4分',
+  rapMode: 'none',
+  language: { primary: 'japanese', englishMixLevel: 'none' },
+  lyricsContent: 'テスト用の歌詞内容です',
+  theme: 'テスト楽曲',
+  contentReflection: 'literal'
+}
+🔄 既存生成システムに変換されたリクエスト: {
+  theme: 'テスト楽曲',
+  musicStyle: 'acoustic pop ballad, acoustic guitar, piano, drums, warm, nostalgic, gentle',
+  songLength: '3-4分',
+  vocalAttribute: '女性（ソロ）'
+}
+ POST /api/generate-lyrics 500 in 5425ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - ロック、ギター、ドラム
+🎵 最終楽器構成: ロック、ギター、ドラム
+🎤 ボーカル設定: {
+  vocalDescription: '男性（ソロ）, 20代, 日本',
+  isNewSystem: false,
+  techniques: [ 'パワフル' ],
+  selectedElements: []
+}
+📨 受信したvocalConfiguration: undefined
+⚠️  SUNO最適化設定が受信されていません
+   - vocalConfiguration?.optimizationSettings: undefined
+   - vocalConfiguration?.useNewSystem: undefined
+🎵 基本のsongLengthを使用: 3-4分
+🔧 A/Bテストフラグ状態: { improvedTranslation: false, dynamicStructure: false }
+ POST /api/generate-lyrics 500 in 414ms
+ ○ Compiling / ...
+ ✓ Compiled / in 5.5s (609 modules)
+ GET / 200 in 6520ms
+ ✓ Compiled in 1037ms (255 modules)
+ GET / 200 in 155ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - undefined
+ POST /api/generate-lyrics 500 in 407ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - undefined
+ POST /api/generate-lyrics 500 in 190ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - undefined
+ POST /api/generate-lyrics 500 in 401ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - jpop, acoustic guitar, piano, gentle, romantic
+🎵 最終楽器構成: jpop, acoustic guitar, piano, gentle, romantic
+🎤 ボーカル設定: {
+  vocalDescription: '女性（ソロ）, 20代, 日本',
+  isNewSystem: false,
+  techniques: [ 'やさしい', 'エモーショナル' ],
+  selectedElements: []
+}
+📨 受信したvocalConfiguration: undefined
+⚠️  SUNO最適化設定が受信されていません
+   - vocalConfiguration?.optimizationSettings: undefined
+   - vocalConfiguration?.useNewSystem: undefined
+🎵 基本のsongLengthを使用: 3-4分
+🔧 A/Bテストフラグ状態: { improvedTranslation: false, dynamicStructure: false }
+ POST /api/generate-lyrics 500 in 365ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - jpop, hip hop elements, electric guitar, drums, energetic
+🎵 最終楽器構成: jpop, hip hop elements, electric guitar, drums, energetic
+🎤 ボーカル設定: {
+  vocalDescription: '男性（ソロ）, 20代, 日本',
+  isNewSystem: false,
+  techniques: [ 'パワフル', 'ラップ' ],
+  selectedElements: []
+}
+📨 受信したvocalConfiguration: undefined
+⚠️  SUNO最適化設定が受信されていません
+   - vocalConfiguration?.optimizationSettings: undefined
+   - vocalConfiguration?.useNewSystem: undefined
+🎵 基本のsongLengthを使用: 3-4分
+🔧 A/Bテストフラグ状態: { improvedTranslation: false, dynamicStructure: false }
+ POST /api/generate-lyrics 500 in 303ms
+🔄 従来アーキテクチャモードで処理継続
+🎵 楽器構成: musicStyleから抽出 - hiphop, rap, heavy bass, drums, aggressive
+🎵 最終楽器構成: hiphop, rap, heavy bass, drums, aggressive
+🎤 ボーカル設定: {
+  vocalDescription: '男性（ソロ）, 20代, 日本',
+  isNewSystem: false,
+  techniques: [ 'ラップ', 'フロー' ],
+  selectedElements: []
+}
+📨 受信したvocalConfiguration: undefined
+⚠️  SUNO最適化設定が受信されていません
+   - vocalConfiguration?.optimizationSettings: undefined
+   - vocalConfiguration?.useNewSystem: undefined
+🎵 基本のsongLengthを使用: 3-4分
+🔧 A/Bテストフラグ状態: { improvedTranslation: false, dynamicStructure: false }
+ POST /api/generate-lyrics 500 in 374ms
+ GET / 200 in 192ms
+ GET / 200 in 485ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1237ms (579 modules)
+ GET /robots.txt 404 in 1712ms
+ GET / 200 in 241ms
+
+> suno-lyric-generator@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.0
+   - Local:        http://localhost:3001
+   - Network:      http://169.254.0.21:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.4s
+ ○ Compiling /api/generate-lyrics ...
+ ✓ Compiled /api/generate-lyrics in 2s (298 modules)
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 7.3s (639 modules)
+ POST /api/generate-lyrics 500 in 16417ms
+ POST /api/generate-lyrics 500 in 365ms
+ POST /api/generate-lyrics 500 in 787ms
+ POST /api/generate-lyrics 500 in 341ms
+ POST /api/generate-lyrics 500 in 794ms
+ POST /api/generate-lyrics 500 in 350ms
+
+> suno-lyric-generator@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.0
+   - Local:        http://localhost:3002
+   - Network:      http://169.254.0.21:3002
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.7s

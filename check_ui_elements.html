@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UI Elements Check</title>
+</head>
+<body>
+    <h1>楽曲例示機能のUI要素チェック</h1>
+    
+    <script>
+        // ページ読み込み完了を待つ
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                // DOM要素のチェック
+                const checks = {
+                    'ExampleDisplaySection要素': document.querySelector('.example-display-section, #ExampleDisplaySection, .example-display'),
+                    'サイドバー要素': document.querySelector('aside, .sidebar, .side-bar'),
+                    'サンプル楽曲要素': document.querySelectorAll('.sample-song, .song-sample, .sample-item'),
+                    '分析開始ボタン': document.evaluate("//button[contains(.,'分析開始')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
+                    '楽曲例示テキスト': document.evaluate("//*[contains(.,'楽曲例示')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
+                    'サンプル選択テキスト': document.evaluate("//*[contains(.,'サンプル選択')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+                };
+                
+                console.log('=== UI要素チェック結果 ===');
+                Object.entries(checks).forEach(([name, element]) => {
+                    if (element) {
+                        console.log(`✅ ${name}: 存在`);
+                        if (element.length !== undefined) {
+                            console.log(`   数量: ${element.length}個`);
+                        }
+                        if (element.textContent) {
+                            console.log(`   テキスト: ${element.textContent.slice(0, 100)}`);
+                        }
+                    } else {
+                        console.log(`❌ ${name}: 存在しない`);
+                    }
+                });
+                
+                // 右側エリアの確認
+                const rightArea = document.querySelector('.right-section, .side-panel, .sidebar-right');
+                console.log('\n=== 右側エリア確認 ===');
+                if (rightArea) {
+                    console.log('✅ 右側エリア: 存在');
+                    console.log('   内容:', rightArea.textContent.slice(0, 200));
+                } else {
+                    console.log('❌ 右側エリア: 見つからない');
+                }
+                
+                // メインコンテナの構造確認
+                const mainContainer = document.querySelector('main, #main, .main-container');
+                console.log('\n=== メインコンテナ構造 ===');
+                if (mainContainer) {
+                    console.log('✅ メインコンテナ: 存在');
+                    const children = Array.from(mainContainer.children);
+                    console.log(`   子要素数: ${children.length}`);
+                    children.forEach((child, index) => {
+                        console.log(`   ${index + 1}. ${child.tagName} (class: ${child.className})`);
+                    });
+                }
+                
+            }, 2000); // 2秒待ってからチェック
+        });
+    </script>
+</body>
+</html>

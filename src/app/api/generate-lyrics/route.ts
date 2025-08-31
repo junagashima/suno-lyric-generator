@@ -337,7 +337,12 @@ export async function POST(request: NextRequest) {
     console.log('🔄 従来アーキテクチャモードで処理継続')
 
     // 不要な楽器を除去する関数（改良版）
-    const removeUnwantedInstruments = (styleText: string): string => {
+    const removeUnwantedInstruments = (styleText: string | undefined): string => {
+      // undefined または null の場合はデフォルト楽器構成を返す
+      if (!styleText) {
+        return 'acoustic guitar, piano'
+      }
+      
       const unwantedInstruments = [
         'synth pad', 'synthpad', 'シンセパッド',
         'vocals', 'vocal', 'ボーカル', 'song', 'singing', '歌'
@@ -386,9 +391,12 @@ export async function POST(request: NextRequest) {
       if (analyzedDetails?.instruments) {
         console.log('🎵 楽器構成: 分析結果を使用 -', analyzedDetails.instruments)
         return removeUnwantedInstruments(analyzedDetails.instruments)
-      } else {
+      } else if (musicStyle) {
         console.log('🎵 楽器構成: musicStyleから抽出 -', musicStyle)
         return removeUnwantedInstruments(musicStyle)
+      } else {
+        console.log('🎵 楽器構成: デフォルト楽器を使用')
+        return removeUnwantedInstruments(undefined) // デフォルト値を取得
       }
     }
 
@@ -1408,6 +1416,10 @@ ${vocalSettings.isNewSystem ? `
       }
     }
     
+    // SUNOタグを抽出（清浄化前に）
+    const sunoTagsMatch = lyrics.match(/^\[[\w\s,]+\][\s\n]*/m)
+    const extractedSunoTags = sunoTagsMatch ? sunoTagsMatch[0].trim() : ''
+    
     // 歌詞内の装飾記号を清浄化
     lyrics = lyrics
       .replace(/🔥\s*\[Rap Verse\]\s*🔥\s*/g, '') // 🔥アイコン行全体を除去
@@ -1419,6 +1431,7 @@ ${vocalSettings.isNewSystem ? `
       titles,
       lyrics,
       styleInstruction: styleResponse.replace(/^["']|["']$/g, '').trim(),
+      sunoTags: extractedSunoTags || 'jpop,japanese pop,gentle', // デフォルトタグを設定
       mode,
       settings: {
         mood,
