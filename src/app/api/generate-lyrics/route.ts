@@ -1564,7 +1564,48 @@ Output only the formatted English style instruction.`
 
     // ステップ5: 応答処理と品質チェック
     const lyricsResponse = lyricsCompletion.choices[0]?.message?.content || ''
-    const styleResponse = styleCompletion.choices[0]?.message?.content || ''
+    let styleResponse = styleCompletion.choices[0]?.message?.content || ''
+    
+    // 🚨 緊急：英語スタイル指示から日本語を完全除去
+    const removeJapaneseFromStyle = (text: string): string => {
+      // 日本語文字の正規表現
+      const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g
+      
+      // 既知の日本語フレーズを英語に置換
+      const commonReplacements: { [key: string]: string } = {
+        '優しく響くボーカル': 'gentle vocals',
+        '感情豊かな': 'emotional',
+        '心温まる': 'heartwarming',
+        '懐かしい': 'nostalgic',
+        '穏やか': 'gentle',
+        '力強い': 'powerful',
+        '透明感のある': 'clear',
+        '暖かい': 'warm',
+        'やわらか': 'soft',
+        '美しい': 'beautiful',
+        '深み': 'depth',
+        '響く': 'resonant'
+      }
+      
+      let result = text
+      
+      // 既知の日本語フレーズを置換
+      Object.entries(commonReplacements).forEach(([japanese, english]) => {
+        result = result.replace(new RegExp(japanese, 'g'), english)
+      })
+      
+      // 残った日本語文字を検出して警告
+      if (japaneseRegex.test(result)) {
+        console.warn('🚨 英語スタイル指示に日本語が残っています:', result.match(japaneseRegex))
+        // 日本語文字を除去（最終手段）
+        result = result.replace(japaneseRegex, '')
+      }
+      
+      return result
+    }
+    
+    // 英語スタイル指示から日本語を除去
+    styleResponse = removeJapaneseFromStyle(styleResponse)
 
     // タイトル抽出（既存システムと同じロジック）
     let titles: string[] = []
@@ -1615,18 +1656,85 @@ Output only the formatted English style instruction.`
         lyrics = lines.slice(startIndex).join('\n').trim()
       }
     }
+    
+    // 🚨 SUNOタグ内の日本語を英語に変換
+    const fixSunoTags = (text: string): string => {
+      // SUNOタグ内の日本語を英語に変換
+      const tagReplacements: { [key: string]: string } = {
+        '静かにアコースティックギターが旋律を奏でる': 'Acoustic guitar intro',
+        'ギター演奏': 'Guitar playing',
+        'ピアノソロ': 'Piano solo',
+        'ドラム': 'Drums',
+        'ベース': 'Bass',
+        'アコースティックギター': 'Acoustic guitar',
+        'エレキギター': 'Electric guitar',
+        '楽器演奏': 'Instrumental',
+        'イントロ': 'Intro',
+        'アウトロ': 'Outro',
+        'フェードアウト': 'Fade out',
+        '間奏': 'Interlude'
+      }
+      
+      let result = text
+      
+      // タグ内の日本語を置換
+      result = result.replace(/\[([^\]]*)\]/g, (match, content) => {
+        let englishContent = content
+        Object.entries(tagReplacements).forEach(([japanese, english]) => {
+          englishContent = englishContent.replace(new RegExp(japanese, 'g'), english)
+        })
+        
+        // まだ日本語が残っている場合は削除
+        const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g
+        if (japaneseRegex.test(englishContent)) {
+          console.warn('🚨 SUNOタグに日本語が残っています:', match)
+          englishContent = englishContent.replace(japaneseRegex, '').trim()
+          // 空になった場合はデフォルトタグ
+          if (!englishContent) {
+            englishContent = 'Instrumental'
+          }
+        }
+        
+        return `[${englishContent}]`
+      })
+      
+      return result
+    }
+    
+    lyrics = fixSunoTags(lyrics)
+
+    // 🚨 最終品質チェック：英語スタイル指示とSUNOタグに日本語が混入していないか確認
+    const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/
+    const cleanedStyleInstruction = styleResponse.replace(/^["']|["']$/g, '').trim()
+    const cleanedLyrics = lyrics.replace(/^\*\*歌詞（Sunoタグ付き）:\*\*\s*\n?/m, '').trim()
+    
+    const issues: string[] = []
+    
+    // 英語スタイル指示の日本語チェック
+    if (japaneseRegex.test(cleanedStyleInstruction)) {
+      issues.push('英語スタイル指示に日本語が混入しています')
+      console.error('🚨 スタイル指示に日本語混入:', cleanedStyleInstruction.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+/g))
+    }
+    
+    // SUNOタグの日本語チェック  
+    const sunoTags = cleanedLyrics.match(/\[[^\]]*\]/g) || []
+    const japaneseTags = sunoTags.filter(tag => japaneseRegex.test(tag))
+    if (japaneseTags.length > 0) {
+      issues.push('SUNOタグに日本語が混入しています')
+      console.error('🚨 SUNOタグに日本語混入:', japaneseTags)
+    }
 
     // 最終出力構築
     const finalOutput: FinalOutput = {
       titles: titles.slice(0, 3),
-      lyrics: lyrics.replace(/^\*\*歌詞（Sunoタグ付き）:\*\*\s*\n?/m, '').trim(),
-      styleInstruction: styleResponse.replace(/^["']|["']$/g, '').trim(),
+      lyrics: cleanedLyrics,
+      styleInstruction: cleanedStyleInstruction,
       editableStyle: true,
       regenerationSupported: true,
       qualityCheck: {
-        hasJapanese: userSettings.language.primary === 'japanese',
-        confidence: 'high', 
-        issues: []
+        hasJapanese: issues.length > 0,
+        confidence: issues.length === 0 ? 'high' : 'medium', 
+        issues
       }
     }
 
