@@ -4,6 +4,7 @@ import { useState } from 'react'
 import VocalElementSelector from './VocalElementSelector'
 import { VocalConfiguration, AnalyzedVocalResult, SunoOptimizationSettings } from '../types/vocal'
 import { generateOptimizedSunoText } from '../data/sunoVocalElements'
+import { NewArchitectureMain } from './new-architecture/NewArchitectureMain'
 
 interface Props {
   onGenerate: (data: any) => void
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props) {
+  // UI統合: 新旧アーキテクチャの切り替え
+  const [useNewArchitecture, setUseNewArchitecture] = useState(false)
   const [mode, setMode] = useState<'simple' | 'custom'>('simple')
   const [referenceArtist, setReferenceArtist] = useState('')
   const [referenceSong, setReferenceSong] = useState('')
@@ -246,9 +249,73 @@ export function SongGeneratorForm({ onGenerate, isLoading, setIsLoading }: Props
     }
   }
 
+  // 新アーキテクチャが選択されている場合
+  if (useNewArchitecture) {
+    return (
+      <div className="space-y-6">
+        {/* 旧システムへの復帰ボタン */}
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">🚀 新アーキテクチャ（ベータ版）</h3>
+              <p className="text-sm text-gray-600">日本語混入問題を根本解決した新しいフローです</p>
+            </div>
+            <button
+              onClick={() => setUseNewArchitecture(false)}
+              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            >
+              従来システムに戻る
+            </button>
+          </div>
+        </div>
+        
+        {/* 新アーキテクチャコンポーネント */}
+        <NewArchitectureMain onComplete={onGenerate} />
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">歌詞・スタイル生成</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">歌詞・スタイル生成</h2>
+        
+        {/* 新アーキテクチャへの切り替えボタン */}
+        <div className="flex items-center gap-4">
+          <div className="bg-green-100 px-3 py-1 rounded-full">
+            <span className="text-xs font-semibold text-green-800">🔥 NEW</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUseNewArchitecture(true)}
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-semibold"
+          >
+            🚀 新システムを試す
+          </button>
+        </div>
+      </div>
+      
+      {/* 新システム紹介バナー */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-l-4 border-blue-500">
+        <h3 className="text-md font-semibold text-gray-800 mb-2 flex items-center">
+          ✨ 新アーキテクチャのご紹介
+        </h3>
+        <div className="text-sm text-gray-700 space-y-1">
+          <div className="flex items-start gap-2">
+            <span className="text-red-600 font-semibold">🛠️ 根本解決:</span>
+            <span>「ミディアムテンポ、グルーヴ重視」等の日本語混入問題を完全排除</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-blue-600 font-semibold">🎯 構造化:</span>
+            <span>楽曲分析→要素分解→ユーザー制御→生成の明確なフロー</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-green-600 font-semibold">🔧 制御性:</span>
+            <span>各要素の個別ON/OFF制御と品質チェック機能</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">※ 既存システムは引き続きご利用いただけます</p>
+      </div>
 
       {/* モード選択 */}
       <div className="space-y-2">

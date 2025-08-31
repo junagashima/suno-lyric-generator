@@ -8,7 +8,11 @@ import { FinalOutputDisplay } from './FinalOutputDisplay'
 
 // 🎯 Phase 2B: 新アーキテクチャメイン統合コンポーネント
 
-export function NewArchitectureMain() {
+interface NewArchitectureMainProps {
+  onComplete?: (data: any) => void
+}
+
+export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {}) {
   const {
     flowState,
     executeAnalysis,
@@ -38,7 +42,11 @@ export function NewArchitectureMain() {
   const handleFinalGeneration = async () => {
     if (flowState.decomposedElements && canProceed.toOutput) {
       try {
-        await executeFinalGeneration(flowState.decomposedElements, flowState.userSettings)
+        const result = await executeFinalGeneration(flowState.decomposedElements, flowState.userSettings)
+        // onComplete コールバックを呼び出し（従来システムとの統合）
+        if (onComplete && result) {
+          onComplete(result)
+        }
       } catch (error) {
         console.error('最終生成エラー:', error)
       }

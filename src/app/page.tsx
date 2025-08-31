@@ -68,7 +68,20 @@ export default function Home() {
       {/* メインコンテンツ */}
       {useNewArchitecture ? (
         /* 新アーキテクチャ */
-        <NewArchitectureMain />
+        <div className="space-y-8">
+          <NewArchitectureMain onComplete={setGeneratedData} />
+          
+          {/* 生成結果が存在する場合は従来の結果表示を使用 */}
+          {generatedData && (
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">🎵 生成結果</h2>
+              <ResultDisplay 
+                data={generatedData}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+        </div>
       ) : (
         /* 従来システム */
         <>
