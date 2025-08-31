@@ -16,7 +16,7 @@ export function useNewArchitectureFlow() {
         englishMixLevel: 'none'
       },
       // Step 3: 新しい設定項目のデフォルト値
-      vocalAttribute: '女性（ソロ）',
+      vocalAttribute: '男女混合グループ',
       sunoElements: [],
       lyricsContent: '',
       theme: '',
