@@ -117,8 +117,19 @@ export function MusicInputStep({ onAnalyze, isLoading }: MusicInputStepProps) {
         </button>
       </form>
 
+      {/* 例示表示への案内 */}
+      <div className="mt-6 p-4 bg-green-50 border-l-4 border-green-400 rounded">
+        <h3 className="text-sm font-medium text-green-800 mb-2">🎯 楽曲例示・サンプル選択</h3>
+        <p className="text-sm text-green-700 mb-2">
+          右側の「楽曲例示・サンプル選択」から人気楽曲を選んで分析することもできます。
+        </p>
+        <div className="text-xs text-green-600">
+          ジャンル別に整理されたサンプル楽曲から、分析したい楽曲の系統を参考にできます
+        </div>
+      </div>
+
       {/* 説明 */}
-      <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+      <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
         <h3 className="text-sm font-medium text-blue-800 mb-2">💡 新アーキテクチャについて</h3>
         <p className="text-sm text-blue-700">
           この新システムでは、楽曲分析 → 要素分解 → 個人設定 → 最終生成の段階的なフローで、

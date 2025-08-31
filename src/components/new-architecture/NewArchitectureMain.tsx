@@ -6,6 +6,7 @@ import { AnalysisResultDisplay } from './AnalysisResultDisplay'
 import { DecomposedElementsDisplay } from './DecomposedElementsDisplay'
 import { UserSettingsStep } from './UserSettingsStep'
 import { FinalOutputDisplay } from './FinalOutputDisplay'
+import { ExampleDisplaySection } from './ExampleDisplaySection'
 
 // 🎯 Phase 2B: 新アーキテクチャメイン統合コンポーネント
 
@@ -202,6 +203,14 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
 
         {/* 右カラム: サイドバー情報 */}
         <div className="space-y-6">
+          {/* 例示表示セクション（入力ステップでのみ表示） */}
+          {flowState.currentStep === 'input' && (
+            <ExampleDisplaySection
+              onSelectExample={handleAnalysis}
+              isLoading={flowState.isLoading}
+            />
+          )}
+
           {/* 現在の状態表示 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 進行状況</h3>

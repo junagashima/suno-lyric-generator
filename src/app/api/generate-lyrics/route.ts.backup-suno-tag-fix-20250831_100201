@@ -175,64 +175,6 @@ interface VocalSettings {
   techniques: string[]
 }
 
-// 🎯 Phase 2A: SUNO構造タグ修正関数
-// ユーザーのラップ設定に応じて正しい構造を生成
-function generateCorrectStructure(elements: DecomposedElements, settings: UserSettings): string {
-  const baseStructure = elements.structure
-  
-  // ラップモードに応じた構造修正
-  if (settings.rapMode === 'full') {
-    // 全面ラップ: 標準構造を完全にラップ構造に変換
-    return baseStructure
-      .replace(/verse/gi, 'rap verse')
-      .replace(/chorus/gi, 'rap hook')
-      .replace(/pre-chorus/gi, 'rap bridge')
-  } else if (settings.rapMode === 'partial') {
-    // 一部ラップ: 一部のverseをrap verseに変換
-    return baseStructure
-      .replace(/→ verse → chorus/, '→ verse → chorus → rap verse → chorus')
-      .replace(/verse → chorus → verse/, 'verse → chorus → rap verse')
-  }
-  
-  // ラップなし: 元の構造をそのまま使用
-  return baseStructure
-}
-
-// 🎯 Phase 2A: SUNOジャンルタグ生成関数
-// SUNOルールに完全準拠したジャンルタグを生成
-function generateGenreTags(elements: DecomposedElements, settings: UserSettings): string {
-  const tags: string[] = []
-  
-  // ラップモード対応
-  if (settings.rapMode === 'full') {
-    tags.push('hiphop', 'rap', 'japanese rap')
-  } else if (settings.rapMode === 'partial') {
-    tags.push('jpop', 'rap elements', 'hip hop fusion')
-  } else {
-    // ジャンルベースのタグ生成
-    const genre = elements.genre.toLowerCase()
-    if (genre.includes('pop')) {
-      tags.push('jpop', 'japanese pop')
-    } else if (genre.includes('rock')) {
-      tags.push('jrock', 'japanese rock')  
-    } else if (genre.includes('ballad')) {
-      tags.push('jpop', 'ballad', 'emotional')
-    } else {
-      tags.push('jpop') // デフォルト
-    }
-  }
-  
-  // ムードタグ追加
-  const mood = elements.mood.toLowerCase()
-  if (mood.includes('energetic')) tags.push('energetic')
-  if (mood.includes('gentle')) tags.push('gentle')
-  if (mood.includes('nostalgic')) tags.push('nostalgic')
-  
-  // タグを[]形式で結合
-  const tagString = tags.map(tag => `[${tag}]`).join('')
-  return `${tagString}\n\n`
-}
-
 // SUNO 4要素システム用インターフェース（修正版）
 interface ApiVocalConfiguration {
   // 基本のVocalConfiguration
@@ -788,60 +730,6 @@ ${finalRapMode === 'full' ? `
 
 **CRITICAL: [Verse], [Pre-Chorus], [Chorus]タグは絶対に使用禁止**
 ` : `
-## 🚨 CRITICAL: SUNO AI必須タグルール（厳格遵守）
-
-**絶対に使用してはいけないタグ形式:**
-❌ [Verse 1 (Rap)] - 括弧内の説明は使用禁止
-❌ [Chorus (Melody)] - 括弧内の説明は使用禁止
-❌ [ラップバース] - 日本語タグは使用禁止
-❌ [コーラス] - 日本語タグは使用禁止
-
-**SUNO AIが認識する正しいタグ形式のみ使用:**
-✅ [Rap Verse] - ラップセクション
-✅ [Rap Hook] - ラップ用コーラス
-✅ [Chorus] - 通常のコーラス
-✅ [Verse] - 通常のバース
-✅ [Bridge] - ブリッジ
-✅ [Intro] / [Outro] - 導入・終了
-
-${finalRapMode === 'full' ? `
-## 🔥 全面ラップ楽曲専用タグ構成（必須遵守）
-**使用可能タグ（ラップ専用）:**
-- [Intro] - 導入部分
-- [Rap Verse] - メインラップセクション（[Verse]は使用禁止）
-- [Rap Hook] - ラップ用コーラス（[Chorus]は使用禁止）
-- [Rap Bridge] - ラップブリッジ（[Pre-Chorus]は使用禁止）
-- [Outro] - 終了部分
-
-**絶対禁止タグ（全面ラップ時）:**
-❌ [Verse] - 歌メロディー用なので使用禁止
-❌ [Chorus] - 歌メロディー用なので使用禁止
-❌ [Pre-Chorus] - 歌メロディー用なので使用禁止
-` : finalRapMode === 'partial' || analyzedStructure?.hasRap ? `
-## 🎤 一部ラップ楽曲用タグ構成
-**通常セクション用:**
-- [Intro] - 導入部分
-- [Verse] - 歌メロディーセクション
-- [Pre-Chorus] - プリコーラス（任意）
-- [Chorus] - メインコーラス
-- [Bridge] - ブリッジ（任意）
-- [Outro] - 終了部分
-
-**ラップセクション用（必須1箇所以上）:**
-- [Rap Verse] - ラップセクション
-
-**重要**: [Rap Verse]は[Verse]とは別物です。両方を適切に使い分けてください。
-` : `
-## 🎵 通常楽曲用タグ構成
-**使用可能タグ:**
-- [Intro] - 導入部分
-- [Verse] - バースセクション
-- [Pre-Chorus] - プリコーラス（任意）
-- [Chorus] - メインコーラス
-- [Bridge] - ブリッジ（任意）
-- [Outro] - 終了部分
-`}
-
 ## 出力形式
 必ず以下の形式で回答してください：
 
@@ -851,37 +739,10 @@ ${finalRapMode === 'full' ? `
 3. タイトル3
 
 **歌詞（Sunoタグ付き）:**
-⚠️ **タグ使用時の絶対ルール:**
-- 構造タグ（セクション）は必ず英語のみ
-- 括弧内説明は絶対に使用しない
-- 上記の正しいタグ形式のみ使用
-
 [Intro]
-[楽器演奏部分の指示がある場合は英語で]
+[楽器演奏部分の指示がある場合]
 
-${finalRapMode === 'full' ? `[Rap Verse]
-ラップ歌詞内容...
-
-[Rap Hook]
-ラップフック歌詞...
-
-[Rap Verse]
-ラップ歌詞内容...
-
-[Rap Hook]
-ラップフック歌詞...
-` : finalRapMode === 'partial' || analyzedStructure?.hasRap ? `[Verse]
-歌詞内容...
-
-[Chorus]
-歌詞内容...
-
-[Rap Verse]
-ラップセクション歌詞（韻踏み必須）...
-
-[Chorus]
-歌詞内容...
-` : `[Verse]
+[Verse]
 歌詞内容...
 
 [Pre-Chorus]
@@ -890,8 +751,11 @@ ${finalRapMode === 'full' ? `[Rap Verse]
 [Chorus]
 歌詞内容...
 
-[続きのセクション...]
-`}
+${finalRapMode === 'partial' || analyzedStructure?.hasRap ? `[Rap Verse]
+歌詞内容（ラップセクション、絵文字や装飾記号なし）...
+
+` : ''}[続きのセクション...]
+
 [Outro]
 [Fade out]
 `}
@@ -1608,28 +1472,10 @@ ${userSettings.songLength === '2-3分' ?
 - 楽器指示は英語のみ使用: [Acoustic guitar intro], [Piano melody], [Drums and bass]
 - 歌詞本文は日本語で、タグのみ英語厳守
 
-## 🚨 この楽曲専用のSUNOタグ構成（生成AI専用指示）
-
-**ジャンルタグ（歌詞冒頭に配置）:**
-${generateGenreTags(decomposedElements, userSettings)}
-
-**楽曲構造（必須遵守）:**
-${generateCorrectStructure(decomposedElements, userSettings)}
-
-**🚨 CRITICAL: SUNOタグ厳格ルール**
-- 括弧内説明は絶対に使用禁止: [Verse 1 (Rap)] ❌
-- 日本語タグは絶対に使用禁止: [ラップバース] ❌  
-- 正しい英語タグのみ使用: [Rap Verse] ✅
-
-**出力時の注意:**
-- 上記のジャンルタグを歌詞の最初に配置
-- 構造指示に従って正確なセクションタグを使用
-- 括弧内説明や日本語タグは絶対に使用しない
-
 [Intro]
 （楽器演奏部分がある場合は英語タグのみ使用）
 
-（上記の楽曲構造に基づいた各セクション）
+${decomposedElements.structure}に基づいた楽曲構成で、各セクション間の楽器演奏は英語タグで指示
 ...
 
 [Outro]
