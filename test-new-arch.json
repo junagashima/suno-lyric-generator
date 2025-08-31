@@ -1,0 +1,26 @@
+{
+  "useNewArchitecture": true,
+  "decomposedElements": {
+    "instruments": "acoustic guitar, piano, drums",
+    "structure": "intro → verse → chorus → outro",
+    "rhythm": "gentle 4/4 beat",
+    "tempo": "medium tempo (100-110 BPM)",
+    "forbidden": "No heavy distortion, No EDM",
+    "mood": "warm, nostalgic, gentle",
+    "genre": "acoustic pop ballad",
+    "vocal": {
+      "attribute": "男性（ソロ）",
+      "sunoElements": ["Clear", "Emotional", "Gentle"]
+    }
+  },
+  "userSettings": {
+    "songLength": "3-4分",
+    "rapMode": "none",
+    "language": {
+      "primary": "japanese",
+      "englishMixLevel": "none"
+    },
+    "lyricsContent": "新しいシステムでの歌詞生成テスト",
+    "theme": "テスト用楽曲"
+  }
+}

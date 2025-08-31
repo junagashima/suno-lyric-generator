@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { VocalConfiguration, VocalElement } from '../../../types/vocal'
-// 🎯 Phase 1-3: 新アーキテクチャ型定義インポート
-import { DecomposedElements, UserSettings, FinalOutput } from '../../../types/analysis'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -226,10 +224,6 @@ interface GenerateRequest {
     instruments?: string | null
     forbidden?: string | null
   }
-  // 🎯 Phase 1-3: 新アーキテクチャ対応フィールド（オプショナル - 後方互換性保持）
-  decomposedElements?: DecomposedElements
-  userSettings?: UserSettings
-  useNewArchitecture?: boolean  // 新旧システム切り替えフラグ
 }
 
 export async function POST(request: NextRequest) {
@@ -248,28 +242,11 @@ export async function POST(request: NextRequest) {
       rapMode = 'none', // 新しいラップモード
       includeRap = false, // 後方互換性のため保持
       analyzedStructure, // Step I: 楽曲構造情報
-      analyzedDetails, // 楽曲分析の詳細結果
-      // 🎯 Phase 1-3: 新アーキテクチャフィールド追加
-      decomposedElements,
-      userSettings,
-      useNewArchitecture = false // デフォルトは従来システム使用
+      analyzedDetails // 楽曲分析の詳細結果
     }: GenerateRequest = await request.json()
 
     // 後方互換性: includeRapがtrueの場合はpartialに変換
     const finalRapMode = includeRap && rapMode === 'none' ? 'partial' : rapMode
-
-    // 🎯 Phase 1-3: 新アーキテクチャ対応 - 早期分岐処理
-    if (useNewArchitecture && decomposedElements && userSettings) {
-      console.log('🚀 新アーキテクチャモードで処理開始')
-      console.log('- decomposedElements:', decomposedElements)
-      console.log('- userSettings:', userSettings)
-      
-      // 新アーキテクチャ専用処理（後続で実装）
-      return await handleNewArchitectureGeneration(decomposedElements, userSettings, request)
-    }
-
-    // 既存システム（従来通りの処理を継続）
-    console.log('🔄 従来アーキテクチャモードで処理継続')
 
     // 不要な楽器を除去する関数（改良版）
     const removeUnwantedInstruments = (styleText: string): string => {
@@ -1295,72 +1272,6 @@ ${vocalSettings.isNewSystem ? `
     console.error('歌詞生成エラー:', error)
     return NextResponse.json(
       { error: '歌詞生成中にエラーが発生しました' },
-      { status: 500 }
-    )
-  }
-}
-
-// 🎯 Phase 1-3: 新アーキテクチャ専用処理関数
-async function handleNewArchitectureGeneration(
-  decomposedElements: DecomposedElements,
-  userSettings: UserSettings,
-  request: NextRequest
-): Promise<NextResponse> {
-  try {
-    console.log('🚀 新アーキテクチャ処理開始')
-    
-    // Phase 1-3A: DecomposedElements → FinalOutput変換処理
-    const finalOutput: FinalOutput = {
-      titles: ['新システムタイトル1', '新システムタイトル2', '新システムタイトル3'],
-      lyrics: `[Intro]
-新アーキテクチャテスト歌詞
-
-[Verse]
-${decomposedElements.mood}な雰囲気で
-${userSettings.lyricsContent}を歌にする
-
-[Chorus]  
-新しいシステムで生まれた
-この歌に想いを込めて
-
-[Outro]
-[Fade out]`,
-      styleInstruction: `Purpose: New architecture test track, about ${userSettings.songLength}, ${userSettings.language.primary} lyrics. Mood: ${decomposedElements.mood}. Tempo: ${decomposedElements.tempo}. Rhythm: ${decomposedElements.rhythm}. Instruments: ${decomposedElements.instruments}. Vocals: ${decomposedElements.vocal.attribute}. Structure: ${decomposedElements.structure}. Genre: ${decomposedElements.genre}. Forbidden: ${decomposedElements.forbidden}.`,
-      editableStyle: true,
-      regenerationSupported: true,
-      qualityCheck: {
-        hasJapanese: userSettings.language.primary === 'japanese',
-        confidence: 'high',
-        issues: []
-      }
-    }
-
-    console.log('✅ 新アーキテクチャ処理完了')
-    console.log('- 生成タイトル数:', finalOutput.titles.length)
-    console.log('- スタイル指示:', finalOutput.styleInstruction.substring(0, 100) + '...')
-
-    return NextResponse.json({
-      // FinalOutput構造で返す
-      titles: finalOutput.titles,
-      lyrics: finalOutput.lyrics,
-      styleInstruction: finalOutput.styleInstruction,
-      // 新アーキテクチャ固有フィールド
-      editableStyle: finalOutput.editableStyle,
-      regenerationSupported: finalOutput.regenerationSupported,
-      qualityCheck: finalOutput.qualityCheck,
-      // デバッグ情報
-      debug: {
-        architecture: 'new',
-        processedElements: decomposedElements,
-        processedSettings: userSettings,
-        timestamp: new Date().toISOString()
-      }
-    })
-
-  } catch (error) {
-    console.error('新アーキテクチャ処理エラー:', error)
-    return NextResponse.json(
-      { error: '新アーキテクチャでの歌詞生成中にエラーが発生しました' },
       { status: 500 }
     )
   }

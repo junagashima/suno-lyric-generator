@@ -1,0 +1,19 @@
+{
+  "currentStyleInstruction": "Purpose: MV style track, about 75 seconds, Japanese lyrics. Mood: エネルギッシュ, powerful. Tempo: medium-fast. Instruments: guitar + bass + ドラム. Vocals: 男性 voice, passionate. Forbidden: No EDM drops.",
+  "regenerationReason": "japanese_detected",
+  "issueDetails": ["エネルギッシュ", "ドラム", "男性"],
+  "enhancementLevel": "major",
+  "preserveOriginalStructure": true,
+  "decomposedElements": {
+    "instruments": "electric guitar, bass guitar, drum kit",
+    "tempo": "medium-fast (110-120 BPM)",
+    "rhythm": "driving 4/4 beat",
+    "mood": "energetic, powerful, intense",
+    "genre": "rock",
+    "forbidden": "No EDM drops, No comedic tones",
+    "vocal": {
+      "attribute": "男性（ソロ）",
+      "sunoElements": ["Energetic", "Powerful", "Clear"]
+    }
+  }
+}

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { findMusicData } from './musicDatabase'
 import { analyzeOptimalVocalElements } from '../../../utils/vocalAnalyzer'
-import { RawAnalysisResult } from '../../../types/analysis'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -166,22 +165,6 @@ export async function POST(request: NextRequest) {
         forbidden: "No comedic tones, No inappropriate instruments"
       }, 'male'); // デフォルトで男性、フロントエンドで性別に応じて再分析
 
-      // 🎯 Phase 1-2: データベース経由の場合のRawAnalysisResult構築
-      const dbRawAnalysis: RawAnalysisResult = {
-        rawText: JSON.stringify({
-          mood, style,
-          tempo: knownMusicData.tempo || "medium/steady (85-100 BPM)",
-          rhythm: "steady 4/4 beat",
-          instruments: instruments,
-          forbidden: "No comedic tones, No inappropriate instruments",
-          source: 'database',
-          data: knownMusicData
-        }, null, 2),
-        confidence: 'high',
-        webSearchSources: [],
-        analysisTimestamp: new Date().toISOString()
-      }
-
       return NextResponse.json({
         mood,
         style,
@@ -198,8 +181,6 @@ export async function POST(request: NextRequest) {
           vocalStyle: knownMusicData.vocal,
           genre: knownMusicData.genre
         },
-        // 🎯 Phase 1-2: データベース経由でも生分析結果を提供
-        rawAnalysis: dbRawAnalysis,
         debug: {
           source: 'database',
           originalData: knownMusicData,
@@ -764,18 +745,6 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
         confidenceReason = `楽曲・アーティスト情報が不足のため一般的推測分析（${song || '楽曲不明'} - ${artist || 'アーティスト不明'}）`
       }
 
-      // 🎯 Phase 1-2: RawAnalysisResult データ構築（型定義に合わせて）
-      const rawAnalysis: RawAnalysisResult = {
-        rawText: response,                             // 生の分析結果テキスト
-        confidence: confidence as 'high' | 'medium' | 'low',  // 分析信頼度
-        webSearchSources: hasWebSearchInfo ? 
-          (webSearchResults?.split('\n')
-            .filter(line => line.includes('http'))
-            .map(line => line.match(/https?:\/\/[^\s]+/)?.[0] || '')
-            .filter(url => url.length > 0) || []) : [],  // 情報源URL配列
-        analysisTimestamp: new Date().toISOString()    // 分析実行時刻
-      }
-
       return NextResponse.json({
         // 既存フィールド（後方互換性）
         mood,
@@ -791,7 +760,7 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
         structure: {
           hasRap: rapMode !== 'none', // rapMode設定を優先
           vocalStyle: vocalAnalysisResult?.sunoText || 'standard vocals',
-          genre: rapMode === 'full' ? 'Hip-Hip/Rap' : 
+          genre: rapMode === 'full' ? 'Hip-Hop/Rap' : 
                  rapMode === 'partial' ? 'Pop with Rap elements' : 
                  'Contemporary Pop'
         },
@@ -801,8 +770,6 @@ ${webSearchResults || '検索情報: 詳細な楽曲情報は見つかりませ�
         analysisType,
         webSearchPerformed: webSearchResults ? true : false,
         userFeedbackRequest: confidence === 'low' ? 'この分析が不正確な場合、正しい楽曲情報をお聞かせください' : null,
-        // 🎯 Phase 1-2: 新規追加 - 生分析結果データ
-        rawAnalysis,
         debug: {
           originalMood: parsedResponse.mood,
           originalStyle: parsedResponse.style,

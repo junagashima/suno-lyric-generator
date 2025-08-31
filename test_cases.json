@@ -1,0 +1,65 @@
+{
+  "testCases": [
+    {
+      "id": "test_001",
+      "category": "J-POP_ballad",
+      "artist": "あいみょん",
+      "song": "マリーゴールド",
+      "expectedElements": {
+        "genre": "acoustic pop ballad",
+        "tempo": "medium/steady",
+        "mood": "warm, nostalgic, gentle",
+        "expectedInstruments": ["acoustic guitar", "piano", "drums"]
+      }
+    },
+    {
+      "id": "test_002", 
+      "category": "J-Rock",
+      "artist": "Official髭男dism",
+      "song": "Pretender",
+      "expectedElements": {
+        "genre": "pop rock",
+        "tempo": "medium-fast", 
+        "mood": "emotional, powerful",
+        "expectedInstruments": ["electric guitar", "bass", "drums", "piano"]
+      }
+    },
+    {
+      "id": "test_003",
+      "category": "Alternative_Rock", 
+      "artist": "King Gnu",
+      "song": "白日",
+      "expectedElements": {
+        "genre": "alternative rock",
+        "tempo": "medium-fast",
+        "mood": "intense, dramatic",
+        "expectedInstruments": ["electric guitar", "bass", "drums"]
+      }
+    },
+    {
+      "id": "test_004",
+      "category": "Electronic_Pop",
+      "artist": "YOASOBI", 
+      "song": "夜に駆ける",
+      "expectedElements": {
+        "genre": "electronic pop",
+        "tempo": "fast",
+        "mood": "energetic, upbeat", 
+        "expectedInstruments": ["synthesizer", "electronic drums", "bass"]
+      }
+    },
+    {
+      "id": "test_005",
+      "category": "Hip-Hop",
+      "artist": "Dragon Ash",
+      "song": "Grateful Days", 
+      "expectedElements": {
+        "genre": "hip-hop ballad",
+        "tempo": "slow/relaxed",
+        "mood": "nostalgic, reflective",
+        "expectedInstruments": ["acoustic guitar", "drums", "bass"],
+        "expectsRap": true
+      }
+    }
+  ]
+}
