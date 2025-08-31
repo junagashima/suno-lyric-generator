@@ -29,8 +29,18 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
   // 楽曲分析実行
   const handleAnalysis = async (artist: string, song: string) => {
     try {
-      await executeAnalysis(artist, song)
-      // 分析完了後は結果表示、要素分解は手動で実行
+      const analysisResult = await executeAnalysis(artist, song)
+      
+      // 🚀 分析完了後、自動的に要素分解を実行
+      if (analysisResult) {
+        console.log('🔄 自動要素分解を開始します...')
+        try {
+          await executeDecomposition(analysisResult)
+        } catch (decomposeError) {
+          console.error('自動要素分解エラー:', decomposeError)
+          // エラーは既にflowStateに記録されているので、ここでは何もしない
+        }
+      }
     } catch (error) {
       console.error('分析処理エラー:', error)
     }
@@ -147,12 +157,28 @@ export function NewArchitectureMain({ onComplete }: NewArchitectureMainProps = {
             />
           )}
 
-          {flowState.currentStep === 'decompose' && flowState.decomposedElements && (
-            <DecomposedElementsDisplay
-              elements={flowState.decomposedElements}
-              onProceed={() => {/* 自動で次のステップに進む */}}
-              isLoading={flowState.isLoading}
-            />
+          {flowState.currentStep === 'decompose' && (
+            <>
+              {!flowState.decomposedElements && !flowState.error && (
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center">
+                    <div className="animate-pulse text-4xl mb-4">🔧</div>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">SUNO要素に分解中...</h2>
+                    <p className="text-gray-600">
+                      楽曲分析結果を8つのSUNO用要素に分解しています
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {flowState.decomposedElements && (
+                <DecomposedElementsDisplay
+                  elements={flowState.decomposedElements}
+                  onProceed={() => {/* 自動で次のステップに進む */}}
+                  isLoading={flowState.isLoading}
+                />
+              )}
+            </>
           )}
 
           {flowState.currentStep === 'settings' && (
