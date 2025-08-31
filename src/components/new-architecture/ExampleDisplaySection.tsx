@@ -61,6 +61,9 @@ interface ExampleDisplaySectionProps {
 
 export function ExampleDisplaySection({ onSelectExample, isLoading = false }: ExampleDisplaySectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  
+  // デバッグ用ログ
+  console.log('🎯 ExampleDisplaySection レンダリング中', { onSelectExample: !!onSelectExample, isLoading })
 
   const categories = [
     { value: 'all', label: '全て', icon: '🎵' },

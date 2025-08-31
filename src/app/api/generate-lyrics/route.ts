@@ -48,6 +48,8 @@ function translateToEnglish(text: string): string {
     '男性ボーカル': 'male vocals', '女性ボーカル': 'female vocals',
     '男女混合': 'mixed male and female', '男女混合グループ': 'mixed gender group',
     'デュエット': 'duet', 'コーラス': 'chorus', 'ハーモニー': 'harmony',
+    '女性（ソロ）': 'female solo vocals', '男性（ソロ）': 'male solo vocals',
+    '女性ソロ': 'female solo vocals', '男性ソロ': 'male solo vocals',
     
     // 🎯 Phase 1-A: ボーカル関連の頻出パターン追加
     '男性voice': 'male vocals',
@@ -1008,10 +1010,16 @@ ${finalRapMode === 'partial' || analyzedStructure?.hasRap ? '※ **[Rap Verse]�
       // 1. 複合語パターンの翻訳
       const complexPatterns: Record<string, string> = {
         '男女混合グループ voice': 'mixed gender group vocals',
-        '男女混合グループ': 'mixed gender group',
+        '男女混合グループ': 'mixed gender group vocals',
         '男女混合 voice': 'mixed male female vocals',
+        '男女混合': 'mixed male female vocals',
+        '女性（ソロ）': 'female solo vocals',
+        '男性（ソロ）': 'male solo vocals',
+        '女性ソロ': 'female solo vocals',
+        '男性ソロ': 'male solo vocals',
         'グループ voice': 'group vocals',
-        'デュエット voice': 'duet vocals'
+        'デュエット voice': 'duet vocals',
+        'デュエット': 'duet vocals'
       }
       
       // 2. 複合語パターンマッチング

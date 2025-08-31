@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { SongGeneratorForm } from '@/components/SongGeneratorForm'
 import { ResultDisplay } from '@/components/ResultDisplay'
+import { EditableResultDisplay } from '@/components/EditableResultDisplay'
 import { GuideSection } from '@/components/GuideSection'
 import { FAQSection } from '@/components/FAQSection'
 // 🎯 Phase 2B: 新アーキテクチャ統合
@@ -69,13 +70,13 @@ export default function Home() {
         <div className="space-y-8">
           <NewArchitectureMain onComplete={setGeneratedData} />
           
-          {/* 生成結果が存在する場合は従来の結果表示を使用 */}
+          {/* 生成結果が存在する場合は編集可能な結果表示を使用 */}
           {generatedData && (
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">🎵 生成結果</h2>
-              <ResultDisplay 
+              <EditableResultDisplay 
                 data={generatedData}
                 isLoading={isLoading}
+                onUpdateData={setGeneratedData}
               />
             </div>
           )}
