@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { FinalOutput } from '@/types/analysis'
+import { StyleCustomizationGuide } from './StyleCustomizationGuide'
 
 // 🎯 Phase 2B: 新アーキテクチャ用最終出力表示コンポーネント
 
@@ -18,6 +19,9 @@ export function FinalOutputDisplay({
 }: FinalOutputDisplayProps) {
   const [activeTab, setActiveTab] = useState<'titles' | 'lyrics' | 'style'>('titles')
   const [showRegenerateOptions, setShowRegenerateOptions] = useState(false)
+  const [isEditingStyle, setIsEditingStyle] = useState(false)
+  const [editedStyle, setEditedStyle] = useState(output.styleInstruction)
+  const [showCustomizationGuide, setShowCustomizationGuide] = useState(false)
 
   // スタイル指示の品質チェック結果を表示
   const getQualityBadge = () => {
@@ -61,6 +65,20 @@ export function FinalOutputDisplay({
     } catch (error) {
       console.error('コピーに失敗しました:', error)
     }
+  }
+
+  // スタイル更新処理
+  const handleStyleUpdate = (newStyle: string) => {
+    setEditedStyle(newStyle)
+  }
+
+  // スタイル編集保存
+  const handleSaveStyleEdit = () => {
+    // 編集されたスタイルで再生成をトリガー
+    // 実際の実装では、編集されたスタイルを使って再生成APIを呼び出す
+    console.log('スタイル更新:', editedStyle)
+    setIsEditingStyle(false)
+    // TODO: 編集されたスタイルでの再生成処理
   }
 
   // スタイル再生成処理
@@ -173,6 +191,21 @@ export function FinalOutputDisplay({
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">🎨 英語スタイル指示</h3>
             <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowCustomizationGuide(!showCustomizationGuide)}
+                className="text-sm text-purple-600 hover:text-purple-800 border border-purple-300 px-3 py-1 rounded"
+              >
+                📖 カスタマイズガイド
+              </button>
+              {output.editableStyle && (
+                <button
+                  onClick={() => setIsEditingStyle(!isEditingStyle)}
+                  className="text-sm text-green-600 hover:text-green-800 border border-green-300 px-3 py-1 rounded"
+                  disabled={isLoading}
+                >
+                  ✏️ 編集
+                </button>
+              )}
               {output.regenerationSupported && (
                 <button
                   onClick={() => setShowRegenerateOptions(!showRegenerateOptions)}
@@ -183,7 +216,7 @@ export function FinalOutputDisplay({
                 </button>
               )}
               <button
-                onClick={() => copyToClipboard(output.styleInstruction, 'スタイル指示')}
+                onClick={() => copyToClipboard(isEditingStyle ? editedStyle : output.styleInstruction, 'スタイル指示')}
                 className="text-sm text-blue-600 hover:text-blue-800 border border-blue-300 px-3 py-1 rounded"
               >
                 📋 コピー
@@ -231,10 +264,64 @@ export function FinalOutputDisplay({
             </div>
           )}
 
+          {/* カスタマイズガイド */}
+          {showCustomizationGuide && (
+            <StyleCustomizationGuide 
+              currentStyle={isEditingStyle ? editedStyle : output.styleInstruction}
+              onStyleUpdate={handleStyleUpdate}
+            />
+          )}
+
+          {/* スタイル指示の表示・編集 */}
           <div className="bg-gray-50 rounded-md p-4">
-            <div className="text-sm text-gray-900 leading-relaxed">
-              {output.styleInstruction}
-            </div>
+            {isEditingStyle ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    英語スタイル指示を編集
+                  </label>
+                  <textarea
+                    value={editedStyle}
+                    onChange={(e) => setEditedStyle(e.target.value)}
+                    className="w-full h-32 p-3 border border-gray-300 rounded-md text-sm"
+                    placeholder="Purpose: track, about minutes, Japanese lyrics. Mood: . Tempo: . Rhythm: . Instruments: . Vocals: . Structure: . Genre: . Forbidden: ."
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleSaveStyleEdit}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700"
+                  >
+                    ✅ 保存
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingStyle(false)
+                      setEditedStyle(output.styleInstruction)
+                    }}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400"
+                  >
+                    ❌ キャンセル
+                  </button>
+                </div>
+                
+                {/* 編集時の注意事項 */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                  <div className="text-sm text-yellow-800">
+                    <strong>⚠️ 編集時の注意:</strong>
+                    <ul className="mt-1 ml-4 list-disc space-y-1">
+                      <li>日本語を含めるとSUNO AIが正しく認識しない可能性があります</li>
+                      <li>大幅な変更は分析した楽曲イメージから離れる可能性があります</li>
+                      <li>カスタマイズガイドを参考に適切な英語表現を使用してください</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-900 leading-relaxed">
+                {editedStyle}
+              </div>
+            )}
           </div>
 
           {/* 品質チェック詳細 */}
@@ -250,6 +337,25 @@ export function FinalOutputDisplay({
               </div>
             </div>
           )}
+
+          {/* 使用方法ガイド */}
+          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+            <h4 className="text-sm font-medium text-green-800 mb-2">📖 使用方法</h4>
+            <div className="text-sm text-green-700 space-y-2">
+              <div>
+                <strong>🎵 このテキストをSuno AIの「Style of Music」欄にコピー&ペーストしてください</strong>
+              </div>
+              <div className="bg-white rounded p-2 text-xs font-mono text-gray-800">
+                📋 コピーボタンでクリップボードにコピーできます
+              </div>
+              <div className="space-y-1 text-xs">
+                <div>• <strong>カスタマイズ:</strong> 「✏️ 編集」で内容を調整可能</div>
+                <div>• <strong>ガイド:</strong> 「📖 カスタマイズガイド」で英語表現の効果を確認</div>
+                <div>• <strong>再生成:</strong> 「🔄 再生成」で品質改善や日本語除去</div>
+                <div>• <strong>注意:</strong> 大幅な変更は元の楽曲イメージから逸脱する可能性があります</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
