@@ -1423,7 +1423,13 @@ ${decomposedElements.forbidden}
 ## 作詞要件
 以下の要素を考慮してJ-POPヒット曲として成功する歌詞を作成してください：
 
-1. **新アーキテクチャ対応作詞戦略**
+1. **🚨 絶対遵守事項（SUNO AI対応）**
+   - SUNOタグ（[...]）は100%英語のみ使用
+   - 楽器指示は英語: [Acoustic guitar], [Piano solo], [Drums]等
+   - 歌詞本文のみ日本語、演奏指示は全て英語
+   - 例: [Guitar intro] ✅ / [ギター演奏] ❌
+
+2. **新アーキテクチャ対応作詞戦略**
    - 19ジャンル分類システムに基づく適切な表現選択
    - 分析された楽器構成・リズム・テンポに完全同調した歌詞
    - SUNO最適化要素を活かした表現技法
@@ -1447,10 +1453,15 @@ ${userSettings.songLength === '2-3分' ?
 3. タイトル3
 
 **歌詞（Sunoタグ付き）:**
-[Intro]
-[楽器演奏部分の指示がある場合]
+⚠️ **重要な注意事項:**
+- SUNOタグ（[...]内）は絶対に日本語を使用しないでください
+- 楽器指示は英語のみ使用: [Acoustic guitar intro], [Piano melody], [Drums and bass]
+- 歌詞本文は日本語で、タグのみ英語厳守
 
-${decomposedElements.structure}に基づいた楽曲構成
+[Intro]
+（楽器演奏部分がある場合は英語タグのみ使用）
+
+${decomposedElements.structure}に基づいた楽曲構成で、各セクション間の楽器演奏は英語タグで指示
 ...
 
 [Outro]
@@ -1463,7 +1474,7 @@ ${decomposedElements.structure}に基づいた楽曲構成
       messages: [
         {
           role: "system", 
-          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家です。新アーキテクチャの19ジャンル分類システムとSUNO最適化技術を完全に理解し、分析された楽曲要素（ジャンル、楽器、構造、リズム、テンポ、ムード）を歌詞に深く反映させることができます。ボーカル属性とSUNO要素を活用した最高品質の歌詞を作成してください。"
+          content: "あなたは日本の音楽業界で活躍する経験豊富な作詞家で、SUNO AI技術の専門家です。🚨重要：SUNOタグ（[...]内）は絶対に英語のみ使用してください。楽器指示は[Acoustic guitar], [Piano], [Drums]など英語で記述し、歌詞本文のみ日本語を使用します。新アーキテクチャの19ジャンル分類システムとSUNO最適化技術を完全理解し、日本語歌詞と英語楽器タグの完璧な組み合わせで最高品質の楽曲を作成してください。"
         },
         {
           role: "user",
@@ -1475,6 +1486,45 @@ ${decomposedElements.structure}に基づいた楽曲構成
     })
 
     // ステップ4: 英語スタイル指示生成（既存システムのstylePrompt活用）
+    // 🚨 日本語→英語変換処理（日本語混入を防止）
+    const translateToEnglish = (text: string): string => {
+      const translations: { [key: string]: string } = {
+        '女性（ソロ）': 'female solo',
+        '男性（ソロ）': 'male solo', 
+        '女性（デュエット）': 'female duet',
+        '男性（デュエット）': 'male duet',
+        '混声（デュエット）': 'mixed duet',
+        '女性（グループ）': 'female group',
+        '男性（グループ）': 'male group',
+        '混声（グループ）': 'mixed group',
+        'コーラス重視（複数ボーカル）': 'chorus-focused vocals',
+        'ソロ＋コーラス': 'solo with chorus',
+        'Clear': 'clear',
+        'Warm': 'warm',
+        'Expressive': 'expressive',
+        'Emotional': 'emotional',
+        'Gentle': 'gentle',
+        'Powerful': 'powerful',
+        'Smooth': 'smooth',
+        'Rich': 'rich',
+        'Bright': 'bright',
+        'Deep': 'deep',
+        'Soft': 'soft',
+        'Strong': 'strong',
+        'Natural': 'natural',
+        'Dynamic': 'dynamic',
+        'Resonant': 'resonant',
+        'Crisp': 'crisp'
+      }
+      
+      let result = text
+      Object.entries(translations).forEach(([japanese, english]) => {
+        result = result.replace(new RegExp(japanese, 'g'), english)
+      })
+      
+      return result
+    }
+
     const stylePrompt = `Create a Suno AI style instruction for this new architecture song:
 
 **New Architecture Analysis Results:**
@@ -1484,8 +1534,8 @@ ${decomposedElements.structure}に基づいた楽曲構成
 - Rhythm: ${decomposedElements.rhythm}
 - Tempo: ${decomposedElements.tempo}
 - Mood: ${decomposedElements.mood}
-- Vocal Attribute: ${decomposedElements.vocal.attribute}
-- SUNO Elements: ${decomposedElements.vocal.sunoElements?.join(', ') || 'none'}
+- Vocal Attribute: ${translateToEnglish(decomposedElements.vocal.attribute)}
+- SUNO Elements: ${decomposedElements.vocal.sunoElements?.map(e => translateToEnglish(e)).join(', ') || 'none'}
 - Song Length: ${userSettings.songLength}
 - Language: ${userSettings.language.primary}
 - Rap Mode: ${userSettings.rapMode}
